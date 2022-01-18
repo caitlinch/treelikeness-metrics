@@ -1,0 +1,88 @@
+# Open packages
+library(ape)
+
+# Parameters for all simulations
+# local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run.
+# repo_directory          <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
+# al_length               <- Total length of concatenated alignments (we chose 10000).
+# taxa_vec                <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
+# num_reps                <- Number of replicates to run for each set of simulation conditions (we chose 10). Must be >= 1.
+# alisim_gene_models      <- model of sequence evolution for Alisim 
+# alisim_gene_tree_length <- gene-specific tree length for Alisim
+
+local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+al_length <- 10000
+taxa_vec <- c(10,20,50,100,200,500,1000)
+num_reps <- 10
+alisim_gene_models <- NA
+alisim_gene_tree_length <- NA
+
+
+## Experiment 1: Random trees
+# Generate x random trees with y taxa 
+#     Total alignment length = 10,000 bp
+#     Number of trees ranges from 0 to 10,000 in intervals of 100
+#     Length of alignment for each tree is total alignment length divided by the number of trees
+#     Number of taxa varies from 10 to 1000
+# Simulate DNA along each tree with Alisim, using the topology-unlinked partition model
+
+# Create folder to store results of this experiment, if it doesn't already exist
+exp_dir <- paste0(local_directory, "exp_1/")
+if(!file.exists(exp_dir)){dir.create(exp_dir)}
+
+# Prepare parameters for experiments
+# The number of trees should be the divisors for al_length (as only whole numbers of trees are possible)
+number_of_trees <- divisors(al_length)
+number_of_taxa <- taxa_vec
+number_of_replicates <- 1:num_reps
+
+# Create matrix with parameters for generating each simulated alignment
+exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees)
+names(exp1_params) <- c("num_reps", "num_taxa", "num_trees")
+# Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
+exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
+                          sprintf("%03d", exp1_params$num_reps))
+# Add parameters for Alisim
+exp1_params$alisim_gene_models <- alisim_gene_models
+exp1_params$alisim_gene_tree_length <- alisim_gene_tree_length
+# Add names for the tree file, partition file and output alignment file for each simulated alignment
+exp1_params$tree_file <- paste0(exp1_params$uid, "_random_trees.phy")
+exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
+exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
+
+# Iterate through 
+
+
+
+
+
+
+
+## Experiment 2: Related trees
+
+# x will be from 0 to 10000 in intervals of 100 (resulting in 100 steps). Length of each alignment will be al_length/x
+
+# generate 1 random tree with y taxa
+
+# generate (x-1) related trees by performing 1 NNI move from the starting tree
+
+# simulate DNA along each tree with Alisim
+
+# Concatenate alignments
+
+
+## Experiment 3: Mimicking introgression
+
+# fix alignment at al_length
+
+# simulate tree containing a single introgression event in ms and vary proportion of introgressed DNA from 0 to 1
+
+# simulate DNA along each tree with Alisim
+
+# Concatenate alignments
+
+
+## Experiment 4: Repeat above experiments but adding random noise
+
+## Experiment 5: Repeat above experiments adding alignment error

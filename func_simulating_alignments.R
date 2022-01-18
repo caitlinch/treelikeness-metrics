@@ -3,6 +3,7 @@
 
 ## Load required packages
 library(ape)
+library(phangorn)
 
 
 
@@ -20,6 +21,23 @@ generate.random.trees <- function(num_trees, num_taxa, output_filepath = NA){
   }
 }
 
+generate.NNI.trees <- function(num_trees, num_taxa, NNI_moves, output_filepath = NA){
+  # This function generates a random tree with m taxa, and then (n-1) related trees by performing a single NNI move on the starting tree
+  # (where n is num_trees and m is num_taxa)
+  # Generate a single random tree using the `ape` function `rtree` 
+  starting_tree <- rtree(num_taxa)
+  # Determine the total number of related trees to generate
+  num_related_trees = num_trees - 1
+  # Perform NNI moves
+  related_trees <- rNNI(starting_tree, NNI_moves, num_related_trees)
+  # Collate all trees into a single multiphylo object
+  trees <-  c(starting_tree, related_trees)
+  
+  # If output filepath is provided, save trees to file
+  if (!is.na(output_filepath) == TRUE){
+    write.tree(trees, file = output_filepath)
+  }
+}
 
 
 ## Functions to generate partition files
@@ -80,10 +98,30 @@ alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignme
 
 ## Functions to process a single row from the parameters matrix and estimate an alignment using the parameters in that row
 experiment1.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
+  # Function to generate a single alignment given a row from the experiment 1 params dataframe
+  # The alignment will be simulated from a number of random trees
   # Extract row given the row number
   row <- experiment_params[row_id, ]
   # Generate the random trees 
   generate.random.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, output_filepath = paste0(output_directory, row$tree_file))
+  # Generate the partition file
+  partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
+                         models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
+                         output_filepath = paste0(output_directory, row$partition_file))
+  # Call alisim in IQ-Tree2 to simulate DNA along the trees given the partition file
+  alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(output_directory, row$output_alignment_file), 
+                                           partition_file_path = paste0(output_directory, row$partition_file), trees_path = paste0(output_directory, row$tree_file),
+                                           output_format = "fasta", sequence_type = row$sequence_type)
+  
+}
+
+experiment2.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
+  # Function to generate a single alignment given a row from the experiment 1 params dataframe
+  # The alignment will be simulated from a number of trees related by a single NNI move
+  # Extract row given the row number
+  row <- experiment_params[row_id, ]
+  # Generate the random trees 
+  generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, NNI_moves = row$NNI_moves, output_filepath = paste0(output_directory, row$tree_file))
   # Generate the partition file
   partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
                          models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 

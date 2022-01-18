@@ -24,6 +24,15 @@ alisim_gene_tree_length <- NA
 
 
 
+## Prepare parameters that remain stable for all experiments
+# Prepare parameters for experiments
+# The number of trees should be the divisors for total_alignment_length (as only whole numbers of trees are possible)
+number_of_trees <- divisors(total_alignment_length)
+number_of_taxa <- taxa_vec
+number_of_replicates <- 1:num_reps
+
+
+
 ## Experiment 1: Random trees
 # Generate x random trees with y taxa 
 #     Total alignment length = 10,000 bp
@@ -35,12 +44,6 @@ alisim_gene_tree_length <- NA
 # Create folder to store results of this experiment, if it doesn't already exist
 exp1_dir <- paste0(local_directory, "exp_1/")
 if(!file.exists(exp1_dir)){dir.create(exp1_dir)}
-
-# Prepare parameters for experiments
-# The number of trees should be the divisors for total_alignment_length (as only whole numbers of trees are possible)
-number_of_trees <- divisors(total_alignment_length)
-number_of_taxa <- taxa_vec
-number_of_replicates <- 1:num_reps
 
 # Create matrix with parameters for generating each simulated alignment
 exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees)
@@ -60,24 +63,47 @@ exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
 exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-experiment1.row(row_id, output_directory, iqtree2_path, experiment_params)
-
 lapply(1:nrow(exp1_params), experiment1.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path,
        experiment_params = exp1_params)
 
 
 
 ## Experiment 2: Related trees
+# Generate x related trees with y taxa 
+#     Start by generating 1 random tree with y taxa, then perform a single NNI move on the starting tree until x related trees have been generated
+#     Total alignment length = 10,000 bp
+#     Number of trees ranges from 0 to 10,000 in intervals of 100
+#     Length of alignment for each tree is total alignment length divided by the number of trees
+#     Number of taxa varies from 10 to 1000
 
-# x will be from 0 to 10000 in intervals of 100 (resulting in 100 steps). Length of each alignment will be total_alignment_length/x
+# Create folder to store results of this experiment, if it doesn't already exist
+exp2_dir <- paste0(local_directory, "exp_2/")
+if(!file.exists(exp2_dir)){dir.create(exp2_dir)}
 
-# generate 1 random tree with y taxa
+# Prepare parameters for experiments
+# This experiment differs because the number of NNI moves is a variable included in the expand.grid function
+number_of_NNI_moves = 1
+# Create matrix with parameters for generating each simulated alignment
+exp2_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, number_of_NNI_moves)
+names(exp2_params) <- c("num_reps", "num_taxa", "num_trees", "num_NNI_moves")
+# Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
+exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", sprintf("%04d", exp2_params$num_taxa), "_",
+                          sprintf("%03d", exp2_params$num_reps))
+# Add parameters for Alisim
+exp2_params$alisim_gene_models <- alisim_gene_models
+exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
+# Add other parameters
+exp2_params$total_alignment_length <- total_alignment_length
+exp2_params$sequence_type <- sequence_type
+# Add names for the tree file, partition file and output alignment file for each simulated alignment
+exp2_params$tree_file <- paste0(exp2_params$uid, "_random_trees.phy")
+exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
+exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
-# generate (x-1) related trees by performing 1 NNI move from the starting tree
+# Iterate through each row in the parameters dataframe
+lapply(1:nrow(exp2_params), experiment2.generate.alignment, output_directory = exp2_dir, iqtree2_path = iqtree2_path,
+       experiment_params = exp2_params)
 
-# simulate DNA along each tree with Alisim
-
-# Concatenate alignments
 
 
 ## Experiment 3: Mimicking introgression

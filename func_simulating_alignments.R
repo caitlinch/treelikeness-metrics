@@ -15,7 +15,7 @@ generate.random.trees <- function(num_trees, num_taxa, output_filepath = NA){
   trees <- rmtree(num_trees, num_taxa)
   
   # If output filepath is provided, save trees to file
-  if (!is.na(output_filepath) = TRUE){
+  if (!is.na(output_filepath) == TRUE){
     write.tree(trees, file = output_filepath)
   }
 }
@@ -36,7 +36,7 @@ partition.random.trees <- function(num_trees, al_length, sequence_type, models =
   csets <- paste0("\tcharset ", gene_names, " = ", sequence_type, ", ", gene_start_points, "-", gene_end_points, ";")
   
   # Generate model arguments
-  if (!is.na(models) = TRUE){
+  if (!is.na(models) == TRUE){
     # If models have been provided, generate a charpartition line for the partition file
     # "models" should be a list of models with one model corresponding to one gene, or 1 model to be applied to all genes
     if (is.na(rescaled_tree_lengths) == TRUE){
@@ -64,9 +64,8 @@ partition.random.trees <- function(num_trees, al_length, sequence_type, models =
 
 
 ## Functions to simulate alignments in Alisim (available in IQ-Tree2.2-beta)
-
 alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignment_path, partition_file_path, trees_path, 
-                                                     output_format = "phy", sequence_type = "DNA"){
+                                                     output_format = "fasta", sequence_type = "DNA"){
   # This function uses the topology-unlinked partition model in Alisim to generate a sequence alignment
   #     containing multiple concatenated genes, each with its own tree topology and branch lengths
   
@@ -79,8 +78,26 @@ alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignme
 
 
 
-## Utility functions
+## Functions to process a single row from the parameters matrix and estimate an alignment using the parameters in that row
+experiment1.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
+  # Extract row given the row number
+  row <- experiment_params[row_id, ]
+  # Generate the random trees 
+  generate.random.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, output_filepath = paste0(output_directory, row$tree_file))
+  # Generate the partition file
+  partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
+                         models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
+                         output_filepath = paste0(output_directory, row$partition_file))
+  # Call alisim in IQ-Tree2 to simulate DNA along the trees given the partition file
+  alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(output_directory, row$output_alignment_file), 
+                                           partition_file_path = paste0(output_directory, row$partition_file), trees_path = paste0(output_directory, row$tree_file),
+                                           output_format = "fasta", sequence_type = row$sequence_type)
+  
+}
 
+
+
+## Utility functions
 divisors <- function(x){
   # Function to find all divisors of x using modulo division
   y <- 1:x

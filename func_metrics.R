@@ -5,24 +5,28 @@
 library(ape)
 
 # here's paths for different programs needed for test statistics:
-iqtree2_path <- "iqtree2.2-beta"
+iqtree2_path <- "iqtree2"
 
-# here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
+ # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
-alignment_path <- al_tl_path
-sequence_format = "DNA"
-substitution_model = "raw"
 
 # here's a few test alignments with 20 taxa each, with either 1, 10, 100, 1000, or 10000 trees:
 test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/", 
                      c("exp1_00001_0020_001_output_alignment.fa", "exp1_00010_0020_001_output_alignment.fa",
                        "exp1_00100_0020_001_output_alignment.fa", "exp1_01000_0020_001_output_alignment.fa"))
 
+# here's paths for variables needed to test treelikeness metric functions
+alignment_path <- al_tl_path
+sequence_format = "DNA"
+substitution_model = "raw"
+iqtree2_number_threads = "AUTO"
+number_scf_quartets = 100
+
 
 
 ## Site concordance factors (Minh et. al. 2020)
-scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads, number_scf_quartets = 100){
-  # Function to calculate the site concordance factors for an alignment, given a maximum likelihood tree
+scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100){
+  # Function to calculate the site concordance factors for an alignment, given a maximum likelihood tree estimated in IQ-Tree
   
   ## Check that the treefile already exists: if it doesn't, run IQ-Tree and create it
   if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
@@ -35,12 +39,12 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads, number_scf
     # Create the command and call it in the system
     # for sCF: iqtree -t concat.treefile -s ALN_FILE --scf 100 --prefix concord -nt 10
     treefile <- paste0(alignment_path,".treefile")
-    call <- paste0(iqtree_path," -t ",treefile," -s ",alignment_path," --scf ",num_scf_quartets," -nt ","1"," -redo -safe")
-    system(call) # call IQ-tree!
+    call <- paste0(iqtree2_path," -t ",treefile," -s ",alignment_path," --scf ",number_scf_quartets," -nt 1 -redo -safe")
+    system(call)
   }
   ## Retrieve the site concordance factors from the output table
   scf_table <- read.table(paste0(alignment_path,".treefile.cf.stat"), header = TRUE, sep = "\t")
-  scf_extracts <- list(mean_scf = round(mean(scf_table$sCF), digits = 2), 
+  scf_results <- list(mean_scf = round(mean(scf_table$sCF), digits = 2), 
                        median_scf = round(median(scf_table$sCF), digits = 2), 
                        all_scfs = scf_table$sCF, 
                        branch_ids = scf_table$ID)

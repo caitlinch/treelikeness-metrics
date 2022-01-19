@@ -27,6 +27,31 @@ number_of_taxa = 20
 
 
 
+## Q residuals (Gray et. al. 2010)
+q_residuals <- function(alignment_path, sequence_format = "DNA"){
+  ## Uses software`phylogemetric` (available at https://github.com/SimonGreenhill/phylogemetric) to calculate
+  #     the Q-residuals of Gray et. al. (2010)
+  
+  ## Change fasta file (from alisim) into nexus file
+  # Nexus format required for `phylogemetric` software
+  f <- read.FASTA(file = alignment_path, type = sequence_format)
+  nexus_path <- paste0(alignment_path, ".nex")
+  if (sequence_format == "DNA"){
+    nexus_format = "dna"
+  } else if ((sequence_format == "AA") | (sequence_format == "Protein")){
+    nexus_format = "protein"
+  }
+  write.nexus.data(f, nexus_path, format = nexus_format, interleaved = FALSE)
+  # Remove the "INTERLEAVE = FALSE" section (so other programs aren't confused)
+  txt <- readLines(nexus_path)
+  ind <- grep("FORMAT", txt)
+  txt[ind] <- "  FORMAT DATATYPE=DNA MISSING=? GAP=-;"
+  write(txt, file = nexus_path, append = FALSE)
+  
+  
+}
+
+
 ## TIGER (Cummins and McInerney 2011)
 TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   # Tree Independent Genertion of Evolutionary Rates

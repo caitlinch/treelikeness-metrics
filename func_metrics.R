@@ -54,6 +54,15 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   # Create system command and call fast_TIGER
   call <- paste0(fast_TIGER_path, " ", data_type, " ", informative_alignment_path)
   system(call)
+  
+  ## Open the results file and output mean TIGER value
+  # TIGER values range from 0 to 1, with values closer to 1 indicating more stable/consistent sites
+  TIGER_file <- paste0(informative_alignment_path, "_r8s.txt")
+  TIGER_values <- as.numeric(readLines(TIGER_file))
+  # Calculate the mean TIGER value
+  mean_TIGER_value <- mean(TIGER_values)
+  # Return the mean value
+  return(mean_TIGER_value)
   }
 
 

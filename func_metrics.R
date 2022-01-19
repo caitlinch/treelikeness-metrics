@@ -29,7 +29,8 @@ number_of_taxa = 20
 likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads, number_of_taxa){
   # Function to call IQ-Tree and create a likelihood map for the alignment
   
-  ## Check whether likelihood mapping or IQ-Tree have run before. 
+  ## Create the likelihood map
+  # Check whether likelihood mapping or IQ-Tree have run before. 
   # If one or both haven't run IQ-Tree to create the likelihood map
   iq_file <- paste0(alignment_path, ".iqtree")
   map_file <- paste0(alignment_path, ".lmap.eps")
@@ -39,31 +40,26 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
     system(call)
   }
   
+  ## Extract results from likelihood map
+  iq_log <- readLines(iq_file)
+  ind <- grep("Number of fully resolved  quartets",iq_log)
+  resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+  ind <- grep("Number of partly resolved quartets",iq_log)
+  partly_resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+  ind <- grep("Number of unresolved",iq_log)
+  unresolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+  total_q <- (resolved_q+partly_resolved_q+unresolved_q)
+  prop_resolved <- resolved_q/total_q
+  
+  ## Collate results into a vector
+  lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
+  names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
+                        "total_num_quartets", "proportion_resolved_quartets")
+  
+  ## Return results
+  return(lm_results)
 }
 
-
-
-call.IQTREE.quartet <- function(iqtree_path,alignment_path,nsequences){
-  # For this alignment, check if the IQ-Tree log file, the treefile OR the likelihood map for this alignment exist
-  # If any of those files don't exist, run IQ-Tree
-  # This way if IQ-Tree failed to run properly, or if it ran before without doing the likelihood mapping, it will rerun here
-  if (file.exists(paste0(alignment_path,".iqtree")) == FALSE){
-    # Given an alignment, get a tree from IQ-tree and find the sum of the pairwise distance matrix
-    # Specify -lmap with 25 times the number of sequences, so that each sequence is covered ~100 times in the quartet sampling
-    nquartet <- 25*as.numeric(nsequences)
-    system(paste0(iqtree_path," -s ",alignment_path," -nt 1 -lmap ",nquartet," -redo -safe")) # call IQ-tree!
-  } else if (file.exists(paste0(alignment_path,".lmap.eps")) == FALSE){
-    # Given an alignment, get a tree from IQ-tree and find the sum of the pairwise distance matrix
-    # Specify -lmap with 25 times the number of sequences, so that each sequence is covered ~100 times in the quartet sampling
-    nquartet <- 25*as.numeric(nsequences)
-    system(paste0(iqtree_path," -s ",alignment_path," -nt 1 -lmap ",nquartet," -redo -safe")) # call IQ-tree!
-  } else if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
-    # Given an alignment, get a tree from IQ-tree and find the sum of the pairwise distance matrix
-    # Specify -lmap with 25 times the number of sequences, so that each sequence is covered ~100 times in the quartet sampling
-    nquartet <- 25*as.numeric(nsequences)
-    system(paste0(iqtree_path," -s ",alignment_path," -nt 1 -lmap ",nquartet," -redo -safe")) # call IQ-tree!
-  } 
-}
 
 
 ## Site concordance factors (Minh et. al. 2020)

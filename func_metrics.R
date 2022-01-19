@@ -8,8 +8,9 @@ library(ips) # to determine the indices of the parsimony informative sites
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 
- # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
+# here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
 
 # here's a few test alignments with 20 taxa each, with either 1, 10, 100, 1000, or 10000 trees:
@@ -22,15 +23,17 @@ alignment_path <- al_tl_path
 sequence_format = "DNA"
 substitution_model = "raw"
 iqtree2_number_threads = "AUTO"
+phylogemetric_number_of_threads = NA
 number_scf_quartets = 100
 number_of_taxa = 20
 
 
 
-## Q residuals (Gray et. al. 2010)
-q_residuals <- function(alignment_path, sequence_format = "DNA"){
+## Q-residuals (Gray et. al. 2010)
+q_residuals <- function(alignment_path, phylogemetric_path, sequence_format = "DNA", phylogemetric_number_of_threads = NA){
   ## Uses software`phylogemetric` (available at https://github.com/SimonGreenhill/phylogemetric) to calculate
   #     the Q-residuals of Gray et. al. (2010)
+  # Outputs a value between 0 and 1, where 0 indicates the quartets are treelike
   
   ## Change fasta file (from alisim) into nexus file
   # Nexus format required for `phylogemetric` software
@@ -48,7 +51,21 @@ q_residuals <- function(alignment_path, sequence_format = "DNA"){
   txt[ind] <- "  FORMAT DATATYPE=DNA MISSING=? GAP=-;"
   write(txt, file = nexus_path, append = FALSE)
   
+  ## Apply `phylogemetric` and save output as a vector
+  if (is.na(phylogemetric_number_of_threads)){
+    # Run basic command
+    call <- paste0(phylogemetric_path, " qresidual ", nexus_path)
+  } else {
+    # Use multiple cores with the -w/--workers argument
+    call <- paste0(phylogemetric_path, " -w ", phylogemetric_number_of_threads, " qresidual ", nexus_path)
+  }
+  program_output <- system(call, intern = TRUE)
+  # Format the program output into a nice vector containing just the mean Q-residual value per taxa
+  q_residuals <- as.numeric(unlist(strsplit(program_output, "\t"))[c(FALSE, TRUE)])
   
+  ## Return mean Q-residual value
+  mean_q_residual <- mean(q_residuals)
+  return(mean_q_residual)
 }
 
 
@@ -88,7 +105,7 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   mean_TIGER_value <- mean(TIGER_values)
   # Return the mean value
   return(mean_TIGER_value)
-  }
+}
 
 
 
@@ -121,7 +138,7 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
   ## Collate results into a vector
   lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
   names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
-                        "total_num_quartets", "proportion_resolved_quartets")
+                         "total_num_quartets", "proportion_resolved_quartets")
   
   ## Return results
   return(lm_results)
@@ -150,9 +167,9 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
   ## Retrieve the site concordance factors from the output table
   scf_table <- read.table(paste0(alignment_path,".treefile.cf.stat"), header = TRUE, sep = "\t")
   scf_results <- list(mean_scf = round(mean(scf_table$sCF), digits = 2), 
-                       median_scf = round(median(scf_table$sCF), digits = 2), 
-                       all_scfs = scf_table$sCF, 
-                       branch_ids = scf_table$ID)
+                      median_scf = round(median(scf_table$sCF), digits = 2), 
+                      all_scfs = scf_table$sCF, 
+                      branch_ids = scf_table$ID)
   ## Return the site concordance factor results
   return(scf_results)
 }

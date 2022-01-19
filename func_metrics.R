@@ -21,8 +21,31 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 
 
 ## Site concordance factors (Minh et. al. 2020)
-scf <- function(alignment_path, iqtree2_path){
+scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads, number_scf_quartets = 100){
+  # Function to calculate the site concordance factors for an alignment, given a maximum likelihood tree
   
+  ## Check that the treefile already exists: if it doesn't, run IQ-Tree and create it
+  if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
+    # Given an alignment, estimate the maximum likelihood tree with IQ-Tree2
+    call <- paste0(iqtree2_path," -s ",alignment_path," -nt ", iqtree2_number_threads, " -redo -safe")
+    system(call)
+  }
+  ## Check if the site concordance factors have already been calculated: if they have not, calculate them
+  if (file.exists(paste0(alignment_path,".treefile.cf.stat")) == FALSE){
+    # Create the command and call it in the system
+    # for sCF: iqtree -t concat.treefile -s ALN_FILE --scf 100 --prefix concord -nt 10
+    treefile <- paste0(alignment_path,".treefile")
+    call <- paste0(iqtree_path," -t ",treefile," -s ",alignment_path," --scf ",num_scf_quartets," -nt ","1"," -redo -safe")
+    system(call) # call IQ-tree!
+  }
+  ## Retrieve the site concordance factors from the output table
+  scf_table <- read.table(paste0(alignment_path,".treefile.cf.stat"), header = TRUE, sep = "\t")
+  scf_extracts <- list(mean_scf = round(mean(scf_table$sCF), digits = 2), 
+                       median_scf = round(median(scf_table$sCF), digits = 2), 
+                       all_scfs = scf_table$sCF, 
+                       branch_ids = scf_table$ID)
+  ## Return the site concordance factor results
+  return(scf_results)
 }
 
 

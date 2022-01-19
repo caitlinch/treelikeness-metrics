@@ -2,10 +2,12 @@
 ## This file contains functions to apply treelikeness metrics to a single alignment
 
 ## Load required packages
-library(ape)
+library(ape) # for general tree/alignment wrangling, and the delta.plots function
+library(ips) # to determine the indices of the parsimony informative sites
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
+fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 
  # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -25,8 +27,39 @@ number_of_taxa = 20
 
 
 
+## TIGER (Cummins and McInerney 2011)
+TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
+  # Tree Independent Genertion of Evolutionary Rates
+  # Function to calculate TIGER values from a multiple sequence alignment using the 
+  #   pbfrandsen/fast_TIGER software (available here: https://github.com/pbfrandsen/fast_TIGER)
+  
+  ## Remove phylogenetically uninformative sites from the alignment
+  # Uninformative sites can bias the TIGER values - see List (2021)
+  alignment <- read.FASTA(alignment_path, type = sequence_format)
+  # Detect informative sites (the sites to keep)
+  is_inds <- pis(as.matrix(alignment), what = "index")
+  # Index the alignment, to reduce it to just the informative sites
+  informative_alignment <- as.matrix.DNAbin(alignment)[,c(is_inds)]
+  # Write the informative alignment to disk
+  informative_alignment_path <- paste0(alignment_path, "_ParsimonyInformativeSites_only.phy")
+  write.phy(informative_alignment, file = informative_alignment_path)
+  
+  ## Run fast_TIGER
+  # Change sequence format to either "dna" or "aa" (only allowable data type names)
+  if (sequence_format == "DNA"){
+    data_type = "dna"
+  } else if ((sequence_format == "AA") | (sequence_format == "Protein")){
+    data_type = "protein"
+  }
+  # Create system command and call fast_TIGER
+  call <- paste0(fast_TIGER_path, " ", data_type, " ", informative_alignment_path)
+  system(call)
+  }
+
+
+
 ## Likelihood mapping (Strimmer and von Haeseler 1997)
-likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads, number_of_taxa){
+likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, number_of_taxa){
   # Function to call IQ-Tree and create a likelihood map for the alignment
   
   ## Create the likelihood map

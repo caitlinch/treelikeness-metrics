@@ -24,6 +24,11 @@ alisim_gene_tree_length <- NA
 
 
 
+## Source functions from caitlinch/treelikeness_metrics
+source(paste0(repo_directory, "func_simulating_alignments.R"))
+
+
+
 ## Prepare parameters that remain stable for all experiments
 # Prepare parameters for experiments
 # The number of trees should be the divisors for total_alignment_length (as only whole numbers of trees are possible)

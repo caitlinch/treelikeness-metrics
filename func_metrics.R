@@ -4,6 +4,7 @@
 ## Load required packages
 library(ape) # for general tree/alignment wrangling, and the delta.plots function
 library(ips) # to determine the indices of the parsimony informative sites
+library(phangorn) # for splits and networks
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
@@ -46,14 +47,31 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   #   3. If the confidence network does not contain a tree, reject the null hypothesis that the data originated in a tree
   #         - Reject the null hypothesis if and only if this set is incompatible
   
+  ## Construct and bootstrap a NeighborNet network
   # Convert fasta to nexus
   nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA")
   # Name output path
-  output_path <- paste0(alignment_path, "_Bootstrap_Splits.nex")
+  output_path <- paste0(alignment_path, "_Splitstree_output.nex")
   # Assemble the SplitsTree 4 command
   splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path,"; ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true; ASSUME disttransform=NeighbourNet; BOOTSTRAP RUNS=100; EXPORT FILE=", output_path," REPLACE=YES; QUIT'")
   # Call SplitsTree 4
   system(splitstree_command)
+  
+  ## Construct a confidence network using the bootstrap splits
+  # Read in the nexus splits from the Splitstree output file
+  splits <- read.nexus.splits(output_path)
+  # Extract bootstrap confidence values from Splitstree4 output
+  splitstree_text <- readLines(output_path)
+  st_bootstraps_start <- grep("BEGIN st_bootstrap", splitstree_text)
+  st_bootstraps_end <- grep("END; \\[st_Bootstrap\\]", splitstree_text)
+  st_bootstraps_all <- splitstree_text[st_bootstraps_start:st_bootstraps_end]
+  # Trim bootstrap splits to only splits present in network
+  matrix_ind <- grep("MATRIX", st_bootstraps_all)
+  line_ind <- grep("\\[--------------------------------------------------\\]", st_bootstraps_all)
+  st_bootstraps <- st_bootstraps_all[(matrix_ind+1):(line_ind-1)]
+  # Extract bootstrap confidence values from Splitstree4 output
+  split_stbs <- unlist(strsplit(st_bootstraps, "\t"))
+  CN_splits_df <- split_stbs[c(FALSE, TRUE, FALSE)]
   
 }
 

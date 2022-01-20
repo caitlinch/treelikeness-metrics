@@ -9,6 +9,7 @@ library(ips) # to determine the indices of the parsimony informative sites
 iqtree2_path <- "iqtree2"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
+splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 
 # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -20,12 +21,41 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 
 # here's paths for variables needed to test treelikeness metric functions
 alignment_path <- al_tl_path
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test.phy"
 sequence_format = "DNA"
 substitution_model = "raw"
 iqtree2_number_threads = "AUTO"
 phylogemetric_number_of_threads = NA
 number_scf_quartets = 100
 number_of_taxa = 20
+
+
+
+## Network tree-likeness test (Huson and Bryant 2006)
+network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA"){
+  ## Uses Splitstree4 software to implement the Network Treelikeness Test described in Huson and Bryant (2006)
+  # Software available from:
+  # https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/splitstree/
+  
+  ## Test steps:
+  #   1. Infer a split network N from some data
+  #         - Can be done in Splitstree using Networks -> NeighborNet
+  #   2. Construct a confidence network for N with level 1 - alpha
+  #         - Construct the set of splits with CIs excluding 0
+  #         - Can be done in Splitstree4 using `Analysis -> Bootstrap...` then `Analysis -> Show Confidence Network`
+  #   3. If the confidence network does not contain a tree, reject the null hypothesis that the data originated in a tree
+  #         - Reject the null hypothesis if and only if this set is incompatible
+  
+  # Convert fasta to nexus
+  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA")
+  # Name output path
+  output_path <- paste0(alignment_path, "_Bootstrap_Splits.nex")
+  # Assemble the SplitsTree 4 command
+  splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path,"; ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true; ASSUME disttransform=NeighbourNet; BOOTSTRAP RUNS=100; EXPORT FILE=", output_path," REPLACE=YES; QUIT'")
+  # Call SplitsTree 4
+  system(splitstree_command)
+  
+}
 
 
 
@@ -207,3 +237,54 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   return(mean_db)
 }
 
+
+
+## Utility functions
+convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
+  ## Convert fasta file to nexus file (if there is no existing nexus file with the same name)
+  
+  ## Prepare parameters for file conversion
+  # Name nexus file by simply appending ".nex" to end of existing file name
+  nexus_alignment_path <- paste0(alignment_path,".nex")
+  # Extract file type from alignment path
+  suffix <- tail(strsplit(alignment_path,"\\.")[[1]],1)
+  # Set format for output nexus file
+  if ((sequence_format == "DNA") | (sequence_format == "dna")){
+    nexus_format = "dna"
+  } else if ((sequence_format == "Protein") | (sequence_format == "protein") | 
+             (sequence_format == "AA") | (sequence_format == "aa")){
+    nexus_format = "protein"
+  }
+  
+  ## Convert to nexus using funcions based on suffix
+  if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
+    ## If the file is a fasta file, convert it to nexus file format (unless a nexus version already exists)
+    if (file.exists(nexus_alignment_path) == FALSE){
+      # Read in the fasta data
+      data <- read.FASTA(alignment_path, type = sequence_format)
+      # Write out the nexus data
+      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, interleaved = FALSE, datablock = FALSE) # write the output as a nexus file)
+    }
+  } else if (suffix == "phy" | suffix == "phylip"){
+    ## If the file is a phy file, convert it to nexus file format (unless a nexus version already exists)
+    if (file.exists(nexus_alignment_path) == FALSE){
+      data <- read.phy(alignment_path)
+      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, interleaved = FALSE, datablock = FALSE) # write the output as a nexus file)
+    }
+  }
+  
+  ## Open the nexus file and delete the interleave = YES or INTERLEAVE = NO part so IQ-TREE can read it
+  nexus <- readLines(nexus_alignment_path)
+  ind <- grep("BEGIN CHARACTERS",nexus)+2
+  if ((sequence_format == "DNA") | (sequence_format == "dna")){
+    nexus[ind] <- "  FORMAT DATATYPE=DNA MISSING=? GAP=-;"
+  } else if ((sequence_format == "Protein") | (sequence_format == "protein") | 
+             (sequence_format == "AA") | (sequence_format == "aa")){
+    nexus[ind] <- "  FORMAT MISSING=? GAP=- DATATYPE=PROTEIN;"
+  }
+  # Write the edited nexus file out 
+  writeLines(nexus,nexus_alignment_path)
+  
+  ## Output file name and path for nexus file
+  return(nexus_alignment_path)
+}

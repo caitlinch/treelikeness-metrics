@@ -9,7 +9,7 @@ library(ips) # to determine the indices of the parsimony informative sites
 iqtree2_path <- "iqtree2"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 
 # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -33,7 +33,7 @@ number_of_taxa = 20
 
 ## Network tree-likeness test (Huson and Bryant 2006)
 network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA"){
-  ## Uses Splitstree4 software to implement the Network Treelikeness Test described in Huson and Bryant (2006)
+  ## Uses Splitstree4.17.1 software to implement the Network Treelikeness Test described in Huson and Bryant (2006)
   # Software available from:
   # https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/splitstree/
   

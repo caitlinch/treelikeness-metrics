@@ -56,6 +56,13 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
   # In IQ-Tree2, estimate a maximum likelihood gene tree for each gene in the gene_folder
   estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads)
+  # Copy all gene trees into a new folder
+  gene_tree_folder <- paste0(dirname(alignment_path), "/gene_tree_folder/")
+  if (dir.exists(gene_tree_folder) == FALSE){dir.create(gene_tree_folder)}
+  # Collect all gene trees (.treefile files) from the gene_folder into the gene_tree_folder
+  all_gene_folder_files <- list.files(gene_folder)
+  all_gene_folder_treefiles <- all_gene_folder_files[grep("\\.treefile", all_gene_folder_files)]
+  all_gene_folder_treefiles <- all_gene_folder_treefiles[grep("\\.treefile\\.log", all_gene_folder_treefiles, invert = TRUE)]
 }
 
 
@@ -301,6 +308,8 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
   
   # Get the list of file names
   all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
+  all_gene_paths <- all_gene_paths[grep("\\.fa", all_gene_paths)]
+  all_gene_paths <- all_gene_paths[grep("\\.fa\\.", all_gene_paths, invert = TRUE)]
   # Run IQ-Tree2 for each of those file names
   lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag)
 }

@@ -296,8 +296,18 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 #### Tree estimation functions ####
-estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path){
+estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO"){
+  ## Function to take a folder full of genes and estimate a gene tree for each one
   
+  # Get the list of file names
+  all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
+  
+}
+
+call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"){
+  # Small function to call IQ-Tree2 for one alignment
+  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP -redo -safe")
+  system(call)
 }
 
 

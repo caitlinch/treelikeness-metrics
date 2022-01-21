@@ -8,6 +8,7 @@ library(phangorn) # for splits and networks
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
+astral_path <- "/Users/caitlincherryh/Documents/Executables/Astral/astral.5.7.5.jar"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
@@ -56,13 +57,18 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
   # In IQ-Tree2, estimate a maximum likelihood gene tree for each gene in the gene_folder
   estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads)
-  # Copy all gene trees into a new folder
-  gene_tree_folder <- paste0(dirname(alignment_path), "/gene_tree_folder/")
-  if (dir.exists(gene_tree_folder) == FALSE){dir.create(gene_tree_folder)}
-  # Collect all gene trees (.treefile files) from the gene_folder into the gene_tree_folder
+  # Collect all gene trees (.treefile files) from the gene_folder
   all_gene_folder_files <- list.files(gene_folder)
   all_gene_folder_treefiles <- all_gene_folder_files[grep("\\.treefile", all_gene_folder_files)]
   all_gene_folder_treefiles <- all_gene_folder_treefiles[grep("\\.treefile\\.log", all_gene_folder_treefiles, invert = TRUE)]
+  # Write all gene trees into a single file
+  all_gene_trees <- unlist(lapply(paste0(gene_folder, all_gene_folder_treefiles), readLines))
+  gene_trees_path <- gsub("output_alignment.fa", "all_gene_trees.txt", alignment_path)
+  write(all_gene_trees, file = gene_trees_path)
+  
+  ## Estimating a species tree using ASTRAL
+    
+  
 }
 
 

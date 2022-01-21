@@ -11,6 +11,7 @@ iqtree2_path <- "iqtree2"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+reticulation_index_path <- "/Users/caitlincherryh/Documents/Executables/Coalescent_simulation_and_gene_flow_detection-master/"
 
 # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -23,12 +24,39 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 # here's paths for variables needed to test treelikeness metric functions
 alignment_path <- al_tl_path
 alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test.phy"
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
 sequence_format = "DNA"
 substitution_model = "raw"
 iqtree2_number_threads = "AUTO"
 phylogemetric_number_of_threads = NA
 number_scf_quartets = 100
 number_of_taxa = 20
+
+#### Treelikeness metric functionc ####
+
+## Reticulation Index (Cai et. al. 2021)
+reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_path, sequence_format = "DNA"){
+  ## Reticulation index quantifies introgression at each node
+  # Requires three inputs: 
+  # 1. Rooted best-estimated species tree with branch lengths estimated in coalescent units, newick format
+  #       - Obtained from running MPEST/ASTRAL on ML gene trees
+  # 2. Rooted bootstrap species trees with branch lengths measured in coalescent units, newick format
+  #       - Obtained from running MPEST/ASTRAL on bootstrap gene trees
+  # 3. Rooted gene trees, newick format
+  #       - Obtained from running IQ-Tree on each partition from the alignment file
+  
+  ## Determine file names
+  partition_path <- gsub("output_alignment.fa", "partitions.nex", alignment_path)
+  
+  ## Estimating gene trees
+  # Create a new folder to store all information about this alignment
+  gene_folder <- paste0(dirname(alignment_path), "/gene_folder/")
+  if (dir.exists(gene_folder) == FALSE){dir.create(gene_folder)}
+  # Run function to separate alignment into genes using partition file
+  gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
+  # Estimate a maximum likelihood gene tree for each gene in IQ-Tree2
+  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path)
+}
 
 
 
@@ -257,7 +285,11 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 
-## Utility functions
+#### Tree estimation functions ####
+
+
+
+#### Utility functions ####
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
   ## Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
@@ -306,3 +338,65 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
   ## Output file name and path for nexus file
   return(nexus_alignment_path)
 }
+
+
+
+genes.from.alignment <- function(alignment_path, partition_path, gene_folder, sequence_format = "DNA", save.gene.info = FALSE){
+  ## Function to take an alignment and a partition file, and save separate alignments for each gene (and a data frame with info about the genes)
+  
+  # Open the alignment as a matrix
+  if (sequence_format == "DNA" | sequence_format == "dna"){
+    aln_mat <- as.matrix(read.FASTA(alignment_path, type = "DNA"))
+  } else if (sequence_format == "AA" | sequence_format == "aa" | sequence_format == "protein" | sequence_format == "Protein"){
+    aln_mat <- as.matrix(read.FASTA(alignment_path, type = "AA"))
+  }
+  
+  # Open partition file and extract genes
+  partition_file <- readLines(partition_path)
+  charpartition_inds <- grep("charset", partition_file)
+  charpartition_lines <- partition_file[charpartition_inds]
+  
+  # Save each gene individually
+  gene_info_list <- lapply(1:length(charpartition_lines), save.one.gene, charpartitions = charpartition_lines, alignment_matrix = aln_mat, output_folder = gene_folder)
+  
+  # If desired, save information about the genes
+  if (save.gene.info == TRUE){
+    gene_info_df <- do.call(rbind.data.frame, gene_info_list)
+    names(gene_info_df) <- c("gene_name", "gene_start_position", "gene_end_position", "gene_length", "sequence_format")
+    
+    write.csv(gene_info_df, file = paste0(dirname(alignment_path), "/genes_from_alignment_info.csv"))
+  }
+}
+
+save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder, sequence_format = "DNA"){
+  ## Small function to process a single charpartition row and save the associated gene
+  
+  # Extract the i^th row using the index and split the line to determine the gene name and location
+  c_line <- charpartitions[index]
+  c_line <- gsub(";", "", c_line)
+  gene_name_split <- unlist(strsplit(c_line, "="))
+  gene_name <- gsub("\tcharset ", "", gene_name_split[1])
+  gene_name <- gsub(" ", "", gene_name)
+  gene_range <- unlist(strsplit(c_line, ","))[2]
+  gene_range <- gsub(" ", "", gene_range)
+  gene_range_split <- strsplit(gene_range, "-")[[1]]
+  gene_start <- as.numeric(gene_range_split[[1]])
+  gene_end <- as.numeric(gene_range_split[[2]])
+  gene_length = length(gene_start:gene_end)
+  
+  # Subset the matrix to include only the sites for gene 1 for all taxa
+  # matrix[1:x, 1:y] where x is the number of taxa and y is the number of sites
+  gene_alignment <- alignment_matrix[, gene_start:gene_end]
+  
+  # Name and output gene file
+  gene_filepath <- paste0(output_folder, gene_name, ".fa")
+  write.FASTA(gene_alignment, file = gene_filepath)
+  
+  # Assemble a vector of information about the gene
+  gene_info <- c(gene_name, gene_start, gene_end, gene_length, sequence_format)
+  names(gene_info) <- c("gene_name", "gene_start_position", "gene_end_position", "gene_length", "sequence_format")
+  return(gene_info)
+}
+
+
+

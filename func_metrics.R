@@ -223,14 +223,24 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
 
 
 ## Site concordance factors (Minh et. al. 2020)
-scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100){
+scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100, add.likelihood.map = FALSE, number_of_taxa = NA){
   # Function to calculate the site concordance factors for an alignment, given a maximum likelihood tree estimated in IQ-Tree
+  # Optional: can perform likelihood map (so tree doesn't have to be estimated multiple times to do both likelihood mapping and sCF)
   
   ## Check that the treefile already exists: if it doesn't, run IQ-Tree and create it
-  if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
-    # Given an alignment, estimate the maximum likelihood tree with IQ-Tree2
-    call <- paste0(iqtree2_path," -s ",alignment_path," -nt ", iqtree2_number_threads, " -redo -safe")
-    system(call)
+  if (add.likelihood.map == FALSE){
+    if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
+      # Given an alignment, estimate the maximum likelihood tree with IQ-Tree2
+      call <- paste0(iqtree2_path," -s ",alignment_path," -nt ", iqtree2_number_threads, " -redo -safe")
+      system(call)
+    }
+  } else if (add.likelihood.map == TRUE){
+    if (((file.exists(paste0(alignment_path, ".iqtree")) == FALSE) | (file.exists(paste0(alignment_path, ".lmap.eps")) == FALSE)) &
+        (is.na(number_of_taxa) == FALSE)) {
+      number_of_quartets <- 25 * as.numeric(number_of_taxa)
+      call <- paste0(iqtree2_path," -s ",alignment_path," -nt ", iqtree2_number_threads, " -lmap ",number_of_quartets," -redo -safe")
+      system(call)
+    }
   }
   ## Check if the site concordance factors have already been calculated: if they have not, calculate them
   if (file.exists(paste0(alignment_path,".treefile.cf.stat")) == FALSE){
@@ -286,6 +296,9 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 #### Tree estimation functions ####
+estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path){
+  
+}
 
 
 

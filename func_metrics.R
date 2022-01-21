@@ -302,7 +302,7 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
   # Get the list of file names
   all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
   # Run IQ-Tree2 for each of those file names
-  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads)
+  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag)
 }
 
 call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE){

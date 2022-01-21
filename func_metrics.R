@@ -67,8 +67,21 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   write(all_gene_trees, file = gene_trees_path)
   
   ## Estimating a species tree using ASTRAL
-    
+  # Assemble file names
+  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_tree.tre", alignment_path)
+  log_path <- gsub("output_alignment.fa", "ASTRAL.log", alignment_path)
+  estimate.ASTRAL.species.tree(gene_trees_path, species_tree_path, log_path, astral_path)
+  # Add length to 0 length branches/NaN branches
+  species_tree <- read.tree(species_tree_path)
+  nan_edges <- which(is.nan(species_tree$edge.length))
+  zero_edges <- which(species_tree$edge.length == 0)
+  species_tree$edge.length[nan_edges] <- 0.1
+  species_tree$edge.length[zero_edges] <- 0.00000001
+  species_tree_RI_path <- gsub("output_alignment.fa", "ASTRAL_species_tree_RI.tre", alignment_path)
+  write.tree(species_tree, file = species_tree_RI_path)
   
+    
+  # To do: work out the bootstrap species trees?
 }
 
 
@@ -114,6 +127,8 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   split_stbs <- unlist(strsplit(st_bootstraps, "\t"))
   CN_splits_df <- split_stbs[c(FALSE, TRUE, FALSE)]
   
+  
+  ## To do: output confidence networks in SPlitstree, read in to R, check if there's an incompatible tree within the set of confidence intervals that don't overlap 0
 }
 
 
@@ -340,6 +355,15 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
   system(call)
 }
 
+
+
+estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path){
+  ## Function to estimate a species tree using ASTRAL
+
+  # Assemble ASTRAL command from input file names
+  astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
+  system(astral_command)
+}
 
 
 #### Utility functions ####

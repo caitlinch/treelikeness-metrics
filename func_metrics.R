@@ -54,8 +54,8 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   if (dir.exists(gene_folder) == FALSE){dir.create(gene_folder)}
   # Run function to separate alignment into genes using partition file
   gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
-  # Estimate a maximum likelihood gene tree for each gene in IQ-Tree2
-  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path)
+  # In IQ-Tree2, estimate a maximum likelihood gene tree for each gene in the gene_folder
+  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads)
 }
 
 
@@ -296,17 +296,32 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 #### Tree estimation functions ####
-estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO"){
+estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE){
   ## Function to take a folder full of genes and estimate a gene tree for each one
   
   # Get the list of file names
   all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
-  
+  # Run IQ-Tree2 for each of those file names
+  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads)
 }
 
-call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"){
+call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE){
   # Small function to call IQ-Tree2 for one alignment
-  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP -redo -safe")
+  
+  # Use _flag commands from function call to assemble IQ-Tree2 call
+  if (redo_flag == TRUE){
+    redo_call = " -redo"
+  } else if (redo_flag == FALSE){
+      redo_call = ""
+  }
+  if (safe_flag == TRUE){
+    safe_call = " -safe"
+  } else if (safe_flag == FALSE){
+    safe_call = ""
+  }
+  # Assemble call
+  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP", redo_call, safe_call)
+  # Invoke OS command
   system(call)
 }
 

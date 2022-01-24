@@ -123,28 +123,26 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   splits <- read.nexus.splits(confidence_path)
   
   ## Read in the splits from the confidence network and turn text file into a dataframe
-  # Find the starting line and end line for the splits info
-  splits_text <- readLines(confidence_path)
-  splits_start <- grep("MATRIX", splits_text)
+  # Find the starting line for the splits (line after "MATRIX") and read in from that line down as tsv
+  splits_start <- grep("MATRIX", readLines(confidence_path))
   splits_df <- read.delim(confidence_path, header = FALSE, skip = splits_start)
-  # Remove rows that do not contain splits
+  # Remove rows that do not contain splits from data frame
   splits_df <- splits_df[1:length(splits),]
+  # Format data frame columns
+  names(splits_df) <- c("split_and_size", "weight", "interval", "taxa")
+  splits_df$taxa <- gsub(",", "", splits_df$taxa)
+  ss <- gsub(" ","",gsub("size=","",gsub("\\]","",gsub("\\[","",unlist(strsplit(splits_df$split_and_size, ","))))))
+  splits_df$split <- as.numeric(ss[c(TRUE,FALSE)])
+  splits_df$size <- as.numeric(ss[c(FALSE, TRUE)])
+  si <- gsub(" ","",gsub("\\)","",gsub("\\(","",unlist(strsplit(splits_df$interval, ",")))))
+  splits_df$interval_start <- as.numeric(si[c(TRUE, FALSE)])
+  splits_df$interval_end <- as.numeric(si[c(FALSE, TRUE)])
+  # Reorder data frame columns
+  splits_df <- splits_df[,c("split","size","interval","interval_start","interval_end","taxa")]
   
-  # Extract bootstrap confidence values from Splitstree4 output
-  splitstree_text <- readLines(output_path)
-  st_bootstraps_start <- grep("BEGIN st_bootstrap", splitstree_text)
-  st_bootstraps_end <- grep("END; \\[st_Bootstrap\\]", splitstree_text)
-  st_bootstraps_all <- splitstree_text[st_bootstraps_start:st_bootstraps_end]
-  # Trim bootstrap splits to only splits present in network
-  matrix_ind <- grep("MATRIX", st_bootstraps_all)
-  line_ind <- grep("\\[--------------------------------------------------\\]", st_bootstraps_all)
-  st_bootstraps <- st_bootstraps_all[(matrix_ind+1):(line_ind-1)]
-  # Extract bootstrap confidence values from Splitstree4 output
-  split_stbs <- unlist(strsplit(st_bootstraps, "\t"))
-  CN_splits_df <- split_stbs[c(FALSE, TRUE, FALSE)]
+
   
-  
-  ## To do: output confidence networks in SPlitstree, read in to R, check if there's an incompatible tree within the set of confidence intervals that don't overlap 0
+  ## To do: check if there's an incompatible tree within the set of confidence intervals that don't overlap
 }
 
 

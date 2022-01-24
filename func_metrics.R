@@ -25,7 +25,8 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 # here's paths for variables needed to test treelikeness metric functions
 alignment_path <- al_tl_path
 alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test_4.17.2.phy"
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/incompatible_splits.nexus"
+#alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
 sequence_format = "DNA"
 substitution_model = "raw"
 iqtree2_number_threads = "AUTO"
@@ -80,7 +81,7 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   species_tree_RI_path <- gsub("output_alignment.fa", "ASTRAL_species_tree_RI.tre", alignment_path)
   write.tree(species_tree, file = species_tree_RI_path)
   
-    
+  
   # To do: work out the bootstrap species trees?
 }
 
@@ -109,18 +110,18 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   output_path <- paste0(alignment_path, "_Splitstree_output.nex")
   # Assemble the SplitsTree 4 command
   splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path, ";",
-                                                        " ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
-                                                        " ASSUME disttransform=NeighborNet;",
-                                                        " bootstrap runs=100;",
-                                                        " confidence_splits level=95 file=", confidence_path, ";",
-                                                        " export file=", output_path, " REPLACE=yes;",
-                                                        " quit;'")
+                               " ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
+                               " ASSUME disttransform=NeighborNet;",
+                               " bootstrap runs=100;",
+                               " confidence_splits level=95 file=", confidence_path, ";",
+                               " export file=", output_path, " REPLACE=yes;",
+                               " quit;'")
   # Call SplitsTree 4
   system(splitstree_command)
   
   ## Construct a confidence network using the bootstrap splits
   # Read in the nexus splits from the confidence network
-  splits <- read.nexus.splits(confidence_path)
+  splits <- suppressWarnings(read.nexus.splits(confidence_path))
   
   ## Read in the splits from the confidence network and turn text file into a dataframe
   # Find the starting line for the splits (line after "MATRIX") and read in from that line down as tsv
@@ -140,9 +141,23 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # Reorder data frame columns
   splits_df <- splits_df[,c("split","size","interval","interval_start","interval_end","taxa")]
   
-
+  ## Construct the set of splits with confidence intervals excluding 0 (for the network treelikeness test)
+  test_df <- splits_df[which(splits_df$interval_start > 0 & splits_df$interval_end > 0), ]
+  test_splits <- splits[which(splits_df$interval_start > 0 & splits_df$interval_end > 0)]
   
-  ## To do: check if there's an incompatible tree within the set of confidence intervals that don't overlap
+  ## Determine whether the splits are compatible by conducting pairwise comparison
+  c_df <- do.call(rbind.data.frame, lapply(1:length(test_splits), pairwise.compatibility, set_of_splits = test_splits))
+  # A set of splits is compatible if all pairwise comparisons between splits are compatible
+  if (length(which(c_df$compatibility == "Incompatible")) != 0){
+    # Some pairwise comparisons between splits are incompatible: therefore, the null hypothesis that data was originated in a tree is rejected
+    ntlt_result <- "Non-tree-like"
+  } else if (length(which(c_df$compatibility == "Incompatible")) == 0){
+    # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
+    ntlt_result <- "Tree-like"
+  }
+  
+  ## Return Network Treelikeness Test result
+  return(ntlt_result)
 }
 
 
@@ -356,7 +371,7 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
   if (redo_flag == TRUE){
     redo_call = " -redo"
   } else if (redo_flag == FALSE){
-      redo_call = ""
+    redo_call = ""
   }
   if (safe_flag == TRUE){
     safe_call = " -safe"
@@ -373,7 +388,7 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
 
 estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path){
   ## Function to estimate a species tree using ASTRAL
-
+  
   # Assemble ASTRAL command from input file names
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
@@ -488,6 +503,88 @@ save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder
   names(gene_info) <- c("gene_name", "gene_start_position", "gene_end_position", "gene_length", "sequence_format")
   return(gene_info)
 }
+
+
+
+
+is.split.trivial <- function(split){
+  # Extract the bipartition subsets from the tree
+  ss1 <- split[[1]] # get the indices of all taxa in the split
+  taxa <- attr(split,"labels") # get the names of all taxa in the tree
+  ss1_taxa <- taxa[ss1] # use the split indices to get the taxa names from the split
+  ss2_taxa <- setdiff(taxa,ss1_taxa) # take the elements from taxa not in subset 1 to get the elements in ss2
+  # Test whether the split is trivial (if it is trivial, either ss1 or ss1 will be 1)
+  if ((length(ss1_taxa) == 1) || (length(ss2_taxa) == 1)){
+    trivial <- TRUE
+  } else {
+    trivial <- FALSE
+  }
+  return(trivial)
+}
+
+
+trivial.splits.wrapper <- function(index, set_of_splits){
+  # Function that wraps around is.split.trivial for better application of lapply
+  split <- set_of_splits[index]
+  is.trivial <- is.split.trivial(split)
+  return(is.trivial)
+}
+
+
+
+are.splits.compatible <- function(split1_index, split2_index, set_of_splits){
+  ## Function to compare a pair of splits and determine whether they are compatible
+  
+  ## Open splits
+  # A split "A|B" is a bipartition of a taxon set "X" into two non-empty sets
+  split1 <- set_of_splits[split1_index]
+  split2 <- set_of_splits[split2_index]
+  # Get indices of all taxa in splits
+  si1 <- split1[[1]]
+  si2 <- split2[[1]]
+  
+  ## Determine whether splits are compatible
+  #Get list of taxa for each side of each split
+  taxa <- attr(set_of_splits, "labels")
+  A1 <- taxa[si1]
+  B1 <- setdiff(taxa, A1)
+  A2 <- taxa[si2]
+  B2 <- setdiff(taxa, A2)
+  # Two splits S1 = A1|B1 and S2 = A2|B2 on X are compatible if one of the four possible intersections 
+  #   of their split parts is empty: A1 ∩ A2, A1 ∩ B2, B1 ∩ A2, B1 ∩ B2
+  #   Otherwise, the splits are incompatible
+  #   A set of splits is compatible if all pairs of splits in S are compatible
+  i1 <- intersect(A1, A2)
+  i2 <- intersect(A1, B2)
+  i3 <- intersect(B1, A2)
+  i4 <- intersect(B1, B2)
+  if ((length(i1) == 0) | (length(i2) == 0) | (length(i3) == 0) | (length(i4) == 0)){
+    result = "Compatible"
+  } else {
+    result = "Incompatible"
+  }
+  
+  ## Return output
+  output = c(split1_index, split2_index, result)
+  names(output) <- c("split1", "split2", "compatibility")
+  return(output)
+}
+
+
+pairwise.compatibility <- function(index, set_of_splits){
+  ## Function to take one split and compare pairwise to all other splits within a set to determine
+  #     whether they are compatible
+  
+  # Get indices to compare split to all splits except itself
+  comparison_indices <- setdiff(1:length(set_of_splits), index)
+  # Compare split to all splits except itself
+  pc_df <- do.call(rbind.data.frame, lapply(comparison_indices, are.splits.compatible, index, set_of_splits))
+  names(pc_df) <- c("split1", "split2", "compatibility")
+  # Return pairwise compatibility data frame
+  return(pc_df)
+}
+
+
 
 
 

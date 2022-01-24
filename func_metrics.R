@@ -4,8 +4,7 @@
 ## Load required packages
 library(ape) # for general tree/alignment wrangling, and the delta.plots function
 library(ips) # to determine the indices of the parsimony informative sites
-library(phangorn) # for splits and networks
-library(phytools) # to root trees at the midpoint
+library(phangorn) # for splits and networks, for midpoint rooting trees 
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
@@ -613,19 +612,42 @@ pairwise.compatibility <- function(index, set_of_splits){
 
 
 
+format.all.trees <- function(trees){
+  ## Function to take a multiphylo object and format each tree for the Reticulation Index program
+  #       using the function `format.one.tree` (found below)
+  
+  # Make an index for each tree
+  indices <- 1:length(trees)
+  # Loop though each index. 
+  # For each index, format the corresponding tree and resave it to the `trees` multiphylo object
+  for (i in indices){
+    # Get the tree
+    i_tree <- trees[[i]]
+    # Reformat the tree
+    i_tree <- format.one.tree(i_tree)
+    # Return the reformatted tree to the multiphylo object
+    trees[[i]] <- i_tree
+  }
+  
+  # Return reformatted trees
+  return(trees)
+}
+
+
+
 format.one.tree <- function(tree){
   ## Function to take one tree and format it for the Reticulation Index programs
   
   # Add branch lengths to terminalbranches
-  nan_edges <- which(is.nan(species_tree$edge.length))
+  nan_edges <- which(is.nan(tree$edge.length))
   tree$edge.length[nan_edges] <- 0.1
   # Add branch lengths to 0 length branches
-  zero_edges <- which(species_tree$edge.length == 0)
+  zero_edges <- which(tree$edge.length == 0)
   tree$edge.length[zero_edges] <- 0.00000001
   # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
   # Root the tree at the midpoint
-  
-  
-  
+  tree <- midpoint(tree)
+  # Return the tree
+  return(tree)
 }
 

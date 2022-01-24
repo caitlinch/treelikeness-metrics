@@ -25,7 +25,6 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 # here's paths for variables needed to test treelikeness metric functions
 alignment_path <- al_tl_path
 alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test_4.17.2.phy"
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/incompatible_splits.nexus"
 #alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
 sequence_format = "DNA"
 substitution_model = "raw"
@@ -108,16 +107,19 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # Name output path
   confidence_path <- paste0(alignment_path, "_confidence.nexus")
   output_path <- paste0(alignment_path, "_Splitstree_output.nex")
-  # Assemble the SplitsTree 4 command
-  splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path, ";",
-                               " ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
-                               " ASSUME disttransform=NeighborNet;",
-                               " bootstrap runs=100;",
-                               " confidence_splits level=95 file=", confidence_path, ";",
-                               " export file=", output_path, " REPLACE=yes;",
-                               " quit;'")
-  # Call SplitsTree 4
-  system(splitstree_command)
+  # Run Splitstree4 if the confidence_path and output_path files do not exist
+  if ((file.exists(confidence_path) == FALSE) | (file.exists(output_path) == FALSE)){
+    # Assemble the SplitsTree 4 command
+    splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path, ";",
+                                 " ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
+                                 " ASSUME disttransform=NeighborNet;",
+                                 " bootstrap runs=100;",
+                                 " confidence_splits level=95 file=", confidence_path, ";",
+                                 " export file=", output_path, " REPLACE=yes;",
+                                 " quit;'")
+    # Call SplitsTree 4
+    system(splitstree_command)
+  }
   
   ## Construct a confidence network using the bootstrap splits
   # Read in the nexus splits from the confidence network

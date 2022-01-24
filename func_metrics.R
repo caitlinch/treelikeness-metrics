@@ -93,6 +93,12 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   write.tree(gene_trees, file = gene_trees_reformatted_path)
   
   ## Apply the Reticulation Index
+  # Follow steps in `imulator_tripletCounter_tripletMaper.sh` to simulate gene trees, summarize triplet frequency distribution, 
+  #     and map unbalanced triplets to the species tree
+  # "sh simulator_tripletCounter_tripletMapper.sh [path_to_species_tree] [path_to_bootstrap_species_trees] [path_to_gene_trees]"
+  ri_command <- paste0("sh ", reticulation_index_path, "simulator_tripletCounter_tripletMapper.sh ", species_tree_path, " ", bs_tree_path,
+                       " ", gene_trees_reformatted_path)
+  
 }
 
 

@@ -5,6 +5,7 @@
 library(ape) # for general tree/alignment wrangling, and the delta.plots function
 library(ips) # to determine the indices of the parsimony informative sites
 library(phangorn) # for splits and networks
+library(phytools) # to root trees at the midpoint
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
@@ -70,11 +71,16 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   
   ## Estimating a species tree using ASTRAL
   # Assemble file names
-  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_tree.tre", alignment_path)
+  output_tree_path <- gsub("output_alignment.fa", "ASTRAL_all_trees.tre", alignment_path)
   log_path <- gsub("output_alignment.fa", "ASTRAL.log", alignment_path)
-  estimate.ASTRAL.multilocus.bootstrapping(gene_trees_path, species_tree_path, log_path, astral_path, bootstrap_path_file)
+  bs_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_tree.tre", alignment_path)
+  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_bootstrap_trees.tre", alignment_path)
+  estimate.ASTRAL.multilocus.bootstrapping(gene_trees_path, output_tree_path, log_path, astral_path, bootstrap_path_file)
+  # Separate out bootstrap replicates/species trees into different files
+  all_astral_trees <- read.tree(species_tree_path)
+  bs_trees <- all_astral_trees[1:100]
+  species_tree <- all_astral_trees[102][[1]]
   # Add length to 0 length branches/NaN branches
-  species_tree <- read.tree(species_tree_path)
   nan_edges <- which(is.nan(species_tree$edge.length))
   zero_edges <- which(species_tree$edge.length == 0)
   species_tree$edge.length[nan_edges] <- 0.1
@@ -607,5 +613,19 @@ pairwise.compatibility <- function(index, set_of_splits){
 
 
 
-
+format.one.tree <- function(tree){
+  ## Function to take one tree and format it for the Reticulation Index programs
+  
+  # Add branch lengths to terminalbranches
+  nan_edges <- which(is.nan(species_tree$edge.length))
+  tree$edge.length[nan_edges] <- 0.1
+  # Add branch lengths to 0 length branches
+  zero_edges <- which(species_tree$edge.length == 0)
+  tree$edge.length[zero_edges] <- 0.00000001
+  # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
+  # Root the tree at the midpoint
+  
+  
+  
+}
 

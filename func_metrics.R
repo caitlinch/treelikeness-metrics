@@ -72,7 +72,7 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   # Assemble file names
   species_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_tree.tre", alignment_path)
   log_path <- gsub("output_alignment.fa", "ASTRAL.log", alignment_path)
-  estimate.ASTRAL.species.tree(gene_trees_path, species_tree_path, log_path, astral_path)
+  estimate.ASTRAL.multilocus.bootstrapping(gene_trees_path, species_tree_path, log_path, astral_path, bootstrap_path_file)
   # Add length to 0 length branches/NaN branches
   species_tree <- read.tree(species_tree_path)
   nan_edges <- which(is.nan(species_tree$edge.length))

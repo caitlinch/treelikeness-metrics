@@ -63,6 +63,10 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   all_gene_trees <- unlist(lapply(paste0(gene_folder, all_gene_folder_treefiles), readLines))
   gene_trees_path <- gsub("output_alignment.fa", "all_gene_trees.txt", alignment_path)
   write(all_gene_trees, file = gene_trees_path)
+  # Create and save a file where each line is a file path to gene tree bootstrap files (.ufboot files from IQ-Tree2) - one per line
+  ufboot_files <- paste0(gene_folder, grep("\\.ufboot", all_gene_folder_files, value = TRUE))
+  bootstrap_path_file <- paste0(dirname(alignment_path),"/gene_tree_bootstrap_files.txt")
+  write(ufboot_files, file = bootstrap_path_file)
   
   ## Estimating a species tree using ASTRAL
   # Assemble file names
@@ -387,7 +391,7 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
   call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP", redo_call, " ", safe_call, " ", bootstraps_call)
   print(call)
   # Invoke OS command
-  #system(call)
+  system(call)
 }
 
 
@@ -399,6 +403,17 @@ estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
 }
+
+
+
+estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path, bootstraps_file){
+  ## Function to estimate a species tree using ASTRAl and perform multi-locus bootstrapping
+  
+  # Assemble ASTRAL command from input file names
+  astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -b ", bootstraps_file, " -o ", species_tree_file, " 2> ", log_file)
+  system(astral_command)
+}
+
 
 
 #### Utility functions ####

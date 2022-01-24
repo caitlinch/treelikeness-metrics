@@ -23,9 +23,7 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
                        "exp1_00100_0020_001_output_alignment.fa", "exp1_01000_0020_001_output_alignment.fa"))
 
 # here's paths for variables needed to test treelikeness metric functions
-alignment_path <- al_tl_path
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test_4.17.2.phy"
-#alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
 sequence_format = "DNA"
 substitution_model = "raw"
 iqtree2_number_threads = "AUTO"
@@ -56,7 +54,7 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   # Run function to separate alignment into genes using partition file
   gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
   # In IQ-Tree2, estimate a maximum likelihood gene tree for each gene in the gene_folder
-  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads)
+  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads, bootstraps = "-bb 1000 -wbtl")
   # Collect all gene trees (.treefile files) from the gene_folder
   all_gene_folder_files <- list.files(gene_folder)
   all_gene_folder_treefiles <- all_gene_folder_files[grep("\\.treefile", all_gene_folder_files)]
@@ -355,7 +353,7 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 #### Tree estimation functions ####
-estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE){
+estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
   ## Function to take a folder full of genes and estimate a gene tree for each one
   
   # Get the list of file names
@@ -363,27 +361,33 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
   all_gene_paths <- all_gene_paths[grep("\\.fa", all_gene_paths)]
   all_gene_paths <- all_gene_paths[grep("\\.fa\\.", all_gene_paths, invert = TRUE)]
   # Run IQ-Tree2 for each of those file names
-  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag)
+  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag, bootstraps)
 }
 
-call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE){
+call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
   # Small function to call IQ-Tree2 for one alignment
   
   # Use _flag commands from function call to assemble IQ-Tree2 call
   if (redo_flag == TRUE){
-    redo_call = " -redo"
+    redo_call = "-redo"
   } else if (redo_flag == FALSE){
     redo_call = ""
   }
   if (safe_flag == TRUE){
-    safe_call = " -safe"
+    safe_call = "-safe"
   } else if (safe_flag == FALSE){
     safe_call = ""
   }
+  if (is.na(bootstraps)){
+    bootstraps_call = ""
+  } else if (is.na(bootstraps) == FALSE){
+    bootstraps_call = bootstraps
+  }
   # Assemble call
-  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP", redo_call, safe_call)
+  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP", redo_call, " ", safe_call, " ", bootstraps_call)
+  print(call)
   # Invoke OS command
-  system(call)
+  #system(call)
 }
 
 

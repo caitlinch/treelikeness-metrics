@@ -119,8 +119,17 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   system(splitstree_command)
   
   ## Construct a confidence network using the bootstrap splits
-  # Read in the nexus splits from the Splitstree output file
-  splits <- read.nexus.splits(output_path)
+  # Read in the nexus splits from the confidence network
+  splits <- read.nexus.splits(confidence_path)
+  
+  ## Read in the splits from the confidence network and turn text file into a dataframe
+  # Find the starting line and end line for the splits info
+  splits_text <- readLines(confidence_path)
+  splits_start <- grep("MATRIX", splits_text)
+  splits_df <- read.delim(confidence_path, header = FALSE, skip = splits_start)
+  # Remove rows that do not contain splits
+  splits_df <- splits_df[1:length(splits),]
+  
   # Extract bootstrap confidence values from Splitstree4 output
   splitstree_text <- readLines(output_path)
   st_bootstraps_start <- grep("BEGIN st_bootstrap", splitstree_text)

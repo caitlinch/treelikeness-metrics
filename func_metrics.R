@@ -72,23 +72,27 @@ reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_
   # Assemble file names
   output_tree_path <- gsub("output_alignment.fa", "ASTRAL_all_trees.tre", alignment_path)
   log_path <- gsub("output_alignment.fa", "ASTRAL.log", alignment_path)
-  bs_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_tree.tre", alignment_path)
-  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_bootstrap_trees.tre", alignment_path)
+  bs_tree_path <- gsub("output_alignment.fa", "ASTRAL_bootstrap_tree.tre", alignment_path)
+  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_trees.tre", alignment_path)
   estimate.ASTRAL.multilocus.bootstrapping(gene_trees_path, output_tree_path, log_path, astral_path, bootstrap_path_file)
+  
+  ## Formatting the trees for the Reticulation Index
   # Separate out bootstrap replicates/species trees into different files
-  all_astral_trees <- read.tree(species_tree_path)
+  all_astral_trees <- read.tree(output_tree_path)
   bs_trees <- all_astral_trees[1:100]
   species_tree <- all_astral_trees[102][[1]]
-  # Add length to 0 length branches/NaN branches
-  nan_edges <- which(is.nan(species_tree$edge.length))
-  zero_edges <- which(species_tree$edge.length == 0)
-  species_tree$edge.length[nan_edges] <- 0.1
-  species_tree$edge.length[zero_edges] <- 0.00000001
-  species_tree_RI_path <- gsub("output_alignment.fa", "ASTRAL_species_tree_RI.tre", alignment_path)
-  write.tree(species_tree, file = species_tree_RI_path)
+  # Reformat and save trees
+  bs_trees <- format.all.trees(bs_trees)
+  write.tree(bs_trees, file = bs_tree_path)
+  species_tree <- format.one.tree(species_tree)
+  write.tree(species_tree, file = species_tree_path)
+  # Open gene trees and reformat
+  gene_trees <- read.tree(gene_trees_path)
+  gene_trees <- format.all.trees(gene_trees)
+  gene_trees_reformatted_path <- gsub("output_alignment.fa", "all_gene_trees_reformatted.txt", alignment_path)
+  write.tree(gene_trees, file = gene_trees_reformatted_path)
   
-  
-  # To do: work out the bootstrap species trees?
+  ## Apply the Reticulation Index
 }
 
 
@@ -640,10 +644,14 @@ format.one.tree <- function(tree){
   
   # Add branch lengths to terminalbranches
   nan_edges <- which(is.nan(tree$edge.length))
-  tree$edge.length[nan_edges] <- 0.1
+  if (length(nan_edges) > 0){
+    tree$edge.length[nan_edges] <- 0.1
+  }
   # Add branch lengths to 0 length branches
   zero_edges <- which(tree$edge.length == 0)
-  tree$edge.length[zero_edges] <- 0.00000001
+  if (length(zero_edges) > 0){
+    tree$edge.length[zero_edges] <- 0.00000001
+  }
   # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
   # Root the tree at the midpoint
   tree <- midpoint(tree)

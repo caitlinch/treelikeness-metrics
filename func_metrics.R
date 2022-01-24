@@ -11,7 +11,7 @@ iqtree2_path <- "iqtree2"
 astral_path <- "/Users/caitlincherryh/Documents/Executables/Astral/astral.5.7.5.jar"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-splitstree_path <- "/Users/caitlincherryh/Documents/Executables/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 reticulation_index_path <- "/Users/caitlincherryh/Documents/Executables/Coalescent_simulation_and_gene_flow_detection-master/"
 
 # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
@@ -24,7 +24,7 @@ test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp
 
 # here's paths for variables needed to test treelikeness metric functions
 alignment_path <- al_tl_path
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test.phy"
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_splitstree4/test_4.17.2.phy"
 alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
 sequence_format = "DNA"
 substitution_model = "raw"
@@ -105,9 +105,16 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # Convert fasta to nexus
   nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA")
   # Name output path
+  confidence_path <- paste0(alignment_path, "_confidence.nexus")
   output_path <- paste0(alignment_path, "_Splitstree_output.nex")
   # Assemble the SplitsTree 4 command
-  splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path,"; ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true; ASSUME disttransform=NeighbourNet; BOOTSTRAP RUNS=100; EXPORT FILE=", output_path," REPLACE=YES; QUIT'")
+  splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path, ";",
+                                                        " ASSUME chartransform=Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
+                                                        " ASSUME disttransform=NeighborNet;",
+                                                        " bootstrap runs=100;",
+                                                        " confidence_splits level=95 file=", confidence_path, ";",
+                                                        " export file=", output_path, " REPLACE=yes;",
+                                                        " quit;'")
   # Call SplitsTree 4
   system(splitstree_command)
   

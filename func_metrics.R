@@ -8,11 +8,9 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 # here's paths for different programs needed for test statistics:
 iqtree2_path <- "iqtree2"
-astral_path <- "/Users/caitlincherryh/Documents/Executables/Astral/astral.5.7.5.jar"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-reticulation_index_path <- "/Users/caitlincherryh/Documents/Executables/Coalescent_simulation_and_gene_flow_detection-master/"
 
 # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -33,73 +31,7 @@ number_of_taxa = 20
 
 #### Treelikeness metric functionc ####
 
-## Reticulation Index (Cai et. al. 2021)
-reticulation_index <- function(alignment_path, reticulation_index_path, iqtree2_path, sequence_format = "DNA"){
-  ## Reticulation index quantifies introgression at each node
-  # Requires three inputs: 
-  # 1. Rooted best-estimated species tree with branch lengths estimated in coalescent units, newick format
-  #       - Obtained from running MPEST/ASTRAL on ML gene trees
-  # 2. Rooted bootstrap species trees with branch lengths measured in coalescent units, newick format
-  #       - Obtained from running MPEST/ASTRAL on bootstrap gene trees
-  # 3. Rooted gene trees, newick format
-  #       - Obtained from running IQ-Tree on each partition from the alignment file
-  
-  ## Determine file names
-  partition_path <- gsub("output_alignment.fa", "partitions.nex", alignment_path)
-  
-  ## Estimating gene trees
-  # Create a new folder to store all information about this alignment
-  gene_folder <- paste0(dirname(alignment_path), "/gene_folder/")
-  if (dir.exists(gene_folder) == FALSE){dir.create(gene_folder)}
-  # Run function to separate alignment into genes using partition file
-  gene_info <- genes.from.alignment(alignment_path, partition_path, gene_folder, sequence_format)
-  # In IQ-Tree2, estimate a maximum likelihood gene tree for each gene in the gene_folder
-  estimate.iqtree2.gene.trees(gene_folder, iqtree2_path, iqtree2_number_threads, bootstraps = "-bb 1000 -wbtl")
-  # Collect all gene trees (.treefile files) from the gene_folder
-  all_gene_folder_files <- list.files(gene_folder)
-  all_gene_folder_treefiles <- all_gene_folder_files[grep("\\.treefile", all_gene_folder_files)]
-  all_gene_folder_treefiles <- all_gene_folder_treefiles[grep("\\.treefile\\.log", all_gene_folder_treefiles, invert = TRUE)]
-  # Write all gene trees into a single file
-  all_gene_trees <- unlist(lapply(paste0(gene_folder, all_gene_folder_treefiles), readLines))
-  gene_trees_path <- gsub("output_alignment.fa", "all_gene_trees.txt", alignment_path)
-  write(all_gene_trees, file = gene_trees_path)
-  # Create and save a file where each line is a file path to gene tree bootstrap files (.ufboot files from IQ-Tree2) - one per line
-  ufboot_files <- paste0(gene_folder, grep("\\.ufboot", all_gene_folder_files, value = TRUE))
-  bootstrap_path_file <- paste0(dirname(alignment_path),"/gene_tree_bootstrap_files.txt")
-  write(ufboot_files, file = bootstrap_path_file)
-  
-  ## Estimating a species tree using ASTRAL
-  # Assemble file names
-  output_tree_path <- gsub("output_alignment.fa", "ASTRAL_all_trees.tre", alignment_path)
-  log_path <- gsub("output_alignment.fa", "ASTRAL.log", alignment_path)
-  bs_tree_path <- gsub("output_alignment.fa", "ASTRAL_bootstrap_tree.tre", alignment_path)
-  species_tree_path <- gsub("output_alignment.fa", "ASTRAL_species_trees.tre", alignment_path)
-  estimate.ASTRAL.multilocus.bootstrapping(gene_trees_path, output_tree_path, log_path, astral_path, bootstrap_path_file)
-  
-  ## Formatting the trees for the Reticulation Index
-  # Separate out bootstrap replicates/species trees into different files
-  all_astral_trees <- read.tree(output_tree_path)
-  bs_trees <- all_astral_trees[1:100]
-  species_tree <- all_astral_trees[102][[1]]
-  # Reformat and save trees
-  bs_trees <- format.all.trees(bs_trees)
-  write.tree(bs_trees, file = bs_tree_path)
-  species_tree <- format.one.tree(species_tree)
-  write.tree(species_tree, file = species_tree_path)
-  # Open gene trees and reformat
-  gene_trees <- read.tree(gene_trees_path)
-  gene_trees <- format.all.trees(gene_trees)
-  gene_trees_reformatted_path <- gsub("output_alignment.fa", "all_gene_trees_reformatted.txt", alignment_path)
-  write.tree(gene_trees, file = gene_trees_reformatted_path)
-  
-  ## Apply the Reticulation Index
-  # Follow steps in `imulator_tripletCounter_tripletMaper.sh` to simulate gene trees, summarize triplet frequency distribution, 
-  #     and map unbalanced triplets to the species tree
-  # "sh simulator_tripletCounter_tripletMapper.sh [path_to_species_tree] [path_to_bootstrap_species_trees] [path_to_gene_trees]"
-  ri_command <- paste0("sh ", "simulator_tripletCounter_tripletMapper.sh ", basename(species_tree_path), " ", basename(bs_tree_path),
-                       " ", basename(gene_trees_reformatted_path))
-  
-}
+
 
 
 
@@ -374,7 +306,6 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 #### Tree estimation functions ####
 estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
   ## Function to take a folder full of genes and estimate a gene tree for each one
-  
   # Get the list of file names
   all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
   all_gene_paths <- all_gene_paths[grep("\\.fa", all_gene_paths)]
@@ -384,8 +315,7 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
 }
 
 call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
-  # Small function to call IQ-Tree2 for one alignment
-  
+  ## Small function to call IQ-Tree2 for one alignment
   # Use _flag commands from function call to assemble IQ-Tree2 call
   if (redo_flag == TRUE){
     redo_call = "-redo"
@@ -409,21 +339,15 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
   system(call)
 }
 
-
-
 estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path){
   ## Function to estimate a species tree using ASTRAL
-  
   # Assemble ASTRAL command from input file names
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
 }
 
-
-
 estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path, bootstraps_file){
   ## Function to estimate a species tree using ASTRAl and perform multi-locus bootstrapping
-  
   # Assemble ASTRAL command from input file names
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -b ", bootstraps_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
@@ -433,7 +357,7 @@ estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tre
 
 #### Utility functions ####
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
-  ## Convert fasta file to nexus file (if there is no existing nexus file with the same name)
+  ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
   ## Prepare parameters for file conversion
   # Name nexus file by simply appending ".nex" to end of existing file name
@@ -512,7 +436,7 @@ genes.from.alignment <- function(alignment_path, partition_path, gene_folder, se
 
 save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder, sequence_format = "DNA"){
   ## Small function to process a single charpartition row and save the associated gene
-  
+
   # Extract the i^th row using the index and split the line to determine the gene name and location
   c_line <- charpartitions[index]
   c_line <- gsub(";", "", c_line)
@@ -544,6 +468,7 @@ save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder
 
 
 is.split.trivial <- function(split){
+  ## Small function to determine whether a split is trivial or non-trivial (trivial = terminal branch)
   # Extract the bipartition subsets from the tree
   ss1 <- split[[1]] # get the indices of all taxa in the split
   taxa <- attr(split,"labels") # get the names of all taxa in the tree
@@ -560,7 +485,7 @@ is.split.trivial <- function(split){
 
 
 trivial.splits.wrapper <- function(index, set_of_splits){
-  # Function that wraps around is.split.trivial for better application of lapply
+  ## Function that wraps around is.split.trivial for better application of lapply
   split <- set_of_splits[index]
   is.trivial <- is.split.trivial(split)
   return(is.trivial)
@@ -618,56 +543,5 @@ pairwise.compatibility <- function(index, set_of_splits){
   names(pc_df) <- c("split1", "split2", "compatibility")
   # Return pairwise compatibility data frame
   return(pc_df)
-}
-
-
-
-format.all.trees <- function(trees){
-  ## Function to take a multiphylo object and format each tree for the Reticulation Index program
-  #       using the function `format.one.tree` (found below)
-  
-  # Make an index for each tree
-  indices <- 1:length(trees)
-  # Loop though each index. 
-  # For each index, format the corresponding tree and resave it to the `trees` multiphylo object
-  for (i in indices){
-    # Get the tree
-    i_tree <- trees[[i]]
-    # Reformat the tree
-    i_tree <- format.one.tree(i_tree)
-    # Return the reformatted tree to the multiphylo object
-    trees[[i]] <- i_tree
-  }
-  
-  # Return reformatted trees
-  return(trees)
-}
-
-
-
-format.one.tree <- function(tree){
-  ## Function to take one tree and format it for the Reticulation Index programs
-  
-  # Remove support values (do this first because node labels can result in errors thrown while rerooting)
-  tree$node.label <- NULL
-  
-  # Add branch lengths to terminalbranches
-  nan_edges <- which(is.nan(tree$edge.length))
-  if (length(nan_edges) > 0){
-    tree$edge.length[nan_edges] <- 0.1
-  }
-  # Add branch lengths to 0 length branches
-  zero_edges <- which(tree$edge.length == 0)
-  if (length(zero_edges) > 0){
-    tree$edge.length[zero_edges] <- 0.00000001
-  }
-  
-  # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
-  # Root the tree at the midpoint
-  # Do this last: requires branches to have existing (non-0, non-NA) lengths
-  tree <- midpoint(tree)
-  
-  # Return the tree
-  return(tree)
 }
 

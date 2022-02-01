@@ -648,9 +648,8 @@ format.all.trees <- function(trees){
 format.one.tree <- function(tree){
   ## Function to take one tree and format it for the Reticulation Index programs
   
-  # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
-  # Root the tree at the midpoint
-  tree <- midpoint(tree)
+  # Remove support values (do this first because node labels can result in errors thrown while rerooting)
+  tree$node.label <- NULL
   
   # Add branch lengths to terminalbranches
   nan_edges <- which(is.nan(tree$edge.length))
@@ -663,8 +662,10 @@ format.one.tree <- function(tree){
     tree$edge.length[zero_edges] <- 0.00000001
   }
   
-  # Remove support values
-  tree$node.label <- NULL
+  # The output of ASTRAL should be treated as unrooted - but the Reticulation Index requires a rooted tree
+  # Root the tree at the midpoint
+  # Do this last: requires branches to have existing (non-0, non-NA) lengths
+  tree <- midpoint(tree)
   
   # Return the tree
   return(tree)

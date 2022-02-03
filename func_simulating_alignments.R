@@ -136,7 +136,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, output_directory, replicate_number = NA){
+ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", replicate_number = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Construct a command line to call ms from a randomly generated coalescent tree
@@ -228,6 +228,11 @@ calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals)
 determine.coalescence.taxa <- function(node_dataframe){
   ## Take the node dataframe and work out which taxa will be coalescing into which (essential for the ms command line)
   
+  # Convert columns used for filtering into numeric so they can be ordered properly
+  node_dataframe$node <- as.numeric(node_dataframe$node)
+  node_dataframe$ntips <- as.numeric(node_dataframe$ntips)
+  node_dataframe$ndepth <- as.numeric(node_dataframe$ndepth)
+  node_dataframe$coalescence_time <- as.numeric(node_dataframe$coalescence_time)
   # Order dataframe by node depth value
   node_dataframe <- node_dataframe[order(node_dataframe$ndepth),]
   # Make a list of all the taxa to remove

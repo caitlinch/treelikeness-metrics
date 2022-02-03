@@ -136,7 +136,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, output_folder){
+ms.generate.trees <- function(ntaxa, ntrees, output_folder, replicate_number = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Construct a command line to call ms from a randomly generated coalescent tree
@@ -161,7 +161,7 @@ ms.generate.trees <- function(ntaxa, ntrees, output_folder){
   ## Call ms
   ms_op <- system(coal_call, intern = TRUE)
   # Write all output to file
-  ms_op_path <- paste0(output_directory, "ms_output.txt")
+  ms_op_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_ms_output.txt")
   write(ms_op, file = ms_op_path)
   
   ## Format and save gene trees
@@ -169,7 +169,7 @@ ms.generate.trees <- function(ntaxa, ntrees, output_folder){
   ms_txt <- ms_op[3:length(ms_op)] # Remove first two lines (ms command and random seeds lines)
   ms_txt <- ms_txt[which(ms_txt != "")] # Remove empty lines
   ms_txt <- ms_txt[grep("//", ms_txt, invert = TRUE)] # Remove separation lines between gene trees ("//")
-  ms_gene_trees_path <- paste0(output_directory, "ms_gene_trees.txt")
+  ms_gene_trees_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_ms_gene_trees.txt")
   write(ms_txt, file = ms_gene_trees_path)
 }
 

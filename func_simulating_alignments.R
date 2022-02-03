@@ -194,12 +194,34 @@ determine.coalescence.taxa <- function(node_dataframe){
   # Order dataframe by node depth value
   node_dataframe <- node_dataframe[order(node_dataframe$ndepth),]
   # Make a list of all the taxa to remove
-  removed_taxa <- node_dataframe$removed_taxa[!is.na(node_dataframe$removed_taxa)]
+  removed_taxa <- as.numeric(node_dataframe$removed_taxa[!is.na(node_dataframe$removed_taxa)])
   # Iterate through the dataframe row by row to check 
-  # Make a list of all the possible taxa
-  node_taxa <- strsplit(node_dataframe$ms_tip_order, ",")
-  # Remove removed taxa from all sets in node_taxa
+  rows_to_process = which(is.na(node_dataframe$ms_input))
+  for (i in rows_to_process){
+    # Extract row
+    row <- node_dataframe[i,]
+    # Identify taxa in row
+    row_tips <- as.numeric(unlist(strsplit(row$ms_tip_order, ",")))
+    # Remove any taxa in removed_taxa
+    keep_tips <- setdiff(row_tips, removed_taxa)
+    ordered_keep_tips <- keep_tips[order(keep_tips, decreasing = TRUE)]
+    row_ms_input <- paste0(ordered_keep_tips[1], " ", ordered_keep_tips[2])
+    row_removed_tips <- c(removed_taxa, ordered_keep_tips[1])
+    # Attach results back to row
+    row$ms_input <- row_ms_input
+    row$removed_taxa <- paste(row_removed_tips, collapse = ",")
+    # Attach row back to dataframe
+    node_dataframe[i,] <- row
+    # Add removed taxa to list of removed taxa and remove duplicates
+    removed_taxa <- unique(c(removed_taxa, row_removed_tips))
+    # Repeat process with next row: the list of removed taxa will continue to grow as the node depth increases
+  }
   
+  # Each column should now have a nicely formatted ms_input column consisting of two lineages, with the smallest number lineage second
+  #     meaning the lineages in the first population will be moved into the second subpopulation 
+  #     (in the forward direction, this is equivalent to a population splitting)
+  # Return the dataframe
+  return(node_dataframe)
 }
 
 

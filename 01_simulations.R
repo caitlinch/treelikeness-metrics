@@ -111,6 +111,7 @@ lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir,
        experiment_params = exp2_params)
 
 
+#### Generate one ms command ####
 # generate random tree
 ntaxa = 5
 ntrees = 5
@@ -119,7 +120,9 @@ t <- rcoal(ntaxa)
 ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
 # Determine order of coalescence by getting which taxa are in a clade derived from each node
 nodes <- (ntaxa+1):(ntaxa+t$Nnode)
-
+# Extract information about all clades from tree
+node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t, coalescent_times = ms_coal_ints))
+names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa")
 
 # Determine ms command line using coalescent intervals (earlier coalescent events to the left, tips towards the right)
 coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
@@ -128,7 +131,6 @@ coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ",
 coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
                               "-ej ", ms_coal_ints[4], " 2 1 ", "-ej ", ms_coal_ints[3], " 3 2 ", "-ej ", ms_coal_ints[2], " 1 4 ","-ej ", ms_coal_ints[1], " 5 2 ")
 
-extract.clade.from.node(node, tree, coalescent_times)
 
 
 

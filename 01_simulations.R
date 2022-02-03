@@ -122,7 +122,7 @@ ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
 nodes <- (ntaxa+1):(ntaxa+t$Nnode)
 # Extract information about all clades from tree
 node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t, coalescent_times = ms_coal_ints))
-names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa")
+names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa", "ms_input")
 
 # Determine ms command line using coalescent intervals (earlier coalescent events to the left, tips towards the right)
 coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",

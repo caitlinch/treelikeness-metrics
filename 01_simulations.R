@@ -15,6 +15,7 @@ library(phytools)
 
 local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+ms_path <- "ms"
 iqtree2_path <- "iqtree2.2-beta"
 total_alignment_length <- 10000
 sequence_type <- "DNA"
@@ -23,6 +24,10 @@ num_reps <- 10
 alisim_gene_models <- NA
 alisim_gene_tree_length <- NA
 
+# test params
+output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_ms/"
+ntaxa = 5
+ntrees = 5
 
 
 ## Source functions from caitlinch/treelikeness_metrics
@@ -113,8 +118,7 @@ lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir,
 
 #### Generate one ms command ####
 # generate random tree
-ntaxa = 5
-ntrees = 5
+
 # Generate random coalescent tree 
 t <- rcoal(ntaxa)
 ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
@@ -123,14 +127,52 @@ nodes <- (ntaxa+1):(ntaxa+t$Nnode)
 # Extract information about all clades from tree
 node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t, coalescent_times = ms_coal_ints))
 names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa", "ms_input")
+# Format coalescences for ms input
+node_df <- determine.coalescence.taxa(node_df)
+# Create a new column containing -ej event for each row
+node_df$ej <- paste0("-ej ", node_df$coalescence_time, " ", node_df$ms_input)
+# Paste together all the -ej coalescence events for this tree
+all_ej <- paste(node_df$ej, collapse = " ")
+# Construct the ms command line using the -ej events
+coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
 
-# Determine ms command line using coalescent intervals (earlier coalescent events to the left, tips towards the right)
-coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
-                              "-ej 2.326 3 1 -ej 0.294 2 1 -ej 0.166 5 1 -ej 0.004 4 2")
-
-coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
-                              "-ej ", ms_coal_ints[4], " 2 1 ", "-ej ", ms_coal_ints[3], " 3 2 ", "-ej ", ms_coal_ints[2], " 1 4 ","-ej ", ms_coal_ints[1], " 5 2 ")
-
+ms.generate.trees <- function(ntaxa, ntrees, output_folder){
+  ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
+  
+  ## Construct a command line to call ms from a randomly generated coalescent tree
+  # Generate a random tree under the coalescent using ape::rcoal
+  t <- rcoal(ntaxa)
+  # Calculate times for ms -ej commands by finding coalescence times (coalescent intervals found using ape::coalescent.intervals)
+  ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
+  # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }
+  nodes <- (ntaxa+1):(ntaxa+t$Nnode)
+  # Extract information about all clades from tree
+  node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t, coalescent_times = ms_coal_ints))
+  names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa", "ms_input")
+  # Format coalescences for ms input
+  node_df <- determine.coalescence.taxa(node_df)
+  # Create a new column containing -ej event for each row
+  node_df$ej <- paste0("-ej ", node_df$coalescence_time, " ", node_df$ms_input)
+  # Paste together all the -ej coalescence events for this tree
+  all_ej <- paste(node_df$ej, collapse = " ")
+  # Construct the ms command line using the -ej events
+  coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  
+  ## Call ms
+  ms_op <- system(coal_call, intern = TRUE)
+  # Write all output to file
+  ms_op_path <- paste0(output_directory, "ms_output.txt")
+  write(ms_op, file = ms_op_path)
+  
+  ## Format and save gene trees
+  # Remove non-gene tree lines from the ms output
+  ms_txt <- ms_op[3:length(ms_op)] # Remove first two lines (ms command and random seeds lines)
+  ms_txt <- ms_txt[which(ms_txt != "")] # Remove empty lines
+  ms_txt <- ms_txt[grep("//", ms_txt, invert = TRUE)] # Remove separation lines between gene trees ("//")
+  ms_gene_trees_path <- paste0(output_directory, "ms_gene_trees.txt")
+  write(ms_txt, file = ms_gene_trees_path)
+  
+}
 
 
 

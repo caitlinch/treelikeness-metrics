@@ -136,7 +136,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, output_folder, replicate_number = NA){
+ms.generate.trees <- function(ntaxa, ntrees, output_directory, replicate_number = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Construct a command line to call ms from a randomly generated coalescent tree
@@ -212,7 +212,7 @@ calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals)
   # The interval length is the length between two coalescent events: to find the time for e.g. the second event, add the first and second interval together
   # The last interval should be the same as the total depth
   times_vec <- c()
-  for (i in 1:4){
+  for (i in 1:number_of_nodes){
     temp_time <- sum(ints[1:i])
     times_vec <- c(times_vec, temp_time)
   }

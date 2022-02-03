@@ -139,9 +139,14 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", replicate_number = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
-  ## Construct a command line to call ms from a randomly generated coalescent tree
+  ## Create a base tree for the simulations
   # Generate a random tree under the coalescent using ape::rcoal
   t <- rcoal(ntaxa)
+  # Save the random tree
+  t_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_starting_tree.txt")
+  write.tree(t, file = t_path)
+  
+  ## Construct a command line to call ms from a randomly generated coalescent tree
   # Calculate times for ms -ej commands by finding coalescence times (coalescent intervals found using ape::coalescent.intervals)
   ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
   # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }

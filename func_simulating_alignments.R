@@ -152,12 +152,20 @@ extract.clade.from.node <- function(node, tree, coalescent_times){
   n_tree_tips <- length(tree$tip.label)
   coal_index <- node - n_tree_tips # node numbering for non-trivial tips starts at n_tree_tips+1
   coal_time <- coalescent_times[coal_index]
-  # Assemble a command for ms coalescing the taxa involved in this node into an ms command
-  
+  # Determine which taxa to remove
+  if (ndepth == 2){
+    removed_taxa = tip_order[1]
+    ms_input = paste0(tip_order[1], " ", tip_order[2])
+  } else {
+    removed_taxa = NA
+    ms_input = NA
+  }
   # Assemble results into a vector
-  l <- list(node = node, tip_names = tip_names, tip_numbers = tip_numbers, ms_tip_order = tip_order, ntips = ntips, ndepth = ndepth, coalescence_time = coal_time)
+  o <- c(node = node, tip_names = paste(tip_names, collapse = ","), tip_numbers = paste(tip_numbers, collapse = ","), 
+         ms_tip_order = paste(tip_order, collapse = ","), ntips = ntips, ndepth = ndepth, coalescence_time = coal_time,
+         removed_taxa = removed_taxa, ms_input = ms_input)
   # Return vector
-  return(l)
+  return(o)
 }
 
 calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals){
@@ -174,9 +182,26 @@ calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals)
   
   # Round to 3dp (to allow for values as small as 0.001)
   times_vec <- round(times_vec, digits = 3)
+  # Reverse vector so that the longest time aligns with the deepest node
+  times_vec <- rev(times_vec)
   # Return coalescent times
   return(times_vec)
 }
+
+determine.coalescence.taxa <- function(node_dataframe){
+  ## Take the node dataframe and work out which taxa will be coalescing into which (essential for the ms command line)
+  
+  # Order dataframe by node depth value
+  node_dataframe <- node_dataframe[order(node_dataframe$ndepth),]
+  # Make a list of all the taxa to remove
+  removed_taxa <- node_dataframe$removed_taxa[!is.na(node_dataframe$removed_taxa)]
+  # Iterate through the dataframe row by row to check 
+  # Make a list of all the possible taxa
+  node_taxa <- strsplit(node_dataframe$ms_tip_order, ",")
+  # Remove removed taxa from all sets in node_taxa
+  
+}
+
 
 
 #### Utility functions ####

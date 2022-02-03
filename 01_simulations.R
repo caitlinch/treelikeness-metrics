@@ -1,5 +1,6 @@
 # Open packages
 library(ape)
+library(phytools)
 
 # Parameters for all simulations
 # local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run.
@@ -68,7 +69,7 @@ exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
 exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp1_params), experiment1.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path,
+lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path,
        experiment_params = exp1_params)
 
 
@@ -106,9 +107,70 @@ exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp2_params), experiment2.generate.alignment, output_directory = exp2_dir, iqtree2_path = iqtree2_path,
+lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir, iqtree2_path = iqtree2_path,
        experiment_params = exp2_params)
 
+
+# generate random tree
+ntaxa = 5
+ntrees = 5
+# Generate random coalescent tree 
+t <- rcoal(ntaxa)
+nnodes <- t$Nnode
+ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
+ms_lineages <- gsub("t", "", t$tip.label)
+# Determine order of coalescence by getting which taxa are in a clade derived from each node
+nodes <- (ntaxa+1):(ntaxa+t$Nnode)
+
+
+# Determine ms command line using coalescent intervals (earlier coalescent events to the left, tips towards the right)
+coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
+                              "-ej 2.326 3 1 -ej 0.294 2 1 -ej 0.166 5 1 -ej 0.004 4 2")
+
+coalescence_command <- paste0("./ms ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ",
+                              "-ej ", ms_coal_ints[4], " 2 1 ", "-ej ", ms_coal_ints[3], " 3 2 ", "-ej ", ms_coal_ints[2], " 1 4 ","-ej ", ms_coal_ints[1], " 5 2 ")
+
+extract.clade.from.node <- function(node, tree, coalescent_times){
+  ## Small function to take a node, extract the clade from that node, and return the number and names of taxa in that node
+  
+  # Extract clade
+  clade <- extract.clade(tree, node)
+  # Extract information about clade
+  tip_names <- clade$tip.label
+  tip_numbers <- gsub("t", "", tip_names)
+  tip_order <- tip_numbers[order(as.numeric(tip_numbers), decreasing = TRUE)]
+  ntips <- length(clade$tip.label)
+  # Determine depth of this node (how many species does this node contain)
+  ndepth <- node.depth(tree)[node]
+  # Determine which coalescent time is associated with this node
+  n_tree_tips <- length(tree$tip.label)
+  coal_index <- node - n_tree_tips # node numbering for non-trivial tips starts at n_tree_tips+1
+  coal_time <- coalescent_times[coal_index]
+  # Assemble a command for ms coalescing the taxa involved in this node into an ms command
+  
+  # Assemble results into a vector
+  l <- list(node = node, tip_names = tip_names, tip_numbers = tip_numbers, ms_tip_order = tip_order, ntips = ntips, ndepth = ndepth, coalescence_time = coal_time)
+  # Return vector
+  return(l)
+}
+
+calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals){
+  ## Small function to take a number of nodes and determine all the coalescent times needed to run ms
+  
+  ints <- coalescent_intervals$interval.length
+  # The interval length is the length between two coalescent events: to find the time for e.g. the second event, add the first and second interval together
+  # The last interval should be the same as the total depth
+  times_vec <- c()
+  for (i in 1:4){
+    temp_time <- sum(ints[1:i])
+    times_vec <- c(times_vec, temp_time)
+  }
+  
+  # Round to 3dp (to allow for values as small as 0.001)
+  times_vec <- round(times_vec, digits = 3)
+  # Return coalescent times
+  return(times_vec)
+}
 
 
 ## Experiment 3: Mimicking introgression

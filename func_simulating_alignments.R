@@ -220,6 +220,9 @@ determine.coalescence.taxa <- function(node_dataframe){
   # Each column should now have a nicely formatted ms_input column consisting of two lineages, with the smallest number lineage second
   #     meaning the lineages in the first population will be moved into the second subpopulation 
   #     (in the forward direction, this is equivalent to a population splitting)
+  # Now, reorder the rows from longest to shortest coalescence time (in ms, the events should be put in from longest to shortest coalescent time,
+  #     with the root on the left of the command and the tips on the right of the command)
+  node_dataframe <- node_dataframe[order(node_dataframe$coalescence_time, decreasing = TRUE),]
   # Return the dataframe
   return(node_dataframe)
 }

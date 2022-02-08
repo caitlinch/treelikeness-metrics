@@ -98,7 +98,7 @@ alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignme
 
 #### Functions to process a single row from the parameters matrix and estimate an alignment using the parameters in that row ####
 random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
-  # Function to generate a single alignment given a row from the experiment 1 params dataframe
+  ## Function to generate a single alignment given a row from the experiment 1 params dataframe
   # The alignment will be simulated from a number of random trees
   # Extract row given the row number
   row <- experiment_params[row_id, ]
@@ -113,13 +113,19 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
                                            partition_file_path = paste0(output_directory, row$partition_file), trees_path = paste0(output_directory, row$tree_file),
                                            output_format = "fasta", sequence_type = row$sequence_type)
   
+  # Return file paths
+  files_vec <- c(paste0(output_directory, row$tree_file), 
+                 paste0(output_directory, row$partition_file), 
+                 paste0(output_directory, row$output_alignment_file))
+  names(files_vec) <- c("random_tree_file", "partition_file", "alignment_file")
+  return(files_vec)
 }
 
-NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
-  # Function to generate a single alignment given a row from the experiment 1 params dataframe
+NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params_df){
+  ## Function to generate a single alignment given a row from the experiment 1 params dataframe
   # The alignment will be simulated from a number of trees related by a single NNI move
   # Extract row given the row number
-  row <- experiment_params[row_id, ]
+  row <- experiment_params_df[row_id, ]
   # Generate the random trees 
   generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, NNI_moves = row$NNI_moves, output_filepath = paste0(output_directory, row$tree_file))
   # Generate the partition file
@@ -131,8 +137,40 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
                                            partition_file_path = paste0(output_directory, row$partition_file), trees_path = paste0(output_directory, row$tree_file),
                                            output_format = "fasta", sequence_type = row$sequence_type)
   
+  # Return file paths
+  files_vec <- c(paste0(output_directory, row$tree_file), 
+                 paste0(output_directory, row$partition_file), 
+                 paste0(output_directory, row$output_alignment_file))
+  names(files_vec) <- c("random_tree_file", "partition_file", "alignment_file")
+  return(files_vec)
 }
 
+
+ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df){
+  ## Function to generate a single alignment given a row from the experiment 2 params dataframe
+  ## Generate alignments with ILS and without introgression
+  ## Uses ms to generate gene trees
+  
+  # Extract row given the row number
+  row <- experiment_params_df[row_id, ]
+  # Call ms
+  ms_output_files <- ms.generate.trees(row$num_taxa, row$num_trees, output_directory, ms_path, replicate_number)
+  gene_trees_file <- ms_output_files[[3]]
+  # Generate the partition file
+  gene_partition_file <- paste0(output_directory, row$partition_file)
+  partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type, 
+                         models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
+                         output_filepath = gene_partition_file)
+  # Generate DNA along gene trees
+  output_alignment_file <- paste0(output_directory, row$output_alignment_file)
+  alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = output_alignment_file, partition_file_path = gene_partition_file, 
+                                           trees_path = gene_trees_file, output_format = "fasta", sequence_type = row$sequence_type)
+  
+  # Return file paths
+  files_vec <- c(ms_output_files[[1]], ms_output_files[[3]], gene_partition_file, output_alignment_file)
+  names(files_vec) <- c("starting_tree_file", "gene_tree_file", "partition_file", "alignment_file")
+  return(files_vec)
+}
 
 
 #### Functions for ms ####
@@ -143,7 +181,7 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   # Generate a random tree under the coalescent using ape::rcoal
   t <- rcoal(ntaxa)
   # Save the random tree
-  t_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_starting_tree.txt")
+  t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_starting_tree.txt")
   write.tree(t, file = t_path)
   
   ## Construct a command line to call ms from a randomly generated coalescent tree
@@ -166,7 +204,7 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   ## Call ms
   ms_op <- system(coal_call, intern = TRUE)
   # Write all output to file
-  ms_op_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_ms_output.txt")
+  ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_output.txt")
   write(ms_op, file = ms_op_path)
   
   ## Format and save gene trees
@@ -174,7 +212,7 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   ms_txt <- ms_op[3:length(ms_op)] # Remove first two lines (ms command and random seeds lines)
   ms_txt <- ms_txt[which(ms_txt != "")] # Remove empty lines
   ms_txt <- ms_txt[grep("//", ms_txt, invert = TRUE)] # Remove separation lines between gene trees ("//")
-  ms_gene_trees_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_ms_gene_trees.txt")
+  ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_gene_trees.txt")
   write(ms_txt, file = ms_gene_trees_path)
   
   ## Return file paths for output 

@@ -121,6 +121,7 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   return(files_vec)
 }
 
+
 NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params_df){
   ## Function to generate a single alignment given a row from the experiment 1 params dataframe
   # The alignment will be simulated from a number of trees related by a single NNI move
@@ -154,7 +155,7 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   # Call ms
-  ms_output_files <- ms.generate.trees(row$num_taxa, row$num_trees, output_directory, ms_path, replicate_number)
+  ms_output_files <- ms.generate.trees(row$num_taxa, row$num_trees, output_directory, ms_path, row$num_reps, row$uid)
   gene_trees_file <- ms_output_files[[3]]
   # Generate the partition file
   gene_partition_file <- paste0(output_directory, row$partition_file)
@@ -174,14 +175,24 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", replicate_number = NA){
+ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
+  
+  ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
+  if (is.na(unique_id) == TRUE){
+    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_gene_trees.txt")
+  } else if (is.na(unique_id) == FALSE){
+    t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
+  }
   
   ## Create a base tree for the simulations
   # Generate a random tree under the coalescent using ape::rcoal
   t <- rcoal(ntaxa)
   # Save the random tree
-  t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_starting_tree.txt")
   write.tree(t, file = t_path)
   
   ## Construct a command line to call ms from a randomly generated coalescent tree
@@ -204,7 +215,6 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   ## Call ms
   ms_op <- system(coal_call, intern = TRUE)
   # Write all output to file
-  ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_output.txt")
   write(ms_op, file = ms_op_path)
   
   ## Format and save gene trees
@@ -212,7 +222,6 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   ms_txt <- ms_op[3:length(ms_op)] # Remove first two lines (ms command and random seeds lines)
   ms_txt <- ms_txt[which(ms_txt != "")] # Remove empty lines
   ms_txt <- ms_txt[grep("//", ms_txt, invert = TRUE)] # Remove separation lines between gene trees ("//")
-  ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_gene_trees.txt")
   write(ms_txt, file = ms_gene_trees_path)
   
   ## Return file paths for output 

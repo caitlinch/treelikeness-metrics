@@ -176,6 +176,11 @@ ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", r
   ms_txt <- ms_txt[grep("//", ms_txt, invert = TRUE)] # Remove separation lines between gene trees ("//")
   ms_gene_trees_path <- paste0(output_directory, ntrees, "_", ntaxa, "_", replicate_number, "_ms_gene_trees.txt")
   write(ms_txt, file = ms_gene_trees_path)
+  
+  ## Return file paths for output 
+  output_files <- c(t_path, ms_op_path, ms_gene_trees_path)
+  names(output_files) <- c("starting_tree_file", "ms_output_file", "ms_gene_tree_file")
+  return(output_files)
 }
 
 extract.clade.from.node <- function(node, tree, coalescent_times){

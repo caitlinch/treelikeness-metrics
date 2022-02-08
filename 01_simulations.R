@@ -26,9 +26,9 @@ alisim_gene_tree_length <- NA
 
 # test params
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_ms/"
-ntaxa = 5
-ntrees = 5
-
+ntaxa = 10
+ntrees = 20
+replicate_number = 1
 
 ## Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "func_simulating_alignments.R"))
@@ -116,8 +116,8 @@ lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir,
        experiment_params = exp2_params)
 
 
-#### Generate one ms command ####
-ms.generate.trees(ntaxa, ntrees, output_folder)
+#### Run one replicate of experiment 2: ILS ####
+ms.generate.trees(ntaxa, ntrees, output_directory, ms_path, replicate_number)
 
 
 

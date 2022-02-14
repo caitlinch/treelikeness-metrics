@@ -10,6 +10,7 @@ library(phytools)
 # sequence_type           <- Sequence type for simulation (we chose "DNA").
 # taxa_vec                <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
 # num_reps                <- Number of replicates to run for each set of simulation conditions (we chose 10). Must be >= 1.
+# tree_depth              <- Single value or vector of values for total tree length
 # r_vec                   <- Values of introgression (we chose from 0 to 1 in intervals of 0.05)
 # alisim_gene_models      <- model of sequence evolution for Alisim 
 # alisim_gene_tree_length <- gene-specific tree length for Alisim
@@ -22,6 +23,7 @@ total_alignment_length <- 10000
 sequence_type <- "DNA"
 taxa_vec <- c(10,20,50,100,200,500,1000)
 num_reps <- 10
+tree_depth <- 1
 r_vec <- seq(0, 1, 0.05)
 alisim_gene_models <- NA
 alisim_gene_tree_length <- NA
@@ -59,8 +61,8 @@ exp1_dir <- paste0(local_directory, "exp_1/")
 if(!file.exists(exp1_dir)){dir.create(exp1_dir)}
 
 # Create matrix with parameters for generating each simulated alignment
-exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees)
-names(exp1_params) <- c("num_reps", "num_taxa", "num_trees")
+exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, tree_depth)
+names(exp1_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
 exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
                           sprintf("%03d", exp1_params$num_reps))
@@ -96,14 +98,16 @@ if(!file.exists(exp2_dir)){dir.create(exp2_dir)}
 # Prepare parameters for experiments
 # This experiment differs because the number of NNI moves is a variable included in the expand.grid function
 # Create matrix with parameters for generating each simulated alignment
-exp2_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, r_vec)
-names(exp2_params) <- c("num_reps", "num_taxa", "num_trees", "recombination_value")
+exp2_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, tree_depth)
+names(exp2_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
 exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", sprintf("%04d", exp2_params$num_taxa), "_",
-                          sprintf("%03d", exp2_params$num_reps))
+                          sprintf("%03d", exp2_params$num_reps), "_", exp2_params$tree_depth)
 # Add parameters for Alisim
 exp2_params$alisim_gene_models <- alisim_gene_models
 exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
+exp2_params$recombination_value <- 0
+exp2_recombination_type <- NA
 # Add other parameters
 exp2_params$total_alignment_length <- total_alignment_length
 exp2_params$sequence_type <- sequence_type
@@ -123,7 +127,25 @@ lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir,
 # simulate tree containing a single introgression event in ms and vary proportion of introgressed DNA from 0 to 1
 # simulate DNA along each tree with Alisim
 # Concatenate alignments
+exp3_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, tree_depth, r_vec, c("Ancient","Recent"))
+names(exp3_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type")
+# Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
+exp3_params$uid <- paste0("exp2_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
+                          sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
+                          "_", exp3_params$recombination_type)
+# Add parameters for Alisim
+exp3_params$alisim_gene_models <- alisim_gene_models
+exp3_params$alisim_gene_tree_length <- alisim_gene_tree_length
+# Add other parameters
+exp3_params$total_alignment_length <- total_alignment_length
+exp3_params$sequence_type <- sequence_type
+# Add name for the partition file and output alignment file for each simulated alignment
+exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
+exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
 
+# Iterate through each row in the parameters dataframe
+lapply(1:nrow(exp3_params), ILS.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
+       iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
 
 ## Experiment 4: Repeat above experiments but adding random noise
 

@@ -175,23 +175,29 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
+ms.generate.trees <- function(ntaxa, ntrees, tree_depth, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
-  if (is.na(unique_id) == TRUE){
+  if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
     t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_starting_tree.txt")
     ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_output.txt")
     ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_gene_trees.txt")
-  } else if (is.na(unique_id) == FALSE){
+  } else if (is.na(replicate_number) == TRUE & is.na(unique_id) == FALSE){
     t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
     ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
     ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
+  } else {
+    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_ms_gene_trees.txt")
   }
   
   ## Create a base tree for the simulations
   # Generate a random tree under the coalescent using ape::rcoal
   t <- rcoal(ntaxa)
+  # Scale the tree depth (so the total depth is set according to the tree_depth parameter)
+  t$edge.length <- t$edge.length * (tree_depth / max(branching.times(t)))
   # Save the random tree
   write.tree(t, file = t_path)
   

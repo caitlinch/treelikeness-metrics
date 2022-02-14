@@ -112,33 +112,20 @@ exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir, iqtree2_path = iqtree2_path,
-       experiment_params = exp2_params)
+lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
+       iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+  
 
 
-#### Run one replicate of experiment 2: ILS ####
-# Generate gene trees in ms from random starting tree
-ms_output_files <- ms.generate.trees(ntaxa, ntrees, output_directory, ms_path, replicate_number)
-gene_trees_file <- ms_output_files[3]
-# Generate the partition file
-gene_partition_file <- gsub("starting_tree", "partitions", ms_output_files[[1]])
-partition.random.trees(ntrees, total_alignment_length, sequence_type, models = NA, rescaled_tree_lengths = NA, output_filepath = gene_partition_file)
-# Generate DNA along gene trees
-output_alignment_file <- gsub("starting_tree\\.txt", "output_alignment.fasta", ms_output_files[[1]])
-alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = output_alignment_file, partition_file_path = gene_partition_file, 
-                                         trees_path = gene_trees_file, output_format = "fasta", sequence_type = "DNA")
 
 ## Experiment 3: Mimicking introgression
-
 # fix alignment at total_alignment_length
-
 # simulate tree containing a single introgression event in ms and vary proportion of introgressed DNA from 0 to 1
-
 # simulate DNA along each tree with Alisim
-
 # Concatenate alignments
 
 
 ## Experiment 4: Repeat above experiments but adding random noise
 
 ## Experiment 5: Repeat above experiments adding alignment error
+

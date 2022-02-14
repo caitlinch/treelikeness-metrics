@@ -107,7 +107,7 @@ exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", s
 exp2_params$alisim_gene_models <- alisim_gene_models
 exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
 exp2_params$recombination_value <- 0
-exp2_recombination_type <- NA
+exp2_params$recombination_type <- NA
 # Add other parameters
 exp2_params$total_alignment_length <- total_alignment_length
 exp2_params$sequence_type <- sequence_type

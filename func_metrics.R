@@ -6,28 +6,28 @@ library(ape) # for general tree/alignment wrangling, and the delta.plots functio
 library(ips) # to determine the indices of the parsimony informative sites
 library(phangorn) # for splits and networks, for midpoint rooting trees 
 
-# here's paths for different programs needed for test statistics:
-iqtree2_path <- "iqtree2"
-fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-
-# here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
-al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
-
-# here's a few test alignments with 20 taxa each, with either 1, 10, 100, 1000, or 10000 trees:
-test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/", 
-                     c("exp1_00001_0020_001_output_alignment.fa", "exp1_00010_0020_001_output_alignment.fa",
-                       "exp1_00100_0020_001_output_alignment.fa", "exp1_01000_0020_001_output_alignment.fa"))
-
-# here's paths for variables needed to test treelikeness metric functions
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
-sequence_format = "DNA"
-substitution_model = "raw"
-iqtree2_number_threads = "AUTO"
-phylogemetric_number_of_threads = NA
-number_scf_quartets = 100
-number_of_taxa = 20
+# # here's paths for different programs needed for test statistics:
+# iqtree2_path <- "iqtree2"
+# fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+# phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
+# splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+# 
+# # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
+# al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
+# 
+# # here's a few test alignments with 20 taxa each, with either 1, 10, 100, 1000, or 10000 trees:
+# test_paths <- paste0("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/", 
+#                      c("exp1_00001_0020_001_output_alignment.fa", "exp1_00010_0020_001_output_alignment.fa",
+#                        "exp1_00100_0020_001_output_alignment.fa", "exp1_01000_0020_001_output_alignment.fa"))
+# 
+# # here's paths for variables needed to test treelikeness metric functions
+# alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_reticulation_index/exp1_00100_0020_001_output_alignment.fa"
+# sequence_format = "DNA"
+# substitution_model = "raw"
+# iqtree2_number_threads = "AUTO"
+# phylogemetric_number_of_threads = NA
+# number_scf_quartets = 100
+# number_of_taxa = 20
 
 #### Treelikeness metric functionc ####
 

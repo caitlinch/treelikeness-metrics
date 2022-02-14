@@ -117,7 +117,8 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   # Extract row given the row number
   row <- experiment_params[row_id, ]
   # Generate the random trees 
-  generate.random.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, output_filepath = paste0(output_directory, row$tree_file))
+  generate.random.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, tree_depth = row$tree_depth, 
+                        output_filepath = paste0(output_directory, row$tree_file))
   # Generate the partition file
   partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
                          models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
@@ -142,7 +143,8 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   # Generate the random trees 
-  generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, NNI_moves = row$NNI_moves, output_filepath = paste0(output_directory, row$tree_file))
+  generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, tree_depth = row$tree_depth, NNI_moves = row$NNI_moves, 
+                     output_filepath = paste0(output_directory, row$tree_file))
   # Generate the partition file
   partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
                          models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
@@ -169,7 +171,7 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   # Call ms
-  ms_output_files <- ms.generate.trees(row$num_taxa, row$num_trees, output_directory, ms_path, row$num_reps, row$uid)
+  ms_output_files <- ms.generate.trees(row$num_taxa, row$num_trees, row$tree_depth, output_directory, ms_path, row$num_reps, row$uid)
   gene_trees_file <- ms_output_files[[3]]
   # Generate the partition file
   gene_partition_file <- paste0(output_directory, row$partition_file)
@@ -189,7 +191,7 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, tree_depth, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
+ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)

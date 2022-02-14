@@ -286,14 +286,14 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 
 
 ## Delta plots (Holland et. al. 2002)
-mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "raw"){
+mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69"){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   
   ## Open the alignment as a DNAbin object
   alignment <- read.FASTA(alignment_path, type = sequence_format)
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
-  # Default model of DNA substitution is the default model for the `ape` function `dist.dna` ("K80")
+  # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
   pdm <- dist.dna(alignment, model = substitution_model)
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
@@ -308,7 +308,7 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   interval_count = dp$counts
   # To calculate the mean delta_q, calculate a weighted mean from the 
   mean_dq <- weighted.mean(interval_midpoint, interval_count)
-  ## To calculate the mean delta bar:
+  ## To calculate the mean delta bar (the mean value across all taxa e.g. the mean of the mean values for each taxa):
   # Calculate the mean delta bar (delta bar = the mean delta value for each observation/taxa)
   mean_db <- mean(dp$delta.bar)
   ## Return values to outside function

@@ -191,22 +191,28 @@ ILS.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pa
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
+ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0, recombination_type = NA, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
   if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
-    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number), "_ms_gene_trees.txt")
+    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
+                     "_", tree_depth, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
+                         "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
+                                 "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_gene_trees.txt")
   } else if (is.na(replicate_number) == TRUE & is.na(unique_id) == FALSE){
     t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
     ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
     ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
   } else {
-    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA", "_ms_gene_trees.txt")
+    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
+                     "_", tree_depth, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
+                         "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
+                                 "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_gene_trees.txt")
   }
   
   ## Create a base tree for the simulations
@@ -217,7 +223,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value, ou
   # Save the random tree
   write.tree(t, file = t_path)
   
-  ## Construct a command line to call ms from a randomly generated coalescent tree
+  ##
   # Calculate times for ms -ej commands by finding coalescence times (coalescent intervals found using ape::coalescent.intervals)
   ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
   # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }
@@ -229,10 +235,30 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value, ou
   node_df <- determine.coalescence.taxa(node_df)
   # Create a new column containing -ej event for each row
   node_df$ej <- paste0("-ej ", node_df$coalescence_time, " ", node_df$ms_input)
-  # Paste together all the -ej coalescence events for this tree
-  all_ej <- paste(node_df$ej, collapse = " ")
-  # Construct the ms command line using the -ej events
-  coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  
+  ## Construct a command line to call ms from a randomly generated coalescent tree
+  ## If recombination_value = 0 and recombination_type = NA, do not include any recombination
+  if (recombination_value == 0){
+    # Paste together all the -ej coalescence events for this tree
+    all_ej <- paste(node_df$ej, collapse = " ")
+    # Construct the ms command line using the -ej events
+    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  } else if (recombination_value != 0 & recombination_type == "Recent"){
+    ## If recombination_value != 0 and recombination_type = "Recent", add one recombination event between randomly selected pair of sister taxa
+    # Pick a cherry at random and create a recombination event there by using both a simultaneous -ej and -es command at 1/2*coalescent interval
+    node_df <- add.recent.introgression.event(node_df, ntaxa, recombination_value)
+    # Paste together all the -ej coalescence events for this tree
+    all_ej <- paste(node_df$ej, collapse = " ")
+    # Construct the ms command line using the -ej events
+    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  } else if (recombination_value != 0 & recombination_type == "Ancient"){
+    ## If recombination_value != 0 and recombination_type = "Ancient", add one recombination event between the two oldest lineages before they coalesce
+    node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value)
+    # Paste together all the -ej coalescence events for this tree
+    all_ej <- paste(node_df$ej, collapse = " ")
+    # Construct the ms command line using the -ej events
+    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  }
   
   ## Call ms
   ms_op <- system(coal_call, intern = TRUE)
@@ -251,6 +277,8 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value, ou
   names(output_files) <- c("starting_tree_file", "ms_output_file", "ms_gene_tree_file")
   return(output_files)
 }
+
+
 
 extract.clade.from.node <- function(node, tree, coalescent_times){
   ## Small function to take a node, extract the clade from that node, and return the number and names of taxa in that node
@@ -284,6 +312,7 @@ extract.clade.from.node <- function(node, tree, coalescent_times){
   return(o)
 }
 
+
 calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals){
   ## Small function to take a number of nodes and determine all the coalescent times needed to run ms
   
@@ -296,13 +325,14 @@ calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals)
     times_vec <- c(times_vec, temp_time)
   }
   
-  # Round to 3dp (to allow for values as small as 0.001)
-  times_vec <- round(times_vec, digits = 3)
+  # Round to 6dp (to allow for values as small as 0.000001)
+  times_vec <- round(times_vec, digits = 6)
   # Reverse vector so that the longest time aligns with the deepest node
   times_vec <- rev(times_vec)
   # Return coalescent times
   return(times_vec)
 }
+
 
 determine.coalescence.taxa <- function(node_dataframe){
   ## Take the node dataframe and work out which taxa will be coalescing into which (essential for the ms command line)
@@ -346,6 +376,92 @@ determine.coalescence.taxa <- function(node_dataframe){
   node_dataframe <- node_dataframe[order(node_dataframe$coalescence_time, decreasing = TRUE),]
   # Return the dataframe
   return(node_dataframe)
+}
+
+
+add.recent.introgression.event <- function(df, ntaxa, recombination_value){
+  ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
+  
+  # Get candidates for introgression event (all rows in df with ntips = 2)
+  cherry_df <- df[which(df$ntips == 2),]
+  # Pick one row at random
+  row_pick <- sample(1:nrow(cherry_df), 1)
+  row <- cherry_df[row_pick, ]
+  
+  # Set variables for the recombination event commands
+  # Set coalescence time at 1/2 * row$coalescence_time 
+  #     (as there are no coalescence events after this, the length of the coalescent interval is the time that this coalescence event occurs at minus 0)
+  coal_time <- 0.5 * row$coalescence_time
+  # Get the two taxa involved in the event
+  taxa <- as.numeric(unlist(strsplit(row$ms_tip_order, ",")))
+  receptor = max(taxa)
+  donor = min(taxa)
+  # Calculate the inheritance probability (which is 1 - the rate of introgression)
+  inheritance_prob <- 1 - recombination_value
+  # Name the new population (must not share a name with any other population)
+  new_taxa <- ntaxa+1
+  
+  # Create the commands for the recombination event
+  # This is the the instantaneous population split: -es time_of_introgression_event population_splitting inheritance_probability
+  recombination_es <- paste0("-es ", coal_time, " ", donor, " ", inheritance_prob)
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  recombination_ej <-  paste0("-ej ", coal_time, " ", new_taxa, " ", receptor)
+  
+  # Create a new row to attach to the dataframe using the two components of the recombination event
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  recombination_command <- paste0(recombination_es, " ", recombination_ej)
+  new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
+                           coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+  # Attach the new row onto the df
+  df <- rbind(df, new_row_df)
+  # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
+  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  
+  # Return dataframe with recombination event added
+  return(df)
+}
+
+
+
+add.ancient.introgression.event <- function(df, ntaxa, recombination_value){
+  ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
+  
+  # Identify candidate row for introgression - will be row with the largest coalescence time
+  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  row_id = 1 # First row will have largest coalescence time
+  row <- df[row_id, ]
+  
+  # Set variables for the recombination event commands
+  # Set coalescence time halfway along the coalescent interval
+  #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
+  coal_time <- 0.5 * (df$coalescence_time[row_id] - df$coalescence_time[row_id+1])
+  # Get the two taxa involved in the event
+  taxa <- as.numeric(unlist(strsplit(row$ms_tip_order, ",")))
+  receptor = max(taxa)
+  donor = min(taxa)
+  # Calculate the inheritance probability (which is 1 - the rate of introgression)
+  inheritance_prob <- 1 - recombination_value
+  # Name the new population (must not share a name with any other population)
+  new_taxa <- ntaxa+1
+  
+  # Create the commands for the recombination event
+  # This is the the instantaneous population split: -es time_of_introgression_event population_splitting inheritance_probability
+  recombination_es <- paste0("-es ", coal_time, " ", donor, " ", inheritance_prob)
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  recombination_ej <-  paste0("-ej ", coal_time, " ", new_taxa, " ", receptor)
+  
+  # Create a new row to attach to the dataframe using the two components of the recombination event
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  recombination_command <- paste0(recombination_es, " ", recombination_ej)
+  new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
+                           coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+  # Attach the new row onto the df
+  df <- rbind(df, new_row_df)
+  # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
+  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  
+  # Return dataframe with recombination event added
+  return(df)
 }
 
 

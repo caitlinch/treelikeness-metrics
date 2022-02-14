@@ -107,7 +107,7 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   
   # A set of splits is compatible if all pairwise comparisons between splits are compatible
   # Check using the ape function is.compatible (requires splits to be in bitsplits format, which is also in ape)
-  compatibility <- is.compatible.bitsplits(as.bitsplits(splits))
+  compatibility <- is.compatible.bitsplits(as.bitsplits(test_splits))
   
   # A set of splits is compatible if all pairwise comparisons between splits are compatible
   if (compatibility == FALSE){

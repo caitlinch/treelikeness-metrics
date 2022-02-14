@@ -98,17 +98,32 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   
   ## Determine whether the splits are compatible by conducting pairwise comparison
   c_df <- do.call(rbind.data.frame, lapply(1:length(test_splits), pairwise.compatibility, set_of_splits = test_splits))
+  # Each split comparison is listed twice (e.g. 12 & 9, 9 & 12 would both be listed). Remove duplicate comparisons
+  c_df <- remove.duplicate.splits(c_df)
+  # Determine the proportion of compatible split comparisons 
+  #     (the number of comparisons between two splits where the two splits are compatible, 
+  #     divided by the total number of comparisons between 2 splits i.e. ntaxa choose 2 or nrow(c_df))
+  prop_compatible_splits <- round(length(which(c_df$compatibility == "Compatible"))/nrow(c_df), digits = 4)
+  
   # A set of splits is compatible if all pairwise comparisons between splits are compatible
-  if (length(which(c_df$compatibility == "Incompatible")) != 0){
+  # Check using the ape function is.compatible (requires splits to be in bitsplits format, which is also in ape)
+  compatibility <- is.compatible.bitsplits(as.bitsplits(splits))
+  
+  # A set of splits is compatible if all pairwise comparisons between splits are compatible
+  if (compatibility == FALSE){
     # Some pairwise comparisons between splits are incompatible: therefore, the null hypothesis that data was originated in a tree is rejected
     ntlt_result <- "Non-tree-like"
-  } else if (length(which(c_df$compatibility == "Incompatible")) == 0){
+  } else if (compatibility == TRUE){
     # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
     ntlt_result <- "Tree-like"
   }
   
-  ## Return Network Treelikeness Test result
-  return(ntlt_result)
+  ## Create an output vector for the results
+  output_vector <- c(compatibility, ntlt_result, prop_compatible_splits)
+  names(output_vector) <- c("Compatibility", "NetworkTreelikenessTest", "proportion_compatible_split_comparisons")
+  
+  ## Return Network Treelikeness Test results
+  return(output_vector)
 }
 
 
@@ -544,4 +559,31 @@ pairwise.compatibility <- function(index, set_of_splits){
   # Return pairwise compatibility data frame
   return(pc_df)
 }
+
+
+remove.duplicate.splits <- function(df){
+  ## Small function to remove duplicate splits from the compatibility dataframe
+  
+  # Process each row to nicely format the two splits being compared (to make comparison of rows easier)
+  df$split_ids <- unlist(lapply(1:nrow(df), process.one.compatibility.matrix.row, df))
+  # Remove any duplicates split_ids
+  df <- df[!duplicated(df$split_ids), ]
+  # Return dataframe with each comparison of two splits included only once
+  return(df)
+}
+
+
+process.one.compatibility.matrix.row <- function(row_id, df){
+  ## Small function to process one row of the compatibility dataframe and return a nice ordered string of the splits that are involved
+  
+  # Identify row and extract split ids for the two splits being compared in this row
+  row <- df[row_id, ]
+  split_ids <- c(as.numeric(row$split1), as.numeric(row$split2))
+  # Combine the two split ids (small one first, larger one second) and separate with a column
+  output_string <- paste0(min(split_ids), ",", max(split_ids))
+  # Return the newly formatted string
+  return(output_string)
+}
+
+
 

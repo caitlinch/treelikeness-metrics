@@ -11,6 +11,8 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 # fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 # phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 # splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+netmake_path <- "/Applications/Spectre.app/Contents/MacOS/netmake"
+netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
 # 
 # # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 # al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"
@@ -29,9 +31,61 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 # number_scf_quartets = 100
 # number_of_taxa = 20
 
-#### Treelikeness metric functionc ####
-
-
+#### Treelikeness metric functions ####
+tree.proportion <- function(alignment_path, netmake_path, netme_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE){
+  ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
+  
+  ## Calculate tree proportion in R
+  # Open alignment
+  if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
+    # Open alignment
+    al <- read.FASTA(alignment_path, type = sequence_format)
+  } else if (suffix == "nex" | suffix == "nexus") {
+    al <- as.DNAbin(read.nexus.data(alignment_path))
+  }
+  
+  ## NeighborNet network
+  ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
+  # Compute pairwise hamming distances for the taxa
+  mldist <- dist.ml(al, model)
+  # Create a NeighbourNet network from the alignment
+  nnet <- neighborNet(mldist)
+  # Extract the splits from the NeighborNet network
+  unordered_nw_splits <- as.splits(nnet)
+  # Rearrange the splits in order from strongest to weakest 
+  nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
+  
+  ## Greedy tree
+  ## Greedily make a list of compatible splits
+  compatible_splits <- c(1)
+  # Iterate through each split and add it if it's compatible
+  for (i in 2:length(nw_splits)){
+    # Assign the number of i to be the current split being tested for compatibility
+    current_split <- i
+    # Test whether the current split is compatible with all other splits that have been added
+    test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
+    # If the split is compatible, add it to the list of compatible splits
+    if (test_compatibility == TRUE){
+      compatible_splits <- c(compatible_splits, current_split)
+    }
+  }
+  # Take the tree as the set of compatible splits
+  t_splits <- nw_splits[compatible_splits]
+  
+  # If requested, remove all trivial splits (using phangorn::removeTrivialSplits)
+  if (remove_trivial_splits == TRUE){
+    t_splits <- removeTrivialSplits(t_splits)
+    nw_splits <- removeTrivialSplits(nw_splits)
+  }
+  
+  # Calculate the proportion of split weights included in the network are present in the tree
+  t_split_weight_sum <- sum(attr(t_splits, "weight"))
+  nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
+  tree_proportion <- t_split_weight_sum/nw_split_weight_sum
+  
+  # Return the tree proportion value
+  return(tree_proportion)
+}
 
 
 
@@ -119,8 +173,8 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   }
   
   ## Create an output vector for the results
-  output_vector <- c(compatibility, ntlt_result, prop_compatible_splits)
-  names(output_vector) <- c("Compatibility", "NetworkTreelikenessTest", "proportion_compatible_split_comparisons")
+  output_vector <- c(ntlt_result, compatibility, prop_compatible_splits)
+  names(output_vector) <- c("NetworkTreelikenessTest", "AllSplitsCompatible", "proportion_compatible_split_comparisons")
   
   ## Return Network Treelikeness Test results
   return(output_vector)
@@ -370,6 +424,49 @@ estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tre
 
 
 
+#### Network estimation functions ####
+SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, sequence_format = "DNA"){
+  ### Function to take an alignment, estimate a NeighborNet network in Netmake and estimate a minimum evolution spanning tree in NetME
+  ### Requires SPECTRE software to run (both programs exist within SPECTRE)
+  
+  ## Convert alignment to nexus (if it isn't already)
+  if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
+    nexus_al_path <- convert.to.nexus(alignment_path, sequence_format)
+  } else if (suffix == "nexus" | suffix == "nex"){
+    nexus_al_path <- alignment_path
+  }
+  
+  ## Name files
+  suffix <- tolower(unlist(strsplit(basename(nexus_al_path), "\\."))[length(unlist(strsplit(basename(nexus_al_path), "\\.")))])
+  al_name <- paste0(unlist(strsplit(basename(nexus_al_path), "\\."))[1:(length(unlist(strsplit(basename(nexus_al_path), "\\.")))-1)])
+  alignment_dir <- dirname(nexus_al_path)
+  
+  ## Set directory as alignment_dir
+  setwd(alignment_dir)
+  
+  ## Run Netmake to create a compatible split system with a circular ordering from a distance matrix
+  # Assemble netmake command
+  netmake_command <- paste0(netmake_path, " -o ", al_name, " ", basename(nexus_al_path))
+  # Run netmake command
+  system(netmake_command)
+  # Assemble name of netmake output file
+  netmake_op_file <- paste0(alignment_dir, "/", al_name, ".network.nex")
+  
+  ## Run NetME to construct a minimum evolution tree from the specified split network with an implied circular order
+  netme_command <- paste0(netme_path, " -o ", al_name, " ", basename(netmake_op_file))
+  # Run NetME command
+  system(netme_command)
+  # Assemble names of NetME output files
+  netme_nw_file <- paste0(alignment_dir, "/", al_name, ".min-evo.nex")
+  netme_tl_file <- paste0(alignment_dir, "/", al_name, ".treelength")
+  
+  ## Return file names
+  output_vec <- c(netmake_op_file, netme_nw_file, netme_tl_file)
+  return(output_vec)
+}
+
+
+
 #### Utility functions ####
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
   ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
@@ -451,7 +548,7 @@ genes.from.alignment <- function(alignment_path, partition_path, gene_folder, se
 
 save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder, sequence_format = "DNA"){
   ## Small function to process a single charpartition row and save the associated gene
-
+  
   # Extract the i^th row using the index and split the line to determine the gene name and location
   c_line <- charpartitions[index]
   c_line <- gsub(";", "", c_line)

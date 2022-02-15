@@ -65,7 +65,7 @@ exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees
 names(exp1_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
 exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
-                          sprintf("%03d", exp1_params$num_reps))
+                          sprintf("%03d", exp1_params$num_reps), "_", exp2_params$tree_depth)
 # Add parameters for Alisim
 exp1_params$alisim_gene_models <- alisim_gene_models
 exp1_params$alisim_gene_tree_length <- alisim_gene_tree_length
@@ -116,10 +116,9 @@ exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
+lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
        iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
   
-
 
 
 ## Experiment 3: Mimicking introgression
@@ -127,6 +126,11 @@ lapply(1:nrow(exp2_params), ILS.generate.alignment, output_directory = exp2_dir,
 # simulate tree containing a single introgression event in ms and vary proportion of introgressed DNA from 0 to 1
 # simulate DNA along each tree with Alisim
 # Concatenate alignments
+
+# Create folder to store results of this experiment, if it doesn't already exist
+exp3_dir <- paste0(local_directory, "exp_3/")
+if(!file.exists(exp2_dir)){dir.create(exp3_dir)}
+
 exp3_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, tree_depth, r_vec, c("Ancient","Recent"))
 names(exp3_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
@@ -143,11 +147,17 @@ exp3_params$sequence_type <- sequence_type
 exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
 exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
 
-# Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp3_params), ILS.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
+# Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
+lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, 
        iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+
+
 
 ## Experiment 4: Repeat above experiments but adding random noise
 
+
+
 ## Experiment 5: Repeat above experiments adding alignment error
+
+
 

@@ -78,8 +78,8 @@ exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
 exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path,
-       experiment_params = exp1_params)
+# lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
 
 
 
@@ -116,9 +116,9 @@ exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, 
-       iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
-  
+# lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+
 
 
 ## Experiment 3: Mimicking introgression
@@ -129,12 +129,12 @@ lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, 
 
 # Create folder to store results of this experiment, if it doesn't already exist
 exp3_dir <- paste0(local_directory, "exp_3/")
-if(!file.exists(exp2_dir)){dir.create(exp3_dir)}
+if (dir.exists(exp3_dir) == FALSE){dir.create(exp3_dir)}
 
 exp3_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees, tree_depth, r_vec, c("Ancient","Recent"))
 names(exp3_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
-exp3_params$uid <- paste0("exp2_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
+exp3_params$uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
                           sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
                           "_", exp3_params$recombination_type)
 # Add parameters for Alisim
@@ -148,8 +148,8 @@ exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
 exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
-lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, 
-       iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+# lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+lapply(1, ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
 
 
 

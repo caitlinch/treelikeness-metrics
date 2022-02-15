@@ -117,11 +117,11 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   # Extract row given the row number
   row <- experiment_params[row_id, ]
   # Create a new folder to store the results in this experiment from
-  if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
+  if (is.na(row$uid) == FALSE){
+    row_folder <- paste0(output_directory, row$uid, "/")
+  } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "/")
-  } else if (is.na(row$num_reps) == TRUE & is.na(row$uid) == FALSE){
-    row_folder <- paste0(output_directory, row$uid, "/")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "/")
@@ -154,11 +154,11 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   # Create a new folder to store the results in this experiment from
-  if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
+  if (is.na(row$uid) == FALSE){
+    row_folder <- paste0(output_directory, row$uid, "/")
+  } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "/")
-  } else if (is.na(row$num_reps) == TRUE & is.na(row$uid) == FALSE){
-    row_folder <- paste0(output_directory, row$uid, "/")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "/")
@@ -194,11 +194,11 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   row <- experiment_params_df[row_id, ]
   
   # Create a new folder to store results for this file
-  if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
+  if (is.na(row$uid) == FALSE){
+    row_folder <- paste0(output_directory, unique_id, "/")
+  } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
-  } else if (is.na(row$num_reps) == TRUE & is.na(row$uid) == FALSE){
-    row_folder <- paste0(output_directory, unique_id, "/")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
@@ -233,17 +233,17 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
-  if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
+  if (is.na(unique_id) == FALSE){
+    t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
+    ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
+    ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
+  } else if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
     t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
                      "_", tree_depth, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
     ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
                          "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_output.txt")
     ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
                                  "_", tree_depth, "_", recombination_value, "_", recombination_type, "_ms_gene_trees.txt")
-  } else if (is.na(replicate_number) == TRUE & is.na(unique_id) == FALSE){
-    t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
   } else {
     t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
                      "_", tree_depth, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
@@ -426,11 +426,11 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value){
   #     (as there are no coalescence events after this, the length of the coalescent interval is the time that this coalescence event occurs at minus 0)
   coal_time <- 0.5 * row$coalescence_time
   # Get the two taxa involved in the event
-  taxa <- as.numeric(unlist(strsplit(row$ms_tip_order, ",")))
+  taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
   receptor = max(taxa)
   donor = min(taxa)
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
-  inheritance_prob <- 1 - recombination_value
+  inheritance_prob <- round(1 - recombination_value, digits = 2)
   # Name the new population (must not share a name with any other population)
   new_taxa <- ntaxa+1
   
@@ -469,11 +469,11 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value){
   #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
   coal_time <- 0.5 * (df$coalescence_time[row_id] - df$coalescence_time[row_id+1])
   # Get the two taxa involved in the event
-  taxa <- as.numeric(unlist(strsplit(row$ms_tip_order, ",")))
+  taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
   receptor = max(taxa)
   donor = min(taxa)
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
-  inheritance_prob <- 1 - recombination_value
+  inheritance_prob <- round(1 - recombination_value, digits = 2)
   # Name the new population (must not share a name with any other population)
   new_taxa <- ntaxa+1
   

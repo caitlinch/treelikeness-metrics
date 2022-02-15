@@ -195,13 +195,13 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   
   # Create a new folder to store results for this file
   if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
-    row_folder <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
-                     "_", tree_depth, "_", recombination_value, "_", recombination_type, "/")
+    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                         "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
   } else if (is.na(row$num_reps) == TRUE & is.na(row$uid) == FALSE){
     row_folder <- paste0(output_directory, unique_id, "/")
   } else {
-    row_folder <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
-                     "_", tree_depth, "_", recombination_value, "_", recombination_type, "/")
+    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                         "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
   }
   # Create the folder to store information for this row, if it doesn't already exist
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
@@ -277,28 +277,23 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0
   ## Construct a command line to call ms from a randomly generated coalescent tree
   ## If recombination_value = 0 and recombination_type = NA, do not include any recombination
   if (recombination_value == 0){
-    # Paste together all the -ej coalescence events for this tree
-    all_ej <- paste(node_df$ej, collapse = " ")
-    # Construct the ms command line using the -ej events
-    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+    ## No recombination event is present. Do not add any extra splitting (-es) or joining (-ej) events
+    node_df <- node_df
   } else if (recombination_value != 0 & recombination_type == "Recent"){
     ## If recombination_value != 0 and recombination_type = "Recent", add one recombination event between randomly selected pair of sister taxa
     # Pick a cherry at random and create a recombination event there by using both a simultaneous -ej and -es command at 1/2*coalescent interval
     node_df <- add.recent.introgression.event(node_df, ntaxa, recombination_value)
-    # Paste together all the -ej coalescence events for this tree
-    all_ej <- paste(node_df$ej, collapse = " ")
-    # Construct the ms command line using the -ej events
-    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
   } else if (recombination_value != 0 & recombination_type == "Ancient"){
     ## If recombination_value != 0 and recombination_type = "Ancient", add one recombination event between the two oldest lineages before they coalesce
     node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value)
-    # Paste together all the -ej coalescence events for this tree
-    all_ej <- paste(node_df$ej, collapse = " ")
-    # Construct the ms command line using the -ej events
-    coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
   }
   
-  ## Call ms
+  ## Generate gene trees in ms
+  # Paste together all the -ej coalescence events for this tree
+  all_ej <- paste(node_df$ej, collapse = " ")
+  # Construct the ms command line using the -ej events
+  coal_call <- paste0(ms_path, " ", ntaxa, " ", ntrees, " -T -I ", ntaxa," ", paste(rep(1, ntaxa), collapse = " "), " ", all_ej)
+  # Call ms
   ms_op <- system(coal_call, intern = TRUE)
   # Write all output to file
   write(ms_op, file = ms_op_path)

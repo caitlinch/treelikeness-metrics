@@ -32,7 +32,7 @@ netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
 # number_of_taxa = 20
 
 #### Treelikeness metric functions ####
-tree.proportion <- function(alignment_path, netmake_path, netme_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE){
+tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Calculate tree proportion in R

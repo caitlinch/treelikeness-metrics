@@ -128,7 +128,7 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   
   ## Construct and bootstrap a NeighborNet network
   # Convert fasta to nexus
-  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA")
+  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
   # Name output path
   confidence_path <- paste0(alignment_path, "_confidence.nexus")
   output_path <- paste0(alignment_path, "_Splitstree_output.nex")
@@ -454,7 +454,7 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
   
   ## Convert alignment to nexus (if it isn't already)
   if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
-    nexus_al_path <- convert.to.nexus(alignment_path, sequence_format)
+    nexus_al_path <- convert.to.nexus(alignment_path, sequence_format, include_taxablock = FALSE)
   } else if (suffix == "nexus" | suffix == "nex"){
     nexus_al_path <- alignment_path
   }
@@ -491,7 +491,7 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 
 
 #### Utility functions ####
-convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
+convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_taxablock = FALSE){
   ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
   ## Prepare parameters for file conversion
@@ -507,20 +507,27 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
     nexus_format = "protein"
   }
   
-  ## Convert to nexus using funcions based on suffix
+  # Create a variable to specify whether to include a single DATA block (datablock = TRUE) or separate TAXA and CHARACTER boxes (datablock = FALSE)
+  if (include_taxablock == TRUE){
+    datablock_bool = FALSE
+  } else if (include_taxablock == FALSE){
+    datablock_bool = TRUE
+  }
+  
+  ## Convert to nexus using functions based on suffix
   if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
     ## If the file is a fasta file, convert it to nexus file format (unless a nexus version already exists)
     if (file.exists(nexus_alignment_path) == FALSE){
       # Read in the fasta data
       data <- read.FASTA(alignment_path, type = sequence_format)
       # Write out the nexus data
-      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, interleaved = FALSE, datablock = FALSE) # write the output as a nexus file)
+      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = datablock_bool, interleaved = FALSE) # write the output as a nexus file)
     }
   } else if (suffix == "phy" | suffix == "phylip"){
     ## If the file is a phy file, convert it to nexus file format (unless a nexus version already exists)
     if (file.exists(nexus_alignment_path) == FALSE){
       data <- read.phy(alignment_path)
-      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, interleaved = FALSE, datablock = FALSE) # write the output as a nexus file)
+      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = datablock_bool, interleaved = FALSE) # write the output as a nexus file)
     }
   }
   
@@ -528,13 +535,14 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA"){
   nexus <- readLines(nexus_alignment_path)
   ind <- grep("BEGIN CHARACTERS",nexus)+2
   if ((sequence_format == "DNA") | (sequence_format == "dna")){
-    nexus[ind] <- "  FORMAT DATATYPE=DNA MISSING=? GAP=-;"
+    nexus[ind] <- "  FORMAT MISSING=? GAP=- DATATYPE=DNA;"
   } else if ((sequence_format == "Protein") | (sequence_format == "protein") | 
              (sequence_format == "AA") | (sequence_format == "aa")){
     nexus[ind] <- "  FORMAT MISSING=? GAP=- DATATYPE=PROTEIN;"
   }
   # Write the edited nexus file out 
   writeLines(nexus,nexus_alignment_path)
+  
   
   ## Output file name and path for nexus file
   return(nexus_alignment_path)

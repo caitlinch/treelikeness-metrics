@@ -3,16 +3,16 @@
 
 ## Load required packages
 library(ape) # for general tree/alignment wrangling, and the delta.plots function
-library(ips) # to determine the indices of the parsimony informative sites
+library(ips) # to determine the indices of the parsimony informative sites before running TIGER
 library(phangorn) # for splits and networks, for midpoint rooting trees 
 
 # # here's paths for different programs needed for test statistics:
-iqtree2_path <- "iqtree2"
-fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-netmake_path <- "/Applications/Spectre.app/Contents/MacOS/netmake"
-netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
+# iqtree2_path <- "iqtree2"
+# fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+# phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
+# splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+# netmake_path <- "/Applications/Spectre.app/Contents/MacOS/netmake"
+# netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
 # 
 # # here's a file path to a test alignment (one tree, 10000bp, 20 taxa - should be treelike):
 # al_tl_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00001_0020_001_output_alignment.fa"

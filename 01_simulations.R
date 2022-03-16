@@ -28,11 +28,6 @@ r_vec <- seq(0, 1, 0.05)
 alisim_gene_models <- NA
 alisim_gene_tree_length <- NA
 
-# test params
-output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/testing_metrics/testing_ms/"
-ntaxa = 10
-ntrees = 20
-replicate_number = 1
 
 ## Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "func_simulating_alignments.R"))

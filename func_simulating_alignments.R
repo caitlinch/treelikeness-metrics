@@ -195,7 +195,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   
   # Create a new folder to store results for this file
   if (is.na(row$uid) == FALSE){
-    row_folder <- paste0(output_directory, unique_id, "/")
+    row_folder <- paste0(output_directory, row$uid, "/")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")

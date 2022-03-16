@@ -35,17 +35,18 @@ replicate_folder <- exp1_runs[1]
 # test params
 num_iqtree2_threads = "AUTO"
 num_iqtree2_scf_quartets = 100
+iqtree_substitution_model = "JC"
 num_phylogemetric_threads = NA
 sequence_format = "DNA"
 
 treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-                                             num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, num_phylogemetric_threads = NA,
-                                             sequence_format = "DNA"){
+                                             num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                                             num_phylogemetric_threads = NA, sequence_format = "DNA"){
   ## Function to take one alignment and apply all treelikeness metrics
   
   # Get alignment file
   folder_files <- list.files(replicate_folder)
-  alignment_path <- paste0(replicate_folder, grep("output_alignment.fa.", grep("output_alignment.fa", folder_files, value = TRUE), invert = TRUE, value = TRUE))
+  alignment_path <- paste0(replicate_folder, grep("output_alignment\\.fa\\.", grep("output_alignment\\.fa", folder_files, value = TRUE), invert = TRUE, value = TRUE))
   
   # Determine the number of taxa (needed for number of quartets in likelihood mapping and sCFs)
   if (grepl("exp1", replicate_folder)){
@@ -59,7 +60,8 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
   }
   
   # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
-  lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_of_taxa = n_tree_tips)
+  lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
+                           number_of_taxa = n_tree_tips)
   
   # Apply Site concordance factors (Minh et. al. 2020)
   scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 

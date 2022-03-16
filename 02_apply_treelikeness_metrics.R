@@ -32,6 +32,12 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/", "exp_3/"))
 exp1_runs <- paste0(exp_folders[1], list.files(exp_folders[1]), "/")
 replicate_folder <- exp1_runs[1]
 
+# test params
+num_iqtree2_threads = "AUTO"
+num_iqtree2_scf_quartets = 100
+num_phylogemetric_threads = NA
+sequence_format = "DNA"
+
 treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
                                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, num_phylogemetric_threads = NA,
                                              sequence_format = "DNA"){

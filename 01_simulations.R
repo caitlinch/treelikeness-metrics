@@ -25,7 +25,7 @@ taxa_vec <- c(10,20,50,100,200,500,1000)
 num_reps <- 10
 tree_depth <- 1
 r_vec <- seq(0, 1, 0.05)
-alisim_gene_models <- NA
+alisim_gene_models <- "JC"
 alisim_gene_tree_length <- NA
 
 
@@ -60,7 +60,7 @@ exp1_params <- expand.grid(number_of_replicates, number_of_taxa, number_of_trees
 names(exp1_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
 exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
-                          sprintf("%03d", exp1_params$num_reps), "_", exp2_params$tree_depth)
+                          sprintf("%03d", exp1_params$num_reps), "_", exp1_params$tree_depth)
 # Add parameters for Alisim
 exp1_params$alisim_gene_models <- alisim_gene_models
 exp1_params$alisim_gene_tree_length <- alisim_gene_tree_length

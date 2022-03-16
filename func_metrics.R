@@ -7,10 +7,10 @@ library(ips) # to determine the indices of the parsimony informative sites
 library(phangorn) # for splits and networks, for midpoint rooting trees 
 
 # # here's paths for different programs needed for test statistics:
-# iqtree2_path <- "iqtree2"
-# fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-# phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-# splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+iqtree2_path <- "iqtree2"
+fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
+splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 netmake_path <- "/Applications/Spectre.app/Contents/MacOS/netmake"
 netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
 # 
@@ -85,6 +85,28 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   
   # Return the tree proportion value
   return(tree_proportion)
+}
+
+
+
+## Treeness (Cavalli-Sforza and Piazza 1975)
+treeness <- function(alignment_path, sequence_type = "DNA", tree_provided = FALSE, tree_file = NA, iqtree2_path = NA, model = "MFP"){
+  ## Calculate treeness from a sequence alignment
+  
+  # Read in alignment
+  al <- read.FASTA(alignment_path, type = sequence_type)
+  
+  # Read in ML tree for this alignment
+  if (tree_provided == FALSE){
+    # If tree is not provided, estimate tree using IQ-Tree2 and then read in tree
+    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model)
+    tree_file <- paste0(alignment_path, ".treefile")
+    tree <- read.tree(tree_file)
+  } else if (tree_provided == TRUE){
+    # If tree is provided, read in tree
+    tree <- read.tree(tree_file)
+  }
+  
 }
 
 
@@ -373,17 +395,17 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
 
 
 #### Tree estimation functions ####
-estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
+estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = "MFP"){
   ## Function to take a folder full of genes and estimate a gene tree for each one
   # Get the list of file names
   all_gene_paths <- paste0(gene_folder, list.files(gene_folder))
   all_gene_paths <- all_gene_paths[grep("\\.fa", all_gene_paths)]
   all_gene_paths <- all_gene_paths[grep("\\.fa\\.", all_gene_paths, invert = TRUE)]
   # Run IQ-Tree2 for each of those file names
-  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag, bootstraps)
+  lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag, bootstraps, model)
 }
 
-call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA){
+call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = "MFP"){
   ## Small function to call IQ-Tree2 for one alignment
   # Use _flag commands from function call to assemble IQ-Tree2 call
   if (redo_flag == TRUE){
@@ -402,7 +424,7 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
     bootstraps_call = bootstraps
   }
   # Assemble call
-  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m MFP", redo_call, " ", safe_call, " ", bootstraps_call)
+  call <- paste0(iqtree2_path, " -s ", gene_path, " -nt ", iqtree2_number_threads, " -m ", model, " ", redo_call, " ", safe_call, " ", bootstraps_call)
   print(call)
   # Invoke OS command
   system(call)

@@ -1,8 +1,18 @@
-# Open packages
+# /caitlinch/treelikeness_metrics/01_simulations.R
+# Caitlin Cherryh 2022
+
+# This program will simulate alignments with varying levels of treelikeness
+# This program requires IQ-Tree2 (2.2-beta or above) and ms.
+
+
+
+#### 1. Open packages ####
 library(ape)
 library(phytools)
 
-# Parameters for all simulations
+
+
+#### 2. Set parameters ####
 # local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory          <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
 # iqtree2_path            <- Path to IQ-Tree2.2-beta executable (this is the IQ-Tree2 release containing Alisim). 
@@ -28,22 +38,20 @@ r_vec <- seq(0, 0.5, 0.05)
 alisim_gene_models <- "JC"
 alisim_gene_tree_length <- NA
 
-
-## Source functions from caitlinch/treelikeness_metrics
-source(paste0(repo_directory, "func_simulating_alignments.R"))
-
-
-
-## Prepare parameters that remain stable for all experiments
-# Prepare parameters for experiments
-# The number of trees should be the divisors for total_alignment_length (as only whole numbers of trees are possible)
+## Prepare variables that remain stable for all experiments using the input parameters
 number_of_trees <- divisors(total_alignment_length)
 number_of_taxa <- taxa_vec
 number_of_replicates <- 1:num_reps
 
 
 
-## Experiment 1: Random trees
+#### 3. Source functions from caitlinch/treelikeness_metrics ####
+source(paste0(repo_directory, "func_simulating_alignments.R"))
+
+
+
+#### 4. Generate simulations ####
+## Experiment 1: Random trees ##
 # Generate x random trees with y taxa 
 #     Total alignment length = 10,000 bp
 #     Number of trees ranges from 0 to 10,000 (whole number divisors of 10000)
@@ -77,8 +85,7 @@ exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment"
 lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
 
 
-
-## Experiment 2: ILS
+## Experiment 2: ILS ##
 # Generate gene trees using ms to simulate ILS
 #     Total alignment length = 10,000 bp
 #     Number of trees ranges from 0 to 10,000  (whole number divisors of 10000)
@@ -115,8 +122,7 @@ exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment"
 lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
 
 
-
-## Experiment 3: Mimicking introgression
+## Experiment 3: Mimicking introgression ##
 # fix alignment at total_alignment_length
 # simulate tree containing a single introgression event in ms and vary proportion of introgressed DNA from 0 to 1
 # simulate DNA along each tree with Alisim
@@ -147,12 +153,11 @@ exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment"
 lapply(1, ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
 
 
-
-## Experiment 4: Repeat above experiments but adding random noise
-
+## Experiment 4: Repeat above experiments but adding random noise ##
 
 
-## Experiment 5: Repeat above experiments adding alignment error
+
+## Experiment 5: Repeat above experiments adding alignment error ##
 
 
 

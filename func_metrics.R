@@ -285,7 +285,7 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
 
 
 ## Likelihood mapping (Strimmer and von Haeseler 1997)
-likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, number_of_taxa){
+likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, substitution_model = "MFP", number_of_taxa){
   # Function to call IQ-Tree and create a likelihood map for the alignment
   
   ## Create the likelihood map
@@ -295,7 +295,7 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
   map_file <- paste0(alignment_path, ".lmap.eps")
   if ((file.exists(iq_file) == FALSE) | (file.exists(map_file) == FALSE)){
     number_of_quartets <- 25 * as.numeric(number_of_taxa)
-    call <- paste0(iqtree2_path," -s ",alignment_path," -nt ", iqtree2_number_threads, " -lmap ",number_of_quartets," -redo -safe")
+    call <- paste0(iqtree2_path, " -s ", alignment_path, " -m ", substitution_model, " -nt ", iqtree2_number_threads, " -lmap ", number_of_quartets, " -redo -safe")
     system(call)
   }
   

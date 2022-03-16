@@ -65,7 +65,7 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
   
   # Apply Site concordance factors (Minh et. al. 2020)
   scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
-              add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
+              substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
   
   # Apply Delta plots (Holland et. al. 2002)
   mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format, substitution_model = "JC69")
@@ -84,6 +84,11 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
   # Apply Cunningham test (Cunningham 1975)
   
   # Apply tree proportion (new test)
+ 
+  ## Assemble results into a dataframe
+  results_vec <- c(lm)
+  names_vec <- c("lm_num_resolved_quartets", "lm_num_partly_resolved_quartets", "lm_num_unresolved_quartets", "lm_total_num_quartets", "lm_proportion_resolved_quartets")
   
+   
 }
 

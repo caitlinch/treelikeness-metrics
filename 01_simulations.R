@@ -24,7 +24,7 @@ sequence_type <- "DNA"
 taxa_vec <- c(10,20,50,100,200,500,1000)
 num_reps <- 10
 tree_depth <- 1
-r_vec <- seq(0, 1, 0.05)
+r_vec <- seq(0, 0.5, 0.05)
 alisim_gene_models <- "JC"
 alisim_gene_tree_length <- NA
 

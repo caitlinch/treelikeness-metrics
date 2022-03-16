@@ -86,9 +86,9 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
   # Apply tree proportion (new test)
  
   ## Assemble results into a dataframe
-  results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), mean_delta_plot_value)
+  results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), mean_delta_plot_value, mean_q_residual, mean_tiger_value)
   names_vec <- c("lm_num_resolved_quartets", "lm_num_partly_resolved_quartets", "lm_num_unresolved_quartets", "lm_total_num_quartets", "lm_proportion_resolved_quartets",
-                 "scf_mean", "scf_median", "scf_min", "scf_max", "mean_delta_plot_value")
+                 "scf_mean", "scf_median", "scf_min", "scf_max", "mean_delta_plot_value", "mean_q_residual", "mean_tiger_value")
   names(results_vec) <- names_vec
   
    

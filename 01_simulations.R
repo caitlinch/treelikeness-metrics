@@ -15,7 +15,8 @@ library(phytools)
 #### 2. Set parameters ####
 # local_directory                 <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory                  <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
-# iqtree2_path                    <- Path to IQ-Tree2.2-beta executable (this is the IQ-Tree2 release containing Alisim). 
+# ms_path                         <- Path to ms executable 
+# iqtree2_path                    <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included). 
 # total_alignment_length          <- Total length of concatenated alignments (we chose 10000).
 # sequence_type                   <- Sequence type for simulation (we chose "DNA").
 # taxa_vec                        <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
@@ -26,10 +27,19 @@ library(phytools)
 # alisim_gene_models              <- model of sequence evolution for Alisim 
 # alisim_gene_tree_length         <- gene-specific tree length for Alisim
 
-local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
-ms_path <- "ms"
-iqtree2_path <- "iqtree2.2-beta"
+run_location = "soma"
+if (run_location == "local"){
+  local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+  ms_path <- "ms"
+  iqtree2_path <- "iqtree2.2-beta"
+} else if (run_location == "soma"){
+  local_directory <- "/data/caitlin/treelikeness_metrics/"
+  repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
+  ms_path <- "/data/caitlin/executables/msdir/ms"
+  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.1.2-Linux/bin/iqtree2"
+}
+
 total_alignment_length <- 10000
 sequence_type <- "DNA"
 taxa_vec <- c(10,20,50,100,200,500,1000)

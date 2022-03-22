@@ -17,7 +17,10 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
-  ## Calculate tree proportion in R
+  ## Open alignment
+  # Identify file type of alignment
+  suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
+  
   # Open alignment
   if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
     # Open alignment
@@ -54,17 +57,20 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   # Take the tree as the set of compatible splits
   t_splits <- nw_splits[compatible_splits]
   
+  ## Manage trivial splits
   # If requested, remove all trivial splits (using phangorn::removeTrivialSplits)
   if (remove_trivial_splits == TRUE){
     t_splits <- removeTrivialSplits(t_splits)
     nw_splits <- removeTrivialSplits(nw_splits)
   }
   
+  ## Calculate tree proportion
   # Calculate the proportion of split weights included in the network are present in the tree
   t_split_weight_sum <- sum(attr(t_splits, "weight"))
   nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
   tree_proportion <- t_split_weight_sum/nw_split_weight_sum
   
+  ## Return result
   # Return the tree proportion value
   return(tree_proportion)
 }
@@ -434,17 +440,17 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
   ### Function to take an alignment, estimate a NeighborNet network in Netmake and estimate a minimum evolution spanning tree in NetME
   ### Requires SPECTRE software to run (both programs exist within SPECTRE)
   
+  ## Name files
+  suffix <- tolower(unlist(strsplit(basename(nexus_al_path), "\\."))[length(unlist(strsplit(basename(nexus_al_path), "\\.")))])
+  al_name <- paste0(unlist(strsplit(basename(nexus_al_path), "\\."))[1:(length(unlist(strsplit(basename(nexus_al_path), "\\.")))-1)])
+  alignment_dir <- dirname(nexus_al_path)
+  
   ## Convert alignment to nexus (if it isn't already)
   if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
     nexus_al_path <- convert.to.nexus(alignment_path, sequence_format, include_taxablock = FALSE)
   } else if (suffix == "nexus" | suffix == "nex"){
     nexus_al_path <- alignment_path
   }
-  
-  ## Name files
-  suffix <- tolower(unlist(strsplit(basename(nexus_al_path), "\\."))[length(unlist(strsplit(basename(nexus_al_path), "\\.")))])
-  al_name <- paste0(unlist(strsplit(basename(nexus_al_path), "\\."))[1:(length(unlist(strsplit(basename(nexus_al_path), "\\.")))-1)])
-  alignment_dir <- dirname(nexus_al_path)
   
   ## Set directory as alignment_dir
   setwd(alignment_dir)

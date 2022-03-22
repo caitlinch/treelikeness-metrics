@@ -35,15 +35,17 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   mldist <- dist.ml(al, model)
   # Create a NeighbourNet network from the alignment
   nnet <- neighborNet(mldist)
+  
+  ## Greedy tree using an adapted version of Kruskal's algorithm
   # Extract the splits from the NeighborNet network
   unordered_nw_splits <- as.splits(nnet)
-  # Rearrange the splits in order from strongest to weakest 
+  # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
   nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
-  
-  ## Greedy tree
-  ## Greedily make a list of compatible splits
+  # Find the list of compatible splits in the maximum weight tree
+  # Add the first edge (i.e. the edge with the largest weight) to the set of edges comprising the maximum weight spanning tree
   compatible_splits <- c(1)
-  # Iterate through each split and add it if it's compatible
+  # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
+  # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
   for (i in 2:length(nw_splits)){
     # Assign the number of i to be the current split being tested for compatibility
     current_split <- i

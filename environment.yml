@@ -1,0 +1,11 @@
+name: treelikeness_metrics
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - r=4.0
+  - r-base=4.0.3
+  - r-ape
+  - r-phangorn
+  - r-phytools
+  - r-ips

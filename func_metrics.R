@@ -31,7 +31,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   
   ## NeighborNet network
   ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
-  # Compute pairwise hamming distances for the taxa
+  # Compute pairwise distances for the taxa using the specified model of sequence evolution
   mldist <- dist.ml(al, model)
   # Create a NeighbourNet network from the alignment
   nnet <- neighborNet(mldist)

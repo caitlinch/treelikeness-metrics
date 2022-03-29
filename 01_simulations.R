@@ -50,6 +50,12 @@ r_vec <- seq(0, 0.5, 0.05)
 alisim_gene_models <- "JC"
 alisim_gene_tree_length <- NA
 
+
+
+#### 3. Source functions from caitlinch/treelikeness_metrics and prepare variables ####
+source(paste0(repo_directory, "func_simulating_alignments.R"))
+
+
 ## Prepare variables that remain stable for all experiments using the input parameters
 # Determine number of trees - all whole numbers that are a divisor of the total alignment length
 number_of_trees <- divisors(total_alignment_length)
@@ -60,10 +66,6 @@ number_of_replicates <- 1:num_reps
 # Prepare vector for depth of coalescent trees
 tree_depth_coalescent <- seq(floor(tree_depth_coalescent_bounds[1]),ceiling(tree_depth_coalescent_bounds[2]), (ceiling(tree_depth_coalescent_bounds[2])/10))
 tree_depth_coalescent[1] <- tree_depth_coalescent_bounds[1] # Replace first value with actual first value
-
-
-#### 3. Source functions from caitlinch/treelikeness_metrics ####
-source(paste0(repo_directory, "func_simulating_alignments.R"))
 
 
 

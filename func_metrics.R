@@ -79,6 +79,21 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 
+## Cunningham test (Cunningham 1978) ##
+cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", substitution_model = "MFP"){
+  ## Function to estimate what proportion of the variance in the data is represented by the tree
+  
+  ## Test steps:
+  # 1. Infer a tree from the alignment path using IQ-Tree2 (or open the tree if one exists already). This is the predicted distances
+  # 2. The data gives you obsevred distances. Use the observed and predicted distances to calculate a residual sum of squares
+  # 3. Compare the observed distances to some mean distance to get a total sum of squares
+  # 4. Use the R^2 = (TSS - RSS)/RSS as a measure of the variance in the distances that is explained by the tree model
+  
+  # 1. Infer a tree (if one does not already exist)
+  
+}
+
+
 
 ## Network tree-likeness test (Huson and Bryant 2006)
 network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA"){

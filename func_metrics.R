@@ -79,27 +79,6 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 
-## Treeness (Cavalli-Sforza and Piazza 1975)
-treeness <- function(alignment_path, sequence_type = "DNA", tree_provided = FALSE, tree_file = NA, iqtree2_path = NA, model = "MFP"){
-  ## Calculate treeness from a sequence alignment
-  
-  # Read in alignment
-  al <- read.FASTA(alignment_path, type = sequence_type)
-  
-  # Read in ML tree for this alignment
-  if (tree_provided == FALSE){
-    # If tree is not provided, estimate tree using IQ-Tree2 and then read in tree
-    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model)
-    tree_file <- paste0(alignment_path, ".treefile")
-    tree <- read.tree(tree_file)
-  } else if (tree_provided == TRUE){
-    # If tree is provided, read in tree
-    tree <- read.tree(tree_file)
-  }
-  
-}
-
-
 
 ## Network tree-likeness test (Huson and Bryant 2006)
 network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA"){
@@ -162,15 +141,6 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   test_df <- splits_df[which(splits_df$interval_start > 0 & splits_df$interval_end > 0), ]
   test_splits <- splits[which(splits_df$interval_start > 0 & splits_df$interval_end > 0)]
   
-  ## Determine whether the splits are compatible by conducting pairwise comparison
-  c_df <- do.call(rbind.data.frame, lapply(1:length(test_splits), pairwise.compatibility, set_of_splits = test_splits))
-  # Each split comparison is listed twice (e.g. 12 & 9, 9 & 12 would both be listed). Remove duplicate comparisons
-  c_df <- remove.duplicate.splits(c_df)
-  # Determine the proportion of compatible split comparisons 
-  #     (the number of comparisons between two splits where the two splits are compatible, 
-  #     divided by the total number of comparisons between 2 splits i.e. ntaxa choose 2 or nrow(c_df))
-  prop_compatible_splits <- round(length(which(c_df$compatibility == "Compatible"))/nrow(c_df), digits = 4)
-  
   # A set of splits is compatible if all pairwise comparisons between splits are compatible
   # Check using the ape function is.compatible (requires splits to be in bitsplits format, which is also in ape)
   compatibility <- is.compatible.bitsplits(as.bitsplits(test_splits))
@@ -178,15 +148,15 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # A set of splits is compatible if all pairwise comparisons between splits are compatible
   if (compatibility == FALSE){
     # Some pairwise comparisons between splits are incompatible: therefore, the null hypothesis that data was originated in a tree is rejected
-    ntlt_result <- "Non-tree-like"
+    ntlt_result <- "Non-treelike"
   } else if (compatibility == TRUE){
     # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
-    ntlt_result <- "Tree-like"
+    ntlt_result <- "Treelike"
   }
   
   ## Create an output vector for the results
-  output_vector <- c(ntlt_result, compatibility, prop_compatible_splits)
-  names(output_vector) <- c("NetworkTreelikenessTest", "AllSplitsCompatible", "proportion_compatible_split_comparisons")
+  output_vector <- c(ntlt_result)
+  names(output_vector) <- c("NetworkTreelikenessTest")
   
   ## Return Network Treelikeness Test results
   return(output_vector)
@@ -483,7 +453,8 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 #### Functions to apply multiple test statistics ####
 treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
                                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                                             delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, sequence_format = "DNA"){
+                                             delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, tree_proportion_substitution_method = "JC69",
+                                             tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA"){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
   # Get alignment file
@@ -517,13 +488,8 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
     scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
     
-    if (n_tree_tips <= 50){
-      # Apply Network Treelikeness Test (Huson and Bryant 2006)
-      ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format)
-    } else {
-      # Do not apply Network Treelikeness Test - too many taxa
-      ntlt <- NA
-    }
+    # Apply Network Treelikeness Test (Huson and Bryant 2006)
+    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format)
     
     # Apply Delta plots (Holland et. al. 2002)
     mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format, substitution_model = delta_plot_substitution_method)
@@ -534,18 +500,19 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
     # Apply TIGER (Cummins and McInerney 2011)
     mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format)
     
-    # Apply Treeness test (Cavalli-Sforza and Piazza 1975)
-    
     # Apply Cunningham test (Cunningham 1975)
     
     # Apply tree proportion (new test)
+    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = tree_proportion_substitution_method,
+                                       remove_trivial_splits = tree_proportion_remove_trivial_splits)
     
     ## Assemble results into a dataframe and save
-    results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value)
+    results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
+                     "Cunningham_test_result", tree_proportion)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
     names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
-                   "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "NTLT_AllSplitsCompatible", "NTLT_proportion_compatible_split_comparisons",
-                   "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value")
+                   "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value",
+                   "Cunningham_test", "tree_proportion")
     names(results_df) <- names_vec
     write.csv(results_df, file = df_name, row.names = FALSE)
   }

@@ -80,16 +80,37 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 ## Cunningham test (Cunningham 1978) ##
-cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", substitution_model = "MFP"){
+cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", dist.ml_substitution_model = "JC69"){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
   ## Test steps:
-  # 1. Infer a tree from the alignment path using IQ-Tree2 (or open the tree if one exists already). This is the predicted distances
-  # 2. The data gives you obsevred distances. Use the observed and predicted distances to calculate a residual sum of squares
-  # 3. Compare the observed distances to some mean distance to get a total sum of squares
-  # 4. Use the R^2 = (TSS - RSS)/RSS as a measure of the variance in the distances that is explained by the tree model
+  # 1. Infer a tree from the alignment path using IQ-Tree2 (or open the tree if one exists already). This is the predicted distances. Find the pairwise distance matrix.
+  # 2. The data gives you observed distances. Find the pairwise distance matrix.
+  # 3. Use the observed and predicted distances to calculate a residual sum of squares
+  # 4. Compare the observed distances to some mean distance to get a total sum of squares
+  # 5. Use the R^2 = (TSS - RSS)/RSS as a measure of the variance in the distances that is explained by the tree model
   
-  # 1. Infer a tree (if one does not already exist)
+  # 1. Infer a tree (if one does not already exist) and open it
+  if (file.exists(paste0(alignment_path, ".treefile")) == FALSE){
+    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = substitution_model)
+  }
+  # Open the tree
+  t <- read.tree(paste0(alignment_path, ".treefile"))
+  # Extract the distance matrix from the tree
+  t_cophenetic_mat <- cophenetic.phylo(t)
+  
+  # 2. Find the pairwise distance matrix from the alignment
+  dna <- read.dna(alignment_path, format = "fasta")
+  dna_mat <- dist.ml(dna, model = dist.dna_substitution_model) 
+  # Now reorder the t_mat so the taxa are in the same order
+  dna_order <- attr(dna_mat, "Labels")
+  t_ordering_mat <- as.matrix(t_cophenetic_mat)[dna_order, dna_order]
+  t_mat <- as.dist(t_ordering_mat)
+  
+# 3. Use the observed and predicted distances to calculate a residual sum of squares
+  
+
+  
   
 }
 

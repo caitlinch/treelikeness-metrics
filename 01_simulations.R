@@ -111,28 +111,28 @@ lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_
 #   - Concatenate alignments
 
 # Create folder to store results of this experiment, if it doesn't already exist
-exp3_dir <- paste0(local_directory, "exp_3/")
-if (dir.exists(exp3_dir) == FALSE){dir.create(exp3_dir)}
+exp2_dir <- paste0(local_directory, "exp_3/")
+if (dir.exists(exp2_dir) == FALSE){dir.create(exp2_dir)}
 
-exp3_params <- expand.grid(number_of_replicates, number_of_taxa, number_gene_trees, tree_depth_coalescent, r_vec, c("Ancient","Recent"))
-names(exp3_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type")
+exp2_params <- expand.grid(number_of_replicates, number_of_taxa, number_gene_trees, tree_depth_coalescent, r_vec, c("Ancient","Recent"))
+names(exp2_params) <- c("num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type")
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`
-exp3_params$uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
-                          sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
-                          "_", exp3_params$recombination_type)
+exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", sprintf("%04d", exp2_params$num_taxa), "_",
+                          sprintf("%03d", exp2_params$num_reps), "_", exp2_params$tree_depth, "_", exp2_params$recombination_value,
+                          "_", exp2_params$recombination_type)
 # Add parameters for Alisim
-exp3_params$alisim_gene_models <- alisim_gene_models
-exp3_params$alisim_gene_tree_length <- alisim_gene_tree_length
+exp2_params$alisim_gene_models <- alisim_gene_models
+exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
 # Add other parameters
-exp3_params$total_alignment_length <- total_alignment_length
-exp3_params$sequence_type <- sequence_type
+exp2_params$total_alignment_length <- total_alignment_length
+exp2_params$sequence_type <- sequence_type
 # Add name for the partition file and output alignment file for each simulated alignment
-exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
-exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
+exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
+exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
-# lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
-lapply(1, ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+# lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
 
 
 

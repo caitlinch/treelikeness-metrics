@@ -214,7 +214,8 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # Call ms
   ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth = row$tree_depth, 
                                        recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
-                                       output_directory = row_folder, ms_path = "ms", replicate_number = NA, unique_id = row$uid)
+                                       select.sister = FALSE, output_directory = row_folder, ms_path = "ms", replicate_number = NA, 
+                                       unique_id = row$uid)
   gene_trees_file <- ms_output_files[[3]]
   # Generate the partition file
   gene_partition_file <- paste0(row_folder, row$partition_file)
@@ -234,7 +235,8 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0, recombination_type = NA, output_directory, ms_path = "ms", replicate_number = NA, unique_id = NA){
+ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0, recombination_type = NA, select.sister = FALSE, output_directory, ms_path = "ms", 
+                              replicate_number = NA, unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
@@ -287,10 +289,10 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0
   } else if (recombination_value != 0 & recombination_type == "Recent"){
     ## If recombination_value != 0 and recombination_type = "Recent", add one recombination event between randomly selected pair of sister taxa
     # Pick a cherry at random and create a recombination event there by using both a simultaneous -ej and -es command at 1/2*coalescent interval
-    node_df <- add.recent.introgression.event(node_df, ntaxa, recombination_value)
+    node_df <- add.recent.introgression.event(node_df, ntaxa, recombination_value, select.sister)
   } else if (recombination_value != 0 & recombination_type == "Ancient"){
     ## If recombination_value != 0 and recombination_type = "Ancient", add one recombination event between the two oldest lineages before they coalesce
-    node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value)
+    node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value, select.sister)
   }
   
   ## Generate gene trees in ms
@@ -417,23 +419,46 @@ determine.coalescence.taxa <- function(node_dataframe){
 }
 
 
-add.recent.introgression.event <- function(df, ntaxa, recombination_value){
+add.recent.introgression.event <- function(df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
   # Get candidates for introgression event (all rows in df with ntips = 2)
   cherry_df <- df[which(df$ntips == 2),]
-  # Pick one row at random
-  row_pick <- sample(1:nrow(cherry_df), 1)
-  row <- cherry_df[row_pick, ]
+  
+  # Select the two taxa involved in the event
+  if (select.sister == TRUE){
+    # If select.sister == TRUE: pick a cherry. One species in the cherry will be receptor, other will be donor.
+    # Pick one row at random
+    row_pick <- sample(1:nrow(cherry_df), 1)
+    row <- cherry_df[row_pick, ]
+    # Get the two taxa involved in the event
+    taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
+  } else if (select.sister == FALSE){
+    # If select.sister == FALSE: pick any two species that are not a cherry. 
+    #   Pick one species to be the receptor, and any species that is not sister to the receptor to be the donor
+    # First, pick a single taxa from a single cherry
+    row_pick <- sample(1:nrow(cherry_df), 1)
+    row <- cherry_df[row_pick, ]
+    row_taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
+    # Identify which taxa still exist at this point in time by getting a dataframe of all the coalescence events that have not yet occurred
+    existing_taxa_df <- df[which(df$coalescence_time >= row$coalescence_time),]
+    taxa_1 <- sample(row_taxa, 1)
+    # Now get a list of all other taxa from the existing taxa df (i.e. all taxa that exist at this point in time)
+    existing_taxa <- sort(unique(as.numeric(unlist(strsplit(existing_taxa_df$ms_input, " ")))))
+    # Remove the row_taxa from all_taxa
+    not_sister_taxa <- setdiff(existing_taxa, row_taxa)
+    # Randomly pick one taxa from the set of not_sister_taxa
+    taxa_2 <- sample(not_sister_taxa, 1)
+    taxa <- c(taxa_1, taxa_2)
+  }
+  # Identify which taxa is the donor and which taxa is the receptor for the introgression event
+  receptor = max(taxa)
+  donor = min(taxa)
   
   # Set variables for the recombination event commands
   # Set coalescence time at 1/2 * row$coalescence_time 
   #     (as there are no coalescence events after this, the length of the coalescent interval is the time that this coalescence event occurs at minus 0)
   coal_time <- 0.5 * row$coalescence_time
-  # Get the two taxa involved in the event
-  taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
-  receptor = max(taxa)
-  donor = min(taxa)
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
   inheritance_prob <- round(1 - recombination_value, digits = 2)
   # Name the new population (must not share a name with any other population)
@@ -448,7 +473,8 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value){
   # Create a new row to attach to the dataframe using the two components of the recombination event
   # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
-  new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
+  new_row_df <- data.frame(node = NA, tip_names = paste(paste0("t", taxa), collapse = ","), tip_numbers = paste(paste0(taxa), collapse = ","), 
+                           ms_tip_order = paste(sort(taxa, decreasing = TRUE), collapse = ","), ntips = 2, ndepth = NA,
                            coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
   # Attach the new row onto the df
   df <- rbind(df, new_row_df)
@@ -461,7 +487,7 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value){
 
 
 
-add.ancient.introgression.event <- function(df, ntaxa, recombination_value){
+add.ancient.introgression.event <- function(df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
   # Identify candidate row for introgression - will be row with the largest coalescence time

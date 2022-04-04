@@ -111,7 +111,7 @@ lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_
 #   - Concatenate alignments
 
 # Create folder to store results of this experiment, if it doesn't already exist
-exp2_dir <- paste0(local_directory, "exp_3/")
+exp2_dir <- paste0(local_directory, "exp_2/")
 if (dir.exists(exp2_dir) == FALSE){dir.create(exp2_dir)}
 
 exp2_params <- expand.grid(number_of_replicates, number_of_taxa, number_gene_trees, tree_depth_coalescent, r_vec, c("Ancient","Recent"))

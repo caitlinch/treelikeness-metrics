@@ -45,7 +45,7 @@ if (run_location == "local"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
   ms_path <- "/data/caitlin/executables/msdir/ms"
-  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.1.2-Linux/bin/iqtree2"
+  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
   number_parallel_threads <- 20
 }
 
@@ -105,6 +105,10 @@ exp1_params$tree_file <- paste0(exp1_params$uid, "_random_trees.phy")
 exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
 exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
 
+# Write exp1_params dataframe to file as a csv
+exp1_df_path <- paste0(local_directory, "exp1_parameters.csv")
+write.csv(exp1_params, file = exp1_df_path, row.names = TRUE)
+
 # Iterate through each row in the parameters dataframe
 # Run all reps:
 #   lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
@@ -112,11 +116,16 @@ exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment"
 # lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
 
 if (number_parallel_threads == 1){
-  lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+  exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
 } else {
-  mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
+  exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
            mc.cores = number_parallel_threads)
 }
+
+# Change output file names from list to dataframe
+exp1_op_df <- as.data.frame(do.call(rbind, exp1_op_list))
+exp1_op_df_path <- paste0(local_directory, "exp1_file_output_paths.csv")
+write.csv(exp1_op_df, file = exp1_op_df_path, row.names = TRUE)
 
 
 
@@ -147,6 +156,10 @@ exp2_params$sequence_type <- sequence_type
 exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
+# Write exp2_params dataframe to file as a csv
+exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
+write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
+
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
 # Run all reps: 
 #   lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
@@ -154,11 +167,16 @@ exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment"
 #   lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params, select.sister = FALSE)
 
 if (number_parallel_threads == 1){
-  lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+  exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
 } else {
-  mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
+  exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
            mc.cores = number_parallel_threads)
 }
+
+# Change output file names from list to dataframe
+exp2_op_df <- as.data.frame(do.call(rbind, exp2_op_list))
+exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
+write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
 
 
 

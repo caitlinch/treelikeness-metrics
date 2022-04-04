@@ -23,7 +23,9 @@ library(parallel)
 # ms_path                         <- Path to ms executable 
 # iqtree2_path                    <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included). 
 # number_parallel_threads         <- Number of threads to run simultaneously in mclapply when generating alignments
-# total_alignment_length          <- Total length of concatenated alignments in base pairs (we chose 10000).
+# total_alignment_length          <- Total length of concatenated alignments in base pairs (we chose 10000) for the random tree analyses.
+# gene_length                     <- Length of each gene generated in ms. Total alignment length will be length of each gene multiplied by number of gene trees. 
+#                                     For Total Alignment Length = 10000, use 100 gene trees of 100 bp each.
 # sequence_type                   <- Sequence type for simulation (we chose "DNA").
 # taxa_vec                        <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
 # num_reps                        <- Number of replicates to run for each set of simulation conditions (we chose 10). Must be >= 1.
@@ -50,6 +52,7 @@ if (run_location == "local"){
 }
 
 total_alignment_length <- 10000
+gene_length <- 1000
 sequence_type <- "DNA"
 taxa_vec <- c(5,10,20,50,100)
 num_reps <- 10
@@ -150,7 +153,7 @@ exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", s
 exp2_params$alisim_gene_models <- alisim_gene_models
 exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
 # Add other parameters
-exp2_params$total_alignment_length <- total_alignment_length
+exp2_params$total_alignment_length <- number_gene_trees * gene_length
 exp2_params$sequence_type <- sequence_type
 # Add name for the partition file and output alignment file for each simulated alignment
 exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
@@ -166,17 +169,17 @@ write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
 # Run single rep:
 #   lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params, select.sister = FALSE)
 
-if (number_parallel_threads == 1){
-  exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
-} else {
-  exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
-           mc.cores = number_parallel_threads)
-}
-
-# Change output file names from list to dataframe
-exp2_op_df <- as.data.frame(do.call(rbind, exp2_op_list))
-exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
-write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
+# if (number_parallel_threads == 1){
+#   exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+# } else {
+#   exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
+#            mc.cores = number_parallel_threads)
+# }
+# 
+# # Change output file names from list to dataframe
+# exp2_op_df <- as.data.frame(do.call(rbind, exp2_op_list))
+# exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
+# write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
 
 
 

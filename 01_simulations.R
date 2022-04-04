@@ -159,9 +159,9 @@ exp2_params$sequence_type <- sequence_type
 exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
-# Write exp2_params dataframe to file as a csv
-exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
-write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
+# # Write exp2_params dataframe to file as a csv
+# exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
+# write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
 # Run all reps: 

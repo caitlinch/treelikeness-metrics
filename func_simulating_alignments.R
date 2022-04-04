@@ -241,7 +241,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     # Call ms
     ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth = row$tree_depth, 
                                          recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
-                                         select.sister = FALSE, output_directory = row_folder, ms_path = "ms", replicate_number = NA, 
+                                         select.sister = FALSE, output_directory = row_folder, ms_path = ms_path, replicate_number = NA, 
                                          unique_id = row$uid)
     gene_trees_file <- ms_output_files[[3]]
     # Generate the partition file

@@ -515,8 +515,24 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
     # Identify the taxa in rows 2 and 3 (the 4 taxa present at coal_time)
     taxa2 <- as.numeric(unlist(strsplit(row2$ms_input, " ")))
     taxa3 <- as.numeric(unlist(strsplit(row3$ms_input, " ")))
-    # To select which taxa are involved in this event, randomly select one taxa from each row
-    taxa <- c(sample(taxa2, 1), sample(taxa3, 1))
+    # Check whether you have four unique taxa or not
+    check_four_taxa <- c(taxa2, taxa3)
+    if (length(unique(check_four_taxa)) == 4){
+      # If you do, randomly select one taxa from each event for the introgression event
+      # To select which taxa are involved in this event, randomly select one taxa from each row
+      taxa <- c(sample(taxa2, 1), sample(taxa3, 1))
+    } else if (length(unique(check_four_taxa)) == 3){
+      # It is possible that a taxa may occur in both events. (e.g. taxa2 = {3,4} and taxa3 = {3,15})
+      # In that case, it means that first taxa 15 and 3 coalesce into taxa 3, then taxa 3 and 4 coalesce into taxa 3.
+      # If it does, remove the doubled-up taxa from taxa2 (the most basal coalescence event) and use the other taxa for taxa2.
+      #             Use the doubled-up taxa for taxa3.
+      
+    } else if (length(unique(check_four_taxa)) == 2){
+      # If somehow both coalescent events involve only the same two taxa (should not be possible),
+      #    simply select those as the taxa
+      taxa <- unique(check_four_taxa)
+    }
+    
     # Set coalescence time halfway along the coalescent interval
     #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
     #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where

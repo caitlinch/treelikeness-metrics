@@ -177,23 +177,31 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
                          "_", row$tree_depth, "/")
   }
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
-  # Generate the random trees 
-  generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, tree_depth = row$tree_depth, NNI_moves = row$NNI_moves, 
-                     output_filepath = paste0(row_folder, row$tree_file))
-  # Generate the partition file
-  partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
-                         models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
-                         output_filepath = paste0(row_folder, row$partition_file))
-  # Call alisim in IQ-Tree2 to simulate DNA along the trees given the partition file
-  alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(row_folder, row$output_alignment_file), 
-                                           partition_file_path = paste0(row_folder, row$partition_file), trees_path = paste0(row_folder, row$tree_file),
-                                           output_format = "fasta", sequence_type = row$sequence_type)
   
-  # Return file paths
-  files_vec <- c(paste0(row_folder, row$tree_file), 
+  # Create path for output alignment file
+  output_alignment_file <- paste0(row_folder, row$output_alignment_file)
+  
+  # If the output alignment does not already exist, generate the output alignment
+  if (file.exists(output_alignment_file) == FALSE){
+    # Generate the random trees 
+    generate.NNI.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, tree_depth = row$tree_depth, NNI_moves = row$NNI_moves, 
+                       output_filepath = paste0(row_folder, row$tree_file))
+    # Generate the partition file
+    partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
+                           models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
+                           output_filepath = paste0(row_folder, row$partition_file))
+    # Call alisim in IQ-Tree2 to simulate DNA along the trees given the partition file
+    alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(row_folder, row$output_alignment_file), 
+                                             partition_file_path = paste0(row_folder, row$partition_file), trees_path = paste0(row_folder, row$tree_file),
+                                             output_format = "fasta", sequence_type = row$sequence_type)
+  }
+  
+  # Return file paths (along with the row_id to make matching easier)
+  files_vec <- c(row_id,
+                 paste0(row_folder, row$tree_file), 
                  paste0(row_folder, row$partition_file), 
                  paste0(row_folder, row$output_alignment_file))
-  names(files_vec) <- c("random_tree_file", "partition_file", "alignment_file")
+  names(files_vec) <- c("row_id", "random_tree_file", "partition_file", "alignment_file")
   return(files_vec)
 }
 

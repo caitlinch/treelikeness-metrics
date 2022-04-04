@@ -134,7 +134,7 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
   # Create path for output alignment file
-  output_alignment_file <- paste0(row_folder, row$output_alignment_file)
+  output_alignment_file <- paste0(row_folder, row$output_alignment_file, ".fa")
   
   # If the output alignment does not already exist, generate the output alignment
   if (file.exists(output_alignment_file) == FALSE){
@@ -156,7 +156,10 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
                  paste0(row_folder, row$tree_file), 
                  paste0(row_folder, row$partition_file), 
                  output_alignment_file)
-  names(files_vec) <- c("row_id", "random_tree_file", "partition_file", "alignment_file")
+  names(files_vec) <- c("row_id", 
+                        "random_tree_file", 
+                        "partition_file", 
+                        "alignment_file")
   return(files_vec)
 }
 
@@ -179,7 +182,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
   # Create path for output alignment file
-  output_alignment_file <- paste0(row_folder, row$output_alignment_file)
+  output_alignment_file <- paste0(row_folder, row$output_alignment_file, ".fa")
   
   # If the output alignment does not already exist, generate the output alignment
   if (file.exists(output_alignment_file) == FALSE){
@@ -201,7 +204,10 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
                  paste0(row_folder, row$tree_file), 
                  paste0(row_folder, row$partition_file), 
                  output_alignment_file)
-  names(files_vec) <- c("row_id", "random_tree_file", "partition_file", "alignment_file")
+  names(files_vec) <- c("row_id", 
+                        "random_tree_file", 
+                        "partition_file", 
+                        "alignment_file")
   return(files_vec)
 }
 
@@ -228,7 +234,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
   # Create name for output_alignment_file
-  output_alignment_file <- paste0(row_folder, row$output_alignment_file)
+  output_alignment_file <- paste0(row_folder, row$output_alignment_file, ".fa")
   
   # If the output alignment file doesn't exist, generate it
   if (file.exists(output_alignment_file) == FALSE){
@@ -244,13 +250,21 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
                            models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length, 
                            output_filepath = gene_partition_file)
     # Generate DNA along gene trees
-    alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = output_alignment_file, partition_file_path = gene_partition_file, 
+    alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(row_folder, row$output_alignment_file), partition_file_path = gene_partition_file, 
                                              trees_path = gene_trees_file, output_format = "fasta", sequence_type = row$sequence_type)
   }
   
   # Return file paths (along with the row_id to make matching results easier)
-  files_vec <- c(row_id, ms_output_files[[1]], gene_trees_file, gene_partition_file, output_alignment_file)
-  names(files_vec) <- c("row_id", "starting_tree_file", "gene_tree_file", "partition_file", "alignment_file")
+  files_vec <- c(row_id, 
+                 ms_output_files[[1]], 
+                 gene_trees_file, 
+                 gene_partition_file, 
+                 output_alignment_file)
+  names(files_vec) <- c("row_id", 
+                        "starting_tree_file", 
+                        "gene_tree_file", 
+                        "partition_file", 
+                        "alignment_file")
   return(files_vec)
 }
 

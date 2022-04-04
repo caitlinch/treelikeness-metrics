@@ -526,7 +526,9 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
       # In that case, it means that first taxa 15 and 3 coalesce into taxa 3, then taxa 3 and 4 coalesce into taxa 3.
       # If it does, remove the doubled-up taxa from taxa2 (the most basal coalescence event) and use the other taxa for taxa2.
       #             Use the doubled-up taxa for taxa3.
-      
+      doubled_up_taxa <- intersect(taxa2,taxa3)
+      taxa2_remaining <- setdiff(taxa2, doubled_up_taxa)
+      taxa <- c(doubled_up_taxa, taxa2_remaining)
     } else if (length(unique(check_four_taxa)) == 2){
       # If somehow both coalescent events involve only the same two taxa (should not be possible),
       #    simply select those as the taxa

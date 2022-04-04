@@ -457,7 +457,8 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value, selec
   
   # Set variables for the recombination event commands
   # Set coalescence time at 1/2 * row$coalescence_time 
-  #     (as there are no coalescence events after this, the length of the coalescent interval is the time that this coalescence event occurs at minus 0)
+  #     As there are no coalescence events after this (at tips, coalescence time = 0):
+  #           "length of the coalescent interval" = ("time of this coalescent event" - 0) + 0
   coal_time <- 0.5 * row$coalescence_time
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
   inheritance_prob <- round(1 - recombination_value, digits = 2)
@@ -490,41 +491,60 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value, selec
 add.ancient.introgression.event <- function(df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
-  # Identify candidate row for introgression - will be row with the largest coalescence time
+  ## Format node dataframe in order of coalescence time, largest to smallest
   df <- df[order(df$coalescence_time, decreasing = TRUE),]
-  row_id = 1 # First row will have largest coalescence time
-  row <- df[row_id, ]
   
-  # Set variables for the recombination event commands
-  # Set coalescence time halfway along the coalescent interval
-  #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
-  coal_time <- 0.5 * (df$coalescence_time[row_id] - df$coalescence_time[row_id+1])
+  ## Select the two taxa involved the timing of the recombination event
+  if (select.sister == TRUE){
+    # If selecting two taxa that are sister to each other, candidate row for introgression 
+    #    will be row with the largest coalescence time (first row)
+    row_id = 1
+    # Extract row
+    row <- df[row_id, ]
+    # Extract taxa numbers
+    taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
+    # Set coalescence time halfway along the coalescent interval
+    #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
+    coal_time <- (0.5 * (df$coalescence_time[row_id] - df$coalescence_time[row_id+1]))  + df$coalescence_time[row_id+1]
+  } else if (select.sister == FALSE){
+    # If not selecting two taxa that are sister to each other, the introgression event must take place
+    #    less basally (will occur closer towards the tips)
+    # Select the second and third rows (will result in 4 taxa remaining)
+    row2 <- df[2, ]
+    row3 <- df[3, ]
+    # Set coalescence time halfway along the coalescent interval
+    #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
+    #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where
+    #          the number of taxa becomes 3 (from 4)
+    coal_time <- (0.5 * (df$coalescence_time[3] - df$coalescence_time[4])) + df$coalescence_time[4]
+  }
   # Get the two taxa involved in the event
-  taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
   receptor = max(taxa)
   donor = min(taxa)
+  
+  ## Set variables for the recombination event commands
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
   inheritance_prob <- round(1 - recombination_value, digits = 2)
   # Name the new population (must not share a name with any other population)
   new_taxa <- ntaxa+1
   
-  # Create the commands for the recombination event
+  ## Create the commands for the recombination event
   # This is the the instantaneous population split: -es time_of_introgression_event population_splitting inheritance_probability
   recombination_es <- paste0("-es ", coal_time, " ", donor, " ", inheritance_prob)
   # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
   recombination_ej <-  paste0("-ej ", coal_time, " ", new_taxa, " ", receptor)
   
-  # Create a new row to attach to the dataframe using the two components of the recombination event
+  ## Create a new row to attach to the dataframe using the two components of the recombination event
   # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
   new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
                            coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
-  # Attach the new row onto the df
+  ## Attach the new row onto the df
   df <- rbind(df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
   df <- df[order(df$coalescence_time, decreasing = TRUE),]
   
-  # Return dataframe with recombination event added
+  ## Return dataframe with recombination event added
   return(df)
 }
 

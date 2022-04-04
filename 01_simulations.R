@@ -13,6 +13,7 @@
 #### 1. Open packages ####
 library(ape)
 library(phytools)
+library(parallel)
 
 
 
@@ -21,6 +22,7 @@ library(phytools)
 # repo_directory                  <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
 # ms_path                         <- Path to ms executable 
 # iqtree2_path                    <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included). 
+# number_parallel_threads         <- Number of threads to run simultaneously in mclapply when generating alignments
 # total_alignment_length          <- Total length of concatenated alignments in base pairs (we chose 10000).
 # sequence_type                   <- Sequence type for simulation (we chose "DNA").
 # taxa_vec                        <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
@@ -38,11 +40,13 @@ if (run_location == "local"){
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
   ms_path <- "ms"
   iqtree2_path <- "iqtree2.2-beta"
+  number_parallel_threads <- 1
 } else if (run_location == "soma"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
   ms_path <- "/data/caitlin/executables/msdir/ms"
   iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.1.2-Linux/bin/iqtree2"
+  number_parallel_threads <- 20
 }
 
 total_alignment_length <- 10000
@@ -102,8 +106,17 @@ exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
 exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe
-# lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
-lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+# Run all reps:
+#   lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+# Run single rep:
+# lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+
+if (number_parallel_threads == 1){
+  lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+} else {
+  mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
+           mc.cores = number_parallel_threads)
+}
 
 
 
@@ -135,9 +148,17 @@ exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
-# lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
-lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, 
-       experiment_params_df = exp2_params, select.sister = FALSE)
+# Run all reps: 
+#   lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+# Run single rep:
+#   lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params, select.sister = FALSE)
+
+if (number_parallel_threads == 1){
+  lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+} else {
+  mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
+           mc.cores = number_parallel_threads)
+}
 
 
 

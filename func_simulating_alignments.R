@@ -512,6 +512,11 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
     # Select the second and third rows (will result in 4 taxa remaining)
     row2 <- df[2, ]
     row3 <- df[3, ]
+    # Identify the taxa in rows 2 and 3 (the 4 taxa present at coal_time)
+    taxa2 <- as.numeric(unlist(strsplit(row2$ms_input, " ")))
+    taxa3 <- as.numeric(unlist(strsplit(row3$ms_input, " ")))
+    # To select which taxa are involved in this event, randomly select one taxa from each row
+    taxa <- c(sample(taxa2, 1), sample(taxa3, 1))
     # Set coalescence time halfway along the coalescent interval
     #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
     #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where

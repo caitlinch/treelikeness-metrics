@@ -525,7 +525,11 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
       # It is possible that a taxa may occur in both events. (e.g. taxa2 = {3,4} and taxa3 = {3,15})
       # In that case, it means that first taxa 15 and 3 coalesce into taxa 3, then taxa 3 and 4 coalesce into taxa 3.
       # If it does, remove the doubled-up taxa from taxa2 (the most basal coalescence event) and use the other taxa for taxa2.
-      #             Use the doubled-up taxa for taxa3.
+      #             Use the doubled-up taxa for taxa3. (e.g. we would select taxa 3 and 4 for this example)
+      # If you did it the other way (e.g. selecting 3 and 15), you are adding an introgression event between two taxa that have
+      #    just split. There is already ILS between these taxa. Adding introgression will increase the proportion of genetic 
+      #    material moving between these two taxa. However selecting 3 and 4 at coal_time (1/2 way between 3rd and 4th coalescent
+      #    event) does add a new source of incoming genetic material that would not otherwise exist. 
       doubled_up_taxa <- intersect(taxa2,taxa3)
       taxa2_remaining <- setdiff(taxa2, doubled_up_taxa)
       taxa <- c(doubled_up_taxa, taxa2_remaining)

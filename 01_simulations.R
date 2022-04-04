@@ -132,7 +132,8 @@ exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment"
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
 # lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
-lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, 
+       experiment_params_df = exp2_params, select.sister = FALSE)
 
 
 

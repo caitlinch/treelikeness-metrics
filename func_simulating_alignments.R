@@ -190,7 +190,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 }
 
 
-ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df){
+ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df, select.sister = FALSE){
   ## Function to generate a single alignment given a row from the experiment 2 params dataframe
   ## Generate alignments with ILS and without introgression
   ## Uses ms to generate gene trees

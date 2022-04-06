@@ -126,16 +126,16 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   # Create a new folder to store the results in this experiment from (and a file to keep a csv of the parameter values in)
   if (is.na(row$uid) == FALSE){
     row_folder <- paste0(output_directory, row$uid, "/")
-    row_csv_path <- paste0(output_directory, row$uid, "_parameters.csv")
+    row_csv_path <- paste0(row_folder, row$uid, "_parameters.csv")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "/")
-    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                            "_", row$tree_depth, "_parameters.csv")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "/")
-    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
+    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "_parameters.csv")
   }
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
@@ -236,16 +236,16 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # Create a new folder to store results for this file and an output csv folder
   if (is.na(row$uid) == FALSE){
     row_folder <- paste0(output_directory, row$uid, "/")
-    row_csv_path <- paste0(output_directory, row$uid, "_parameters.csv")
+    row_csv_path <- paste0(row_folder, row$uid, "_parameters.csv")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                            "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
                            "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
   }
   # Create the folder to store information for this row, if it doesn't already exist

@@ -119,17 +119,24 @@ alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignme
 random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
   ## Function to generate a single alignment given a row from the experiment 1 params dataframe
   # The alignment will be simulated from a number of random trees
+  
   # Extract row given the row number
   row <- experiment_params[row_id, ]
-  # Create a new folder to store the results in this experiment from
+  
+  # Create a new folder to store the results in this experiment from (and a file to keep a csv of the parameter values in)
   if (is.na(row$uid) == FALSE){
     row_folder <- paste0(output_directory, row$uid, "/")
+    row_csv_path <- paste0(output_directory, row$uid, "_parameters.csv")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "/")
+    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                           "_", row$tree_depth, "_parameters.csv")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "/")
+    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
+                         "_", row$tree_depth, "_parameters.csv")
   }
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
@@ -151,16 +158,22 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
                                              output_format = "fasta", sequence_type = row$sequence_type)
   }
   
-  # Return file paths for the tree file, partition file, and output alignment file (along with the row_id to make matching results easier)
-  files_vec <- c(row_id,
-                 paste0(row_folder, row$tree_file), 
-                 paste0(row_folder, row$partition_file), 
-                 output_alignment_file)
-  names(files_vec) <- c("row_id", 
-                        "random_tree_file", 
-                        "partition_file", 
-                        "alignment_file")
-  return(files_vec)
+  if (file.exists(row_csv_path) == FALSE){
+    # If parameter csv does not exist, finalise parameter csv for output as csv file
+    row$row_id <- row_id
+    row$tree_file <- paste0(row_folder, row$tree_file)
+    row$partition_file <- paste0(row_folder, row$partition_file)
+    row$output_alignment_file <- output_alignment_file
+    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth", "uid", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length",
+                           "sequence_type", "tree_file", "partition_file", "output_alignment_file")]
+    write.csv(output_row, file = row_csv_path, row.names = FALSE)
+  } else if (file.exists(row_csv_path) == TRUE) {
+    # If output parameter csv exists, read it in
+    output_row <- read.csv(row_csv_path)
+  }
+  
+  # Return the dataframe row of parameters for this replicate
+  return(output_row)
 }
 
 
@@ -220,15 +233,20 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   
-  # Create a new folder to store results for this file
+  # Create a new folder to store results for this file and an output csv folder
   if (is.na(row$uid) == FALSE){
     row_folder <- paste0(output_directory, row$uid, "/")
+    row_csv_path <- paste0(output_directory, row$uid, "_parameters.csv")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                           "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
   } else {
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
                          "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+    row_csv_path <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                           "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
   }
   # Create the folder to store information for this row, if it doesn't already exist
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
@@ -243,6 +261,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
                                          recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
                                          select.sister = FALSE, output_directory = row_folder, ms_path = ms_path, replicate_number = NA, 
                                          unique_id = row$uid)
+    start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
     # Generate the partition file
     gene_partition_file <- paste0(row_folder, row$partition_file)
@@ -254,18 +273,24 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
                                              trees_path = gene_trees_file, output_format = "fasta", sequence_type = row$sequence_type)
   }
   
-  # Return file paths (along with the row_id to make matching results easier)
-  files_vec <- c(row_id, 
-                 ms_output_files[[1]], 
-                 gene_trees_file, 
-                 gene_partition_file, 
-                 output_alignment_file)
-  names(files_vec) <- c("row_id", 
-                        "starting_tree_file", 
-                        "gene_tree_file", 
-                        "partition_file", 
-                        "alignment_file")
-  return(files_vec)
+  if (file.exists(row_csv_path) == FALSE){
+    # If parameter csv does not exist, finalise parameter csv for output as csv file
+    row$row_id <- row_id
+    row$starting_tree_file <- start_coal_tree_file
+    row$gene_tree_file <- gene_trees_file
+    row$partition_file <- gene_partition_file
+    row$output_alignment_file <- output_alignment_file
+    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", 
+                           "recombination_type", "uid", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length",
+                           "sequence_type", "starting_tree_file", "gene_tree_file", "partition_file", "output_alignment_file")]
+    write.csv(output_row, file = row_csv_path, row.names = FALSE)
+  } else if (file.exists(row_csv_path) == TRUE) {
+    # If output parameter csv exists, read it in
+    output_row <- read.csv(row_csv_path)
+  }
+  
+  # Return the dataframe row of parameters for this replicate
+  return(output_row)
 }
 
 

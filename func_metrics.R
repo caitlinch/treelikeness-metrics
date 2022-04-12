@@ -497,16 +497,15 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 
 
 #### Functions to apply multiple test statistics ####
-treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
+treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
                                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                                              delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, tree_proportion_substitution_method = "JC69",
                                              tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA"){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
-  # Get alignment file
-  folder_files <- list.files(replicate_folder)
-  alignment_path <- paste0(replicate_folder, grep("output_alignment\\.fa\\.", grep("output_alignment\\.fa", folder_files, value = TRUE), invert = TRUE, value = TRUE))
-  df_name <- gsub("output_alignment.fa", "treelikeness_tests.csv", alignment_path)
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  df_name <- paste0(replicate_folder, "treelikeness_results.csv")
   
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it.
   if (file.exists(df_name) == TRUE){

@@ -158,6 +158,14 @@ exp2_params$sequence_type <- sequence_type
 exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
+# Remove any rows that have 5 taxa and an ancient introgression event
+# Due to the way ancient introgression events are structured (take place at time where four taxa exist, between two non-sister taxa), a recent and an ancient
+#     introgression event will be identical for a tree with 5 taxa
+remove_rows <- which(exp2_params$num_taxa == 5 & exp2_params$recombination_type == "Ancient")
+keep_rows <- setdiff(1:nrow(exp2_params), remove_rows)
+exp2_params <- exp2_params[keep_rows, ]
+
+
 # Write exp2_params dataframe to file as a csv
 exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
 write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)

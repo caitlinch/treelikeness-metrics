@@ -547,6 +547,7 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
     mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format)
     
     # Apply Cunningham test (Cunningham 1975)
+    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69")
     
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = tree_proportion_substitution_method,
@@ -554,7 +555,7 @@ treelikeness.metrics.simulations <- function(replicate_folder, iqtree2_path, spl
     
     ## Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
-                     "Cunningham_test_result", tree_proportion)
+                     cunningham_metric, tree_proportion)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
     names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
                    "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value",

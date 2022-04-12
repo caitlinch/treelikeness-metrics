@@ -636,8 +636,13 @@ add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, se
   ## Create a new row to attach to the dataframe using the two components of the recombination event
   # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
-  new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
-                           coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+  if (select.sister == TRUE){
+    new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
+                             coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+  } else if (select.sister == FALSE){
+    new_row_df <- data.frame(node = NA, tip_names = NA, tip_numbers = NA, ms_tip_order = NA, ntips = NA, ndepth = NA,
+                             coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+  }
   ## Attach the new row onto the r_df
   r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)

@@ -86,10 +86,11 @@ cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads
   ## Test steps:
   # 1. Calculate the observed distances from the alignment (d_ij)
   # 2. Calculate the predicted distances from the tree (p_ij)
-  # 3. Calculate the TSS
-  # 4. Calculate the RSS
+  # 3. Calculate the total sum of squares. TSS = sum of (d_ij)^2
+  # 4. Calculate the residual sum of squares. RSS = sum of (p_ij - d_ij)^2
   # 5. Calculate the R^2 = (TSS - RSS)/ RSS
   
+  ## Test:
   # 1. Calculate the observed distances (d_ij)
   dna <- read.dna(alignment_path, format = "fasta")
   dna_mat <- dist.ml(dna, model = distance_matrix_substitution_model) 
@@ -117,7 +118,7 @@ cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads
   RSS = sum((p_ij - d_ij)^2)
   
   # 5. Calculate the R^2
-  r_squared = (TSS-RSS)/RSS
+  r_squared = 1 - ((RSS)/(TSS))
 
   ## Return the r_squared value
   return(r_squared)

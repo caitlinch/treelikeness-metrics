@@ -80,86 +80,47 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 ## Cunningham test (Cunningham 1978) ##
-cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", dist.ml_substitution_model = "JC69"){
+cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69"){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
   ## Test steps:
-  # 1. Infer a tree from the alignment path using IQ-Tree2 (or open the tree if one exists already). This is the predicted distances. Find the pairwise distance matrix.
-  # 2. The data gives you observed distances. Find the pairwise distance matrix.
-  # 3. Use the observed and predicted distances to calculate a residual sum of squares
-  # 4. Compare the observed distances to some mean distance to get a total sum of squares
-  # 5. Use the R^2 = (TSS - RSS)/RSS as a measure of the variance in the distances that is explained by the tree model
+  # 1. Calculate the observed distances from the alignment (d_ij)
+  # 2. Calculate the predicted distances from the tree (p_ij)
+  # 3. Calculate the TSS
+  # 4. Calculate the RSS
+  # 5. Calculate the R^2 = (TSS - RSS)/ RSS
   
-  # 1. Infer a tree (if one does not already exist) and open it
+  # 1. Calculate the observed distances (d_ij)
+  dna <- read.dna(alignment_path, format = "fasta")
+  dna_mat <- dist.ml(dna, model = distance_matrix_substitution_model) 
+  d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
+  
+  # 2. Calculate the predicted distances (p_ij)
+  # Infer a tree (if one does not already exist) and open it
   if (file.exists(paste0(alignment_path, ".treefile")) == FALSE){
-    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = substitution_model)
+    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = iqtree_substitution_model)
   }
   # Open the tree
   t <- read.tree(paste0(alignment_path, ".treefile"))
   # Extract the distance matrix from the tree
-  t_cophenetic_mat <- cophenetic.phylo(t)
-  
-  # 2. Find the pairwise distance matrix from the alignment
-  dna <- read.dna(alignment_path, format = "fasta")
-  dna_mat <- dist.ml(dna, model = dist.dna_substitution_model) 
-  dna_vals <- as.vector(dna_mat)
+  t_cophenetic_mat <- cophenetic.phylo(t) # in substitutions per site
   # Now reorder the t_mat so the taxa are in the same order
   dna_order <- attr(dna_mat, "Labels")
   t_ordering_mat <- as.matrix(t_cophenetic_mat)[dna_order, dna_order]
   t_mat <- as.dist(t_ordering_mat)
-  t_vals <- as.vector(t_mat)
+  p_ij <- as.vector(t_mat) # predicted distances between taxa i and j
   
-  # 3. Use the observed and predicted distances to calculate a residual sum of squares
-  #      Sum of Squares total = Sum of squares regression + sum of squares error (or SST = SSR + SSE or TSS = RSS + ESS)
-  #      Note that residual sum of squares RSS is the sum of squares of errors
-  # Set variables
-  y_i = as.vector(t_mat)
-  x_i = as.vector(dna_mat)
-  # Identify the equation of the line y_i = a + b * x_i
-  l_m <- lm(y_i ~ x_i) # y ~ x 
-  intercept <- l_m$coefficients[[1]]
-  slope <- l_m$coefficients[[2]]
-  # RSS = sum from i=1 to n (y_i - f(x_i))^2
-  #   where f(x_i) = predicted value of y_i: y_i = a + b * x_i
-  f_of_x_i <- intercept + slope * x_i
-  y_i_minus_predicted_y_i = y_i - f_of_x_i
-  RSS = sum((y_i_minus_predicted_y_i)^2)
+  # 3. Calculate the TSS = sum of (d_ij)^2
+  TSS = sum((d_ij)^2)
   
-  # 4. Compare the observed distances to some mean distance to get a total sum of squares
-  #      The total sum of squares equals the explained sum of squares plus the residual sum of squares
-  #      It is defined as the sum of squared distances between the observations and their overall mean
-  #         TSS = sum from i=1 to n of (y_i - y_bar)^2
-  # The independent variable will be the pairwise distances from the alignment and the dependent variable will be the pairwise distances from the tree
-  y_bar = mean(y_i)
-  y_i_minus_y_bar = y_i - y_bar
-  y_i_minus_y_bar_squared = y_i_minus_y_bar ^ 2
-  TSS = sum(y_i_minus_y_bar_squared)
+  # 4. Calculate the RSS = sum of (p_ij - d_ij)^2
+  RSS = sum((p_ij - d_ij)^2)
   
-  # 5. Calculate R^2 = (TSS - RSS)/RSS
-  R_squared = (TSS-RSS)/RSS
-  
-  
-  
-  
-  
-  ## Using the instructions for finding regression lines from Statistics for Terrified Biologists 1st Ed, page 255
-  x_vals <- t_vals # x = guesses
-  y_vals <- dna_vals # y = actual
-  cross_products <- y_vals * x_vals
-  added_squares_of_x <- sum(x_vals ^ 2)
-  sum_of_squares_of_x <- added_squares_of_x - ((sum(x_vals)^2)/length(x_vals))
-  sum_of_cross_products <- sum(cross_products) - ((sum(x_vals) * sum(y_vals))/length(y_vals))
-  regression_coefficient <- sum_of_cross_products/sum_of_squares_of_x
-  intercept <- mean(y_vals) - (regression_coefficient * mean(x_vals))
-  # R^2 = (sum of cross products)^2/(sum of squares of x * sum of squares of y)
-  added_squares_of_x <- sum(x_vals ^ 2)
-  sum_of_squares_of_x <- added_squares_of_x - ((sum(x_vals)^2)/length(x_vals))
-  added_squares_of_y <- sum(y_vals ^ 2)
-  sum_of_squares_of_y <- added_squares_of_y - ((sum(y_vals)^2)/length(y_vals))
-  cross_products <- y_vals * x_vals
-  sum_of_cross_products <- sum(cross_products) - ((sum(x_vals) * sum(y_vals))/length(y_vals))
-  r_squared <- (sum_of_cross_products^2) / (sum_of_squares_of_x * sum_of_squares_of_y)
+  # 5. Calculate the R^2
+  r_squared = (TSS-RSS)/RSS
 
+  ## Return the r_squared value
+  return(r_squared)
 }
 
 

@@ -36,7 +36,7 @@ library(parallel)
 # alisim_gene_models              <- Model of sequence evolution for Alisim 
 # alisim_gene_tree_length         <- Gene-specific tree length for Alisim
 
-run_location = "local"
+run_location = "soma"
 if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
@@ -159,34 +159,30 @@ exp2_params$sequence_type <- sequence_type
 exp2_params$partition_file <- paste0(exp2_params$uid, "_partitions.nex")
 exp2_params$output_alignment_file <- paste0(exp2_params$uid, "_output_alignment")
 
-# # Write exp2_params dataframe to file as a csv
-# exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
-# write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
+# Write exp2_params dataframe to file as a csv
+exp2_df_path <- paste0(local_directory, "exp2_parameters.csv")
+write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
 
 # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
 # Run all reps: 
 #   lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
 # Run single rep:
 #   lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params, select.sister = FALSE)
+if (number_parallel_threads == 1){
+  exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+} else {
+  exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
+           mc.cores = number_parallel_threads)
+}
 
-# if (number_parallel_threads == 1){
-#   exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
-# } else {
-#   exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
-#            mc.cores = number_parallel_threads)
-# }
-# 
-# # Change output file names from list to dataframe
-# exp2_op_df <- as.data.frame(do.call(rbind, exp2_op_list))
-# exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
-# write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
-
+# Change output file names from list to dataframe
+exp2_op_df <- as.data.frame(do.call(rbind, exp2_op_list))
+exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
+write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
 
 
-## Experiment 3: Repeat above experiments but adding random noise ##
-
-
-
-## Experiment 4: Repeat above experiments adding alignment error ##
+## Ideas for extension:
+#   -  Repeat above experiments but add random noise
+#   -  Repeat above experiments but add alignment error
 
 

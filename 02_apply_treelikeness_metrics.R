@@ -26,8 +26,6 @@ iqtree2_path <- "iqtree2.2-beta"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-#netmake_path <- "/Applications/Spectre.app/Contents/MacOS/netmake"
-#netme_path <- "/Applications/Spectre.app/Contents/MacOS/netme"
 
 
 
@@ -44,28 +42,24 @@ source(paste0(repo_directory, "func_metrics.R"))
 #                                  delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, sequence_format = "DNA")
 
 # Find the three folders of simulated alignments
-exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/", "exp_3/"))
+exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 # For experiment 1:
 exp1_runs <- paste0(exp_folders[1], list.files(exp_folders[1]), "/")
 exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC",
-                    delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, sequence_format = "DNA")
+                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                    delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, tree_proportion_substitution_method = "JC69",
+                    tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA")
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 
 # For experiment 2:
 exp2_runs <- paste0(exp_folders[2], list.files(exp_folders[2]), "/")
 exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC",
-                    delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, sequence_format = "DNA")
+                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                    delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, tree_proportion_substitution_method = "JC69",
+                    tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA")
 exp2_df <- as.data.frame(do.call("rbind", exp2_list))
 
-# For experiment 3:
-exp3_runs <- paste0(exp_folders[3], list.files(exp_folders[3]), "/")
-exp3_list <- lapply(exp3_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC",
-                    delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, sequence_format = "DNA")
-exp3_df <- as.data.frame(do.call("rbind", exp3_list))
 
 
 

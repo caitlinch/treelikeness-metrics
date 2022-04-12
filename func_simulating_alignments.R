@@ -234,21 +234,32 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # Extract row given the row number
   row <- experiment_params_df[row_id, ]
   
-  # Create a new folder to store results for this file and an output csv folder
+  # Create a new folder to store results for this file and create output folders for trees/gene trees/output data
   if (is.na(row$uid) == FALSE){
-    row_folder <- paste0(output_directory, row$uid, "/")
-    row_csv_path <- paste0(row_folder, row$uid, "_parameters.csv")
+    row_folder            <- paste0(output_directory, row$uid, "/")
+    row_csv_path          <- paste0(row_folder, row$uid, "_parameters.csv")
+    start_coal_tree_file  <- paste0(row_folder, row$uid, "_starting_tree.txt")
+    gene_trees_file       <- paste0(row_folder, row$uid, "_ms_gene_trees.txt")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
-    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                         "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                           "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+    row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+    row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+    start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_starting_tree.txt")
+    gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_ms_gene_trees.txt")
   } else {
-    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                         "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                           "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+    row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+    row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+    start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_starting_tree.txt")
+    gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_ms_gene_trees.txt")
   }
+
   # Create the folder to store information for this row, if it doesn't already exist
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
@@ -279,7 +290,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     row$row_id <- row_id
     row$starting_tree_file <- start_coal_tree_file
     row$gene_tree_file <- gene_trees_file
-    row$partition_file <- gene_partition_file
+    row$partition_file <- paste0(row_folder, row$partition_file)
     row$output_alignment_file <- output_alignment_file
     output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", 
                            "recombination_type", "uid", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length",
@@ -480,11 +491,11 @@ determine.coalescence.taxa <- function(node_dataframe){
 }
 
 
-add.recent.introgression.event <- function(df, ntaxa, recombination_value, select.sister = FALSE){
+add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
-  # Get candidates for introgression event (all rows in df with ntips = 2)
-  cherry_df <- df[which(df$ntips == 2),]
+  # Get candidates for introgression event (all rows in r_df with ntips = 2)
+  cherry_df <- r_df[which(r_df$ntips == 2),]
   
   # Select the two taxa involved in the event
   if (select.sister == TRUE){
@@ -502,9 +513,9 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value, selec
     row <- cherry_df[row_pick, ]
     row_taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
     # Identify which taxa still exist at this point in time by getting a dataframe of all the coalescence events that have not yet occurred
-    existing_taxa_df <- df[which(df$coalescence_time >= row$coalescence_time),]
+    existing_taxa_df <- r_df[which(r_df$coalescence_time >= row$coalescence_time),]
     taxa_1 <- sample(row_taxa, 1)
-    # Now get a list of all other taxa from the existing taxa df (i.e. all taxa that exist at this point in time)
+    # Now get a list of all other taxa from the existing taxa r_df (i.e. all taxa that exist at this point in time)
     existing_taxa <- sort(unique(as.numeric(unlist(strsplit(existing_taxa_df$ms_input, " ")))))
     # Remove the row_taxa from all_taxa
     not_sister_taxa <- setdiff(existing_taxa, row_taxa)
@@ -538,22 +549,22 @@ add.recent.introgression.event <- function(df, ntaxa, recombination_value, selec
   new_row_df <- data.frame(node = NA, tip_names = paste(paste0("t", taxa), collapse = ","), tip_numbers = paste(paste0(taxa), collapse = ","), 
                            ms_tip_order = paste(sort(taxa, decreasing = TRUE), collapse = ","), ntips = 2, ndepth = NA,
                            coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
-  # Attach the new row onto the df
-  df <- rbind(df, new_row_df)
+  # Attach the new row onto the r_df
+  r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
-  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  r_df <- r_df[order(r_df$coalescence_time, decreasing = TRUE),]
   
   # Return dataframe with recombination event added
-  return(df)
+  return(r_df)
 }
 
 
 
-add.ancient.introgression.event <- function(df, ntaxa, recombination_value, select.sister = FALSE){
+add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
   ## Format node dataframe in order of coalescence time, largest to smallest
-  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  r_df <- r_df[order(r_df$coalescence_time, decreasing = TRUE),]
   
   ## Select the two taxa involved the timing of the recombination event
   if (select.sister == TRUE){
@@ -561,18 +572,18 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
     #    will be row with the largest coalescence time (first row)
     row_id = 1
     # Extract row
-    row <- df[row_id, ]
+    row <- r_df[row_id, ]
     # Extract taxa numbers
     taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
     # Set coalescence time halfway along the coalescent interval
     #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
-    coal_time <- (0.5 * (df$coalescence_time[row_id] - df$coalescence_time[row_id+1]))  + df$coalescence_time[row_id+1]
+    coal_time <- (0.5 * (r_df$coalescence_time[row_id] - r_df$coalescence_time[row_id+1]))  + r_df$coalescence_time[row_id+1]
   } else if (select.sister == FALSE){
     # If not selecting two taxa that are sister to each other, the introgression event must take place
     #    less basally (will occur closer towards the tips)
     # Select the second and third rows (will result in 4 taxa remaining)
-    row2 <- df[2, ]
-    row3 <- df[3, ]
+    row2 <- r_df[2, ]
+    row3 <- r_df[3, ]
     # Identify the taxa in rows 2 and 3 (the 4 taxa present at coal_time)
     taxa2 <- as.numeric(unlist(strsplit(row2$ms_input, " ")))
     taxa3 <- as.numeric(unlist(strsplit(row3$ms_input, " ")))
@@ -604,7 +615,7 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
     #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
     #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where
     #          the number of taxa becomes 3 (from 4)
-    coal_time <- (0.5 * (df$coalescence_time[3] - df$coalescence_time[4])) + df$coalescence_time[4]
+    coal_time <- (0.5 * (r_df$coalescence_time[3] - r_df$coalescence_time[4])) + r_df$coalescence_time[4]
   }
   # Get the two taxa involved in the event
   receptor = max(taxa)
@@ -627,13 +638,13 @@ add.ancient.introgression.event <- function(df, ntaxa, recombination_value, sele
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
   new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
                            coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
-  ## Attach the new row onto the df
-  df <- rbind(df, new_row_df)
+  ## Attach the new row onto the r_df
+  r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
-  df <- df[order(df$coalescence_time, decreasing = TRUE),]
+  r_df <- r_df[order(r_df$coalescence_time, decreasing = TRUE),]
   
   ## Return dataframe with recombination event added
-  return(df)
+  return(r_df)
 }
 
 

@@ -70,7 +70,8 @@ partition.random.trees <- function(num_trees, al_length, sequence_type, models =
   # Name genes
   gene_names <- sprintf("gene_%05d",1:num_trees)
   # Paste arguments together into charset lines
-  csets <- paste0("\tcharset ", gene_names, " = ", sequence_type, ", ", gene_start_points, "-", gene_end_points, ";")
+  csets <- paste0("\tcharset ", gene_names, " = ", sequence_type, ", ", format(gene_start_points, scientific = FALSE, trim = TRUE), "-", 
+                  format(gene_end_points, scientific = FALSE, trim = TRUE), ";")
   
   # Generate model arguments
   if (!is.na(models) == TRUE){

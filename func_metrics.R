@@ -499,7 +499,7 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 #### Functions to apply multiple test statistics ####
 treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
                                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                                             delta_plot_substitution_method = "JC69", num_phylogemetric_threads = NA, tree_proportion_substitution_method = "JC69",
+                                             distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                                              tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA"){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
@@ -534,22 +534,23 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
     
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
-    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format)
+    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
     
     # Apply Delta plots (Holland et. al. 2002)
-    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format, substitution_model = delta_plot_substitution_method)
+    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
     
     # Apply Q-residuals (Gray et. al. 2010)
-    mean_q_residual <- q_residuals(alignment_path, phylogemetric_path, sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
+    mean_q_residual <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
     
     # Apply TIGER (Cummins and McInerney 2011)
-    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format)
+    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
     
     # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69")
+    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
+                                         distance_matrix_substitution_model = distance_matrix_substitution_method)
     
     # Apply tree proportion (new test)
-    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = tree_proportion_substitution_method,
+    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method,
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits)
     
     ## Assemble results into a dataframe and save

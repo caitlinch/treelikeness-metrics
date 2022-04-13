@@ -55,19 +55,19 @@ exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, s
                     tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 
-# # For experiment 2:
-# exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
-# exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
-# exp2_runs <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
-# exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-#                     supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-#                     iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
-#                     tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
-# exp2_df <- as.data.frame(do.call("rbind", exp2_list))
-# 
-# 
-# 
-# 
+# For experiment 2:
+exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
+exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
+exp2_runs <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
+exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
+                    supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,
+                    iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                    tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
+exp2_df <- as.data.frame(do.call("rbind", exp2_list))
+
+
+
+
 # #### Tests ####
 # # test params
 # alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00004_0050_001_1/exp1_00004_0050_001_1_output_alignment.fa"

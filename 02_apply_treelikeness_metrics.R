@@ -44,7 +44,9 @@ source(paste0(repo_directory, "func_metrics.R"))
 exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 # For experiment 1:
-exp1_runs <- paste0(exp_folders[1], list.files(exp_folders[1]), "/") # should be list of alignments
+exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
+exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
+exp1_runs <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
 exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
                     supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                     iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
@@ -52,7 +54,9 @@ exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, s
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 
 # For experiment 2:
-exp2_runs <- paste0(exp_folders[2], list.files(exp_folders[2]), "/")  # should be list of alignments
+exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
+exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
+exp2_runs <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
 exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
                     supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                     iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
@@ -80,3 +84,9 @@ tree_proportion_remove_trivial_splits = TRUE
 sequence_format = "DNA"
 return_collated_data = TRUE
 
+
+treelikeness.metrics.simulations("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00005_1000_009_1/exp1_00005_1000_009_1_output_alignment.fa",
+                                 iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                                 supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                                 iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
+                                 tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)

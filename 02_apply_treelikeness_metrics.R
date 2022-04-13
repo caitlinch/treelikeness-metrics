@@ -35,10 +35,12 @@ source(paste0(repo_directory, "func_metrics.R"))
 #### 4. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
 # Sample function call:
-# treelikeness.metrics.simulations(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-#                                  num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+# treelikeness.metrics.simulations(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+#                                  supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+#                                  num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
 #                                  distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-#                                  tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA")
+#                                  tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA",
+#                                  return_collated_data = FALSE)
 
 # Find the folders of simulated alignments
 exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))

@@ -505,9 +505,18 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
   
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
-  df_name <- paste0(replicate_folder, "treelikeness_results.csv")
   
-  # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it.
+  # Get unique id for the alignment
+  unique_id <- gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)])
+  
+  # Get list of files in the replicate_folder
+  all_folder_files <- list.files(replicate_folder)
+  aln_folder_files <- grep(unique_id, all_folder_files, value = TRUE)
+  
+  # Create name for output dataframe
+  df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
+  
+  # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
   if (file.exists(df_name) == TRUE){
     ## Read in the results csv file
     results_df <- read.csv(df_name)
@@ -515,15 +524,19 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     ## Apply all treelikeness test statistics to generate the results csv file
     
     # Determine the number of taxa (needed for number of quartets in likelihood mapping and sCFs)
-    if (grepl("exp1", replicate_folder)){
-      random_trees_file <- paste0(replicate_folder, grep("random_trees", folder_files, value = TRUE))
+    if ((grepl("exp1", unique_id)) | (!identical(agrep("random_trees", aln_folder_files), integer(0)))) {
+      # If either the unique id contains "exp1" OR there is a file name containing the phrase "random_trees",
+      #    open the first random tree and see how many taxa are present
+      random_trees_file <- paste0(replicate_folder, grep("random_trees", aln_folder_files, value = TRUE))
       random_trees <- read.tree(random_trees_file)
       n_tree_tips <- unique(Ntip(random_trees))[[1]]
-    } else if ((grepl("exp2", replicate_folder))|(grepl("exp3", replicate_folder))){
-      start_tree_file <- paste0(replicate_folder, grep("starting_tree", folder_files, value = TRUE))
+    } else if ((grepl("exp2", unique_id)) | (!identical(agrep("starting_tree", aln_folder_files), integer(0)))) {
+      # If either the unique id contains "exp2" OR there is a file name containing the phrase "starting_tree",
+      #    open the starting tree and see how many number of taxa present
+      start_tree_file <- paste0(replicate_folder, grep("starting_tree", aln_folder_files, value = TRUE))
       start_tree <- read.tree(start_tree_file)
       n_tree_tips <- Ntip(start_tree)
-    }
+    } 
     
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 

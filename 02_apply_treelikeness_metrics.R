@@ -18,13 +18,22 @@
 # phylogemetric_path      <- Path to phylogemetric executable
 # splitstree_path         <- Path to SplitsTree 4 version 4.17.2 or above
 
-local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
-iqtree2_path <- "iqtree2.2-beta"
-splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
-fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-
+run_location = "soma"
+if (run_location == "local"){
+  local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+  iqtree2_path <- "iqtree2.2-beta"
+  splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+  phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
+  fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+} else if (run_location == "soma"){
+  local_directory <- "/data/caitlin/treelikeness_metrics/"
+  repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
+  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
+  splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
+  phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
+  fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
+}
 
 
 #### 3. Source functions from caitlinch/treelikeness_metrics ####

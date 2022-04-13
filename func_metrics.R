@@ -243,10 +243,14 @@ q_residuals <- function(alignment_path, phylogemetric_path, sequence_format = "D
   program_output <- system(call, intern = TRUE)
   # Format the program output into a nice vector containing just the mean Q-residual value per taxa
   q_residuals <- as.numeric(unlist(strsplit(program_output, "\t"))[c(FALSE, TRUE)])
-  
-  ## Return mean Q-residual value
+  # Calculate mean value
   mean_q_residual <- mean(q_residuals)
-  return(mean_q_residual)
+  
+  ## Return results
+  output_list <- list("mean_q_residual" = mean_q_residual,
+                      "all_q_residuals" = q_residuals)
+  
+  return(output_list)
 }
 
 
@@ -501,18 +505,25 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
                                              num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                                              distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                                             tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA"){
+                                             tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA",
+                                             return_collated_data = FALSE){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
+  
+  ## Prepare variables
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
-  
   # Get unique id for the alignment
   unique_id <- gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)])
-  
-  # Create name for output dataframe
+  # Get list of files in the replicate_folder
+  all_folder_files <- list.files(replicate_folder)
+  aln_folder_files <- grep(unique_id, all_folder_files, value = TRUE)
+  # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
+  collated_df_name <- paste0(replicate_folder, unique_id, "_collated_alignment_results.csv")
   
+  
+  ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
   if (file.exists(df_name) == TRUE){
     ## Read in the results csv file
@@ -526,9 +537,6 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
       n_tree_tips = number_of_taxa
     } else {
       # If the number of taxa isn't supplied as an input variable, determine it by finding the number of taxa from a tree in the folder files for the alignment
-      # Get list of files in the replicate_folder
-      all_folder_files <- list.files(replicate_folder)
-      aln_folder_files <- grep(unique_id, all_folder_files, value = TRUE)
       if ((grepl("exp1", unique_id)) | (!identical(agrep("random_trees", aln_folder_files), integer(0)))) {
         # If either the unique id contains "exp1" OR there is a file name containing the phrase "random_trees",
         #    open the first random tree and see how many taxa are present
@@ -544,47 +552,72 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
       } 
     }
     
+    # Apply all treelikeness tests:
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips)
-    
     # Apply Site concordance factors (Minh et. al. 2020)
     scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
-    
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
     
     # Apply Delta plots (Holland et. al. 2002)
     mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
-    
     # Apply Q-residuals (Gray et. al. 2010)
-    mean_q_residual <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
-    
+    q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
+    mean_q_residual <- q_residual_results$mean_q_residual
     # Apply TIGER (Cummins and McInerney 2011)
     mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
-    
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
-    
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method,
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits)
     
-    ## Assemble results into a dataframe and save
+    # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
-                     cunningham_metric, tree_proportion)
+                     cunningham_metric, tree_proportion, alignment_path)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
     names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
                    "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value",
-                   "Cunningham_test", "tree_proportion")
+                   "Cunningham_test", "tree_proportion", "input_alignment_path")
     names(results_df) <- names_vec
     write.csv(results_df, file = df_name, row.names = FALSE)
   }
   
-  # Return results_df so it can be collated using lapply
-  return(results_df)
+  ## Collate results df and parameter df into one file with all relevant information
+  # Check whether a parameters_csv file exists to collate
+  if (!identical((agrep("parameters", aln_folder_files)), integer(0))) {
+    # Open parameters file
+    aln_params_df <- read.csv(paste0(replicate_folder, grep("parameters", aln_folder_files, value = TRUE)))
+    raw_output_df <- cbind(aln_params_df, results_df)
+    write.csv(raw_output_df, file = collated_df_name, row.names = FALSE)
+  }
+  
+  ## Return df so it can be collated using lapply
+  if (return_collated_data == TRUE){
+    if (!identical((agrep("parameters", aln_folder_files)), integer(0))) {
+      # If you have a parameters csv, you can output the collated df (cbind of parameter df with treelikeness test results df)
+      # Open parameters file
+      aln_params_df <- read.csv(paste0(replicate_folder, grep("parameters", aln_folder_files, value = TRUE)))
+      # Bind dataframe columns
+      raw_output_df <- cbind(aln_params_df, results_df)
+      # Save dataframe as csv
+      write.csv(raw_output_df, file = collated_df_name, row.names = FALSE)
+      # Output results for the collated dataframe (parameters + results)
+      return(raw_output_df)
+    } else {
+      # Even if return_collated_data = TRUE, if there is no parameters csv there can be no collated csv
+      # In this case simply output the results of the treelikeness tests
+      return(results_df)
+    }
+  } else if (return_collated_data == FALSE){
+    # If using default setting or don't have parameter csv, output results for treelikeness tests
+    return(results_df)
+  }
+  
 }
 
 

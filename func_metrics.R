@@ -243,6 +243,8 @@ q_residuals <- function(alignment_path, phylogemetric_path, sequence_format = "D
   program_output <- system(call, intern = TRUE)
   # Format the program output into a nice vector containing just the mean Q-residual value per taxa
   q_residuals <- as.numeric(unlist(strsplit(program_output, "\t"))[c(FALSE, TRUE)])
+  taxa_order <- gsub(" ", "", unlist(strsplit(program_output, "\t"))[c(TRUE, FALSE)])
+  names(q_residuals) <- taxa_order
   # Calculate mean value
   mean_q_residual <- mean(q_residuals)
   

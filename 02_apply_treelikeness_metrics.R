@@ -46,16 +46,16 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 # For experiment 1:
 exp1_runs <- paste0(exp_folders[1], list.files(exp_folders[1]), "/") # should be list of alignments
 exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                    distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
+                    supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                    iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
                     tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA")
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 
 # For experiment 2:
 exp2_runs <- paste0(exp_folders[2], list.files(exp_folders[2]), "/")  # should be list of alignments
 exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                    num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                    distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
+                    supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                    iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
                     tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA")
 exp2_df <- as.data.frame(do.call("rbind", exp2_list))
 
@@ -68,6 +68,8 @@ iqtree2_path <- "iqtree2.2-beta"
 splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+supply_number_of_taxa = FALSE
+number_of_taxa = NA
 num_iqtree2_threads = "AUTO"
 num_iqtree2_scf_quartets = 100
 iqtree_substitution_model = "JC"

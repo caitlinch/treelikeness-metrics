@@ -14,67 +14,92 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 
 #### Treelikeness metric functions ####
-tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE){
+tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, check_iqtree_log_for_identical_sequences = TRUE){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Open alignment
   # Identify file type of alignment
   suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
   
-  # Open alignment
-  if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
-    # Open alignment
-    al <- read.FASTA(alignment_path, type = sequence_format)
-  } else if (suffix == "nex" | suffix == "nexus") {
-    al <- as.DNAbin(read.nexus.data(alignment_path))
-  }
-  
-  ## NeighborNet network
-  ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
-  # Compute pairwise distances for the taxa using the specified model of sequence evolution
-  mldist <- dist.ml(al, model)
-  # Create a NeighbourNet network from the alignment
-  nnet <- neighborNet(mldist)
-  
-  ## Greedy tree using an adapted version of Kruskal's algorithm
-  # Extract the splits from the NeighborNet network
-  unordered_nw_splits <- as.splits(nnet)
-  # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
-  nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
-  # Find the list of compatible splits in the maximum weight tree
-  # Add the first edge (i.e. the edge with the largest weight) to the set of edges comprising the maximum weight spanning tree
-  compatible_splits <- c(1)
-  # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
-  # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
-  for (i in 2:length(nw_splits)){
-    # Assign the number of i to be the current split being tested for compatibility
-    current_split <- i
-    # Test whether the current split is compatible with all other splits that have been added
-    test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
-    # If the split is compatible, add it to the list of compatible splits
-    if (test_compatibility == TRUE){
-      compatible_splits <- c(compatible_splits, current_split)
+  ## Check whether multiple sequences in the alignment are identical
+  if (check_iqtree_log_for_identical_sequences == TRUE){
+    iqtree_log_file <- paste0(alignment_path, ".log")
+    log_lines <- readLines(iqtree_log_file) 
+    identical_ind <- grep("identical sequences \\(see below\\) will be ignored for subsequent analysis", log_lines)
+    
+    if (identical(identical_ind, integer(0))){
+      # If there are no identical sequences, run tree proportion code
+      run_tree_proportion = TRUE
+    } else {
+      # If there are identical sequences, do not run tree proportion code: will not estimate network nicely
+      run_tree_proportion = FALSE
     }
-  }
-  # Take the tree as the set of compatible splits
-  t_splits <- nw_splits[compatible_splits]
-  
-  ## Manage trivial splits
-  # If requested, remove all trivial splits (using phangorn::removeTrivialSplits)
-  if (remove_trivial_splits == TRUE){
-    t_splits <- removeTrivialSplits(t_splits)
-    nw_splits <- removeTrivialSplits(nw_splits)
+  } else {
+    # If not checking for identical sequences in IQ-Tree log file, just proceed to tree proportion code
+    run_tree_proportion = TRUE
   }
   
-  ## Calculate tree proportion
-  # Calculate the proportion of split weights included in the network are present in the tree
-  t_split_weight_sum <- sum(attr(t_splits, "weight"))
-  nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
-  tree_proportion <- t_split_weight_sum/nw_split_weight_sum
-  
-  ## Return result
-  # Return the tree proportion value
-  return(tree_proportion)
+  if (run_tree_proportion == TRUE){
+    # Open alignment
+    if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
+      # Open alignment
+      al <- read.FASTA(alignment_path, type = sequence_format)
+    } else if (suffix == "nex" | suffix == "nexus") {
+      al <- as.DNAbin(read.nexus.data(alignment_path))
+    }
+    
+    ## NeighborNet network
+    ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
+    # Compute pairwise distances for the taxa using the specified model of sequence evolution
+    mldist <- dist.ml(al, model)
+    # Create a NeighbourNet network from the alignment
+    nnet <- neighborNet(mldist)
+    
+    ## Greedy tree using an adapted version of Kruskal's algorithm
+    # Extract the splits from the NeighborNet network
+    unordered_nw_splits <- as.splits(nnet)
+    # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
+    nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
+    # Find the list of compatible splits in the maximum weight tree
+    # Add the first edge (i.e. the edge with the largest weight) to the set of edges comprising the maximum weight spanning tree
+    compatible_splits <- c(1)
+    # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
+    # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
+    for (i in 2:length(nw_splits)){
+      # Assign the number of i to be the current split being tested for compatibility
+      current_split <- i
+      # Test whether the current split is compatible with all other splits that have been added
+      test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
+      # If the split is compatible, add it to the list of compatible splits
+      if (test_compatibility == TRUE){
+        compatible_splits <- c(compatible_splits, current_split)
+      }
+    }
+    # Take the tree as the set of compatible splits
+    t_splits <- nw_splits[compatible_splits]
+    
+    ## Manage trivial splits
+    # If requested, remove all trivial splits (using phangorn::removeTrivialSplits)
+    if (remove_trivial_splits == TRUE){
+      t_splits <- removeTrivialSplits(t_splits)
+      nw_splits <- removeTrivialSplits(nw_splits)
+    }
+    
+    ## Calculate tree proportion
+    # Calculate the proportion of split weights included in the network are present in the tree
+    t_split_weight_sum <- sum(attr(t_splits, "weight"))
+    nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
+    tree_proportion <- t_split_weight_sum/nw_split_weight_sum
+    
+    ## Return result
+    # Return the tree proportion value
+    return(tree_proportion)
+  } else if (run_tree_proportion == FALSE){
+    # If there are identical sequences, the neighborNet function will not work nicely to calculate tree proportion
+    # Report that information
+    tree_proportion = "identical_seqs_no_tree_proportion"
+    return(tree_proportion)
+  }
 }
 
 
@@ -584,7 +609,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method,
-                                       remove_trivial_splits = tree_proportion_remove_trivial_splits)
+                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = TRUE)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,

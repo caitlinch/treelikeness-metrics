@@ -183,21 +183,30 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # Reorder data frame columns
   splits_df <- splits_df[,c("split","size","interval","interval_start","interval_end","taxa")]
   
-  ## Construct the set of splits with confidence intervals excluding 0 (for the network treelikeness test)
-  test_df <- splits_df[which(splits_df$interval_start > 0 & splits_df$interval_end > 0), ]
-  test_splits <- splits[which(splits_df$interval_start > 0 & splits_df$interval_end > 0)]
-  
-  # A set of splits is compatible if all pairwise comparisons between splits are compatible
-  # Check using the ape function is.compatible (requires splits to be in bitsplits format, which is also in ape)
-  compatibility <- is.compatible.bitsplits(as.bitsplits(test_splits))
-  
-  # A set of splits is compatible if all pairwise comparisons between splits are compatible
-  if (compatibility == FALSE){
-    # Some pairwise comparisons between splits are incompatible: therefore, the null hypothesis that data was originated in a tree is rejected
-    ntlt_result <- "Non-treelike"
-  } else if (compatibility == TRUE){
-    # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
-    ntlt_result <- "Treelike"
+  ## Determine Network Treelikeness Test result
+  # First, determine which splits have confidence intervals excluding 0
+  which_splits <- which(splits_df$interval_start > 0 & splits_df$interval_end > 0)
+  # Second, use that set to determine the Network Treelikeness Test result
+  if (length(which_splits > 0)){
+    # If there is one or more split with confidence intervals excluding 0:
+    # Construct the set of splits with confidence intervals excluding 0 (for the network treelikeness test)
+    test_df <- splits_df[which_splits, ]
+    test_splits <- splits[which_splits]
+    
+    # A set of splits is compatible if all pairwise comparisons between splits are compatible
+    # Check using the ape function is.compatible (requires splits to be in bitsplits format, which is also in ape)
+    compatibility <- is.compatible.bitsplits(as.bitsplits(test_splits))
+    
+    # A set of splits is compatible if all pairwise comparisons between splits are compatible
+    if (compatibility == FALSE){
+      # Some pairwise comparisons between splits are incompatible: therefore, the null hypothesis that data was originated in a tree is rejected
+      ntlt_result <- "Non-treelike"
+    } else if (compatibility == TRUE){
+      # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
+      ntlt_result <- "Treelike"
+    }
+  } else if (length(which_splits) == 0){
+    ntlt_result <- "Zero_splits_where_confidence_intervals_exclude_0"
   }
   
   ## Create an output vector for the results
@@ -516,7 +525,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
   # Get unique id for the alignment
-  unique_id <- gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)])
+  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
   # Get list of files in the replicate_folder
   all_folder_files <- list.files(replicate_folder)
   aln_folder_files <- grep(unique_id, all_folder_files, value = TRUE)
@@ -563,7 +572,6 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
-    
     # Apply Delta plots (Holland et. al. 2002)
     mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
     # Apply Q-residuals (Gray et. al. 2010)
@@ -655,13 +663,26 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
       # Read in the fasta data
       data <- read.FASTA(alignment_path, type = sequence_format)
       # Write out the nexus data
-      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = datablock_bool, interleaved = FALSE) # write the output as a nexus file)
+      if (include_taxablock == TRUE){
+        # write the output as a nexus file with a taxa block (single data block = FALSE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = FALSE, interleaved = FALSE)
+      } else if (include_taxablock == FALSE){
+        # write the output as a nexus file without a taxa block - only a single datablock (single data block = TRUE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = TRUE, interleaved = FALSE)
+      }
     }
   } else if (suffix == "phy" | suffix == "phylip"){
     ## If the file is a phy file, convert it to nexus file format (unless a nexus version already exists)
     if (file.exists(nexus_alignment_path) == FALSE){
       data <- read.phy(alignment_path)
-      write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = datablock_bool, interleaved = FALSE) # write the output as a nexus file)
+      # Write out the nexus data
+      if (include_taxablock == TRUE){
+        # write the output as a nexus file with a taxa block (single data block = FALSE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = FALSE, interleaved = FALSE)
+      } else if (include_taxablock == FALSE){
+        # write the output as a nexus file without a taxa block - only a single datablock (single data block = TRUE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = TRUE, interleaved = FALSE)
+      }
     }
   }
   
@@ -676,7 +697,6 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
   }
   # Write the edited nexus file out 
   writeLines(nexus,nexus_alignment_path)
-  
   
   ## Output file name and path for nexus file
   return(nexus_alignment_path)

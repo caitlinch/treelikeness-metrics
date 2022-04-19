@@ -7,6 +7,7 @@
 
 
 #### 1. Open packages ####
+library(parallel)
 
 
 
@@ -17,6 +18,7 @@
 # fast_TIGER_path         <- Path to fast TIGER executable.
 # phylogemetric_path      <- Path to phylogemetric executable
 # splitstree_path         <- Path to SplitsTree 4 version 4.17.2 or above
+# num_cores               <- Number of parallel threads to use at once
 
 run_location = "soma"
 if (run_location == "local"){
@@ -26,6 +28,7 @@ if (run_location == "local"){
   splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
   phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
   fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+  num_cores <- 30
 } else if (run_location == "soma"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
@@ -33,6 +36,7 @@ if (run_location == "local"){
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
+  num_cores <- 1
 }
 
 
@@ -58,20 +62,22 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
 exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
 exp1_runs <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-exp1_list <- lapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                    supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                    iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
-                    tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
+exp1_list <- mclapply(exp1_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                      supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                      iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
+                      tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE,
+                      mc.cores = num_cores)
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 
 # For experiment 2:
 exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
 exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
 exp2_runs <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
-exp2_list <- lapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-                    supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,
-                    iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                    tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
+exp2_list <- mclapply(exp2_runs, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
+                      supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,
+                      iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                      tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE,
+                      mc.cores = num_cores)
 exp2_df <- as.data.frame(do.call("rbind", exp2_list))
 
 

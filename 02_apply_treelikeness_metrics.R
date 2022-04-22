@@ -36,7 +36,7 @@ if (run_location == "local"){
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
-  num_cores <- 1
+  num_cores <- 30
 }
 
 

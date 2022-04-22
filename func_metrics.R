@@ -217,7 +217,7 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   } else if (length(which_splits) == 1){
     # If there is only one split with confidence intervals excluding 0:
     # The set is compatible by default
-    ntlt_result == "Treelike"
+    ntlt_result <- "Treelike"
   } else if (length(which_splits) > 1){
     # If there is one or more split with confidence intervals excluding 0:
     # Construct the set of splits with confidence intervals excluding 0 (for the network treelikeness test)

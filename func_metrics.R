@@ -212,7 +212,13 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   # First, determine which splits have confidence intervals excluding 0
   which_splits <- which(splits_df$interval_start > 0 & splits_df$interval_end > 0)
   # Second, use that set to determine the Network Treelikeness Test result
-  if (length(which_splits > 0)){
+  if (length(which_splits) == 0){
+    ntlt_result <- "Zero_splits_where_confidence_intervals_exclude_0"
+  } else if (length(which_splits) == 1){
+    # If there is only one split with confidence intervals excluding 0:
+    # The set is compatible by default
+    ntlt_result == "Treelike"
+  } else if (length(which_splits) > 1){
     # If there is one or more split with confidence intervals excluding 0:
     # Construct the set of splits with confidence intervals excluding 0 (for the network treelikeness test)
     test_df <- splits_df[which_splits, ]
@@ -230,8 +236,6 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
       # All pairwise comparisons between splits are compatible: therefore, the null hypothesis that data was originated in a tree is accepted
       ntlt_result <- "Treelike"
     }
-  } else if (length(which_splits) == 0){
-    ntlt_result <- "Zero_splits_where_confidence_intervals_exclude_0"
   }
   
   ## Create an output vector for the results

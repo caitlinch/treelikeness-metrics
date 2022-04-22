@@ -28,7 +28,7 @@ if (run_location == "local"){
   splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
   phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
   fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-  num_cores <- 30
+  num_cores <- 1
 } else if (run_location == "soma"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   repo_directory <- "/data/caitlin/treelikeness_metrics/code/"

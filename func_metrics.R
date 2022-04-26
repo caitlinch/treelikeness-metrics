@@ -431,7 +431,7 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   alignment <- read.FASTA(alignment_path, type = sequence_format)
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
-  pdm <- dist.dna(alignment, model = substitution_model)
+  pdm <- dist.ml(alignment, model = substitution_model)
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100

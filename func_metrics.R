@@ -25,14 +25,24 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   if (check_iqtree_log_for_identical_sequences == TRUE){
     iqtree_log_file <- paste0(alignment_path, ".log")
     log_lines <- readLines(iqtree_log_file) 
-    identical_ind <- grep("identical sequences \\(see below\\) will be ignored for subsequent analysis", log_lines)
+    identical_check_1 <- grep("identical sequences \\(see below\\) will be ignored for subsequent analysis", log_lines)
+    identical_check_2.1 <- grep("is identical to", log_lines)
+    identical_check_2.2 <- grep("but kept for subsequent analysis", log_lines)
     
-    if (identical(identical_ind, integer(0))){
-      # If there are no identical sequences, run tree proportion code
-      run_tree_proportion = TRUE
+    # Check for whether identical sequences are present
+    if ((length(identical_check_1) > 0) |
+        (length(identical_check_2.1) > 0 & length(identical_check_2.2) > 0)){
+      identical_sequences_present = TRUE
     } else {
+      identical_sequences_present = FALSE
+    }
+    
+    if (identical_sequences_present == TRUE){
       # If there are identical sequences, do not run tree proportion code: will not estimate network nicely
       run_tree_proportion = FALSE
+    } else if (identical_sequences_present == FALSE) {
+      # If there are no identical sequences, run tree proportion code
+      run_tree_proportion = TRUE
     }
   } else {
     # If not checking for identical sequences in IQ-Tree log file, just proceed to tree proportion code

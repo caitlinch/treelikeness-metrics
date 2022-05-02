@@ -690,8 +690,10 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 #### Utility functions ####
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree
-  # Convert fasta to nexus
-  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  # Convert fasta to nexus (if the conversion has not already occured)
+  if (file.exists(paste0(alignment_path,"_converted.nex")) == FALSE){
+    nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  }
   # Name output path
   splits_output_path <- paste0(alignment_path, "_Splitstree_NeighborNet_splits.nex")
   # Run Splitstree4 if the confidence_path and output_path files do not exist
@@ -722,8 +724,8 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
   ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
   ## Prepare parameters for file conversion
-  # Name nexus file by simply appending ".nex" to end of existing file name
-  nexus_alignment_path <- paste0(alignment_path,".nex")
+  # Name nexus file by simply appending "_converted.nex" to end of existing file name
+  nexus_alignment_path <- paste0(alignment_path,"_converted.nex")
   # Extract file type from alignment path
   suffix <- tail(strsplit(alignment_path,"\\.")[[1]],1)
   # Set format for output nexus file

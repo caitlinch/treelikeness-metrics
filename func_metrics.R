@@ -570,8 +570,8 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
                                              num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                                              distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                                             tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA",
-                                             return_collated_data = FALSE){
+                                             tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
+                                             sequence_format = "DNA", return_collated_data = FALSE){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
   
@@ -639,7 +639,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = TRUE, 
-                                       run_splitstree = TRUE, splitstree_path = splitstree_path)
+                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,

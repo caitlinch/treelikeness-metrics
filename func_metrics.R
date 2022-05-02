@@ -14,7 +14,9 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 
 #### Treelikeness metric functions ####
-tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, check_iqtree_log_for_identical_sequences = TRUE){
+tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
+                            check_iqtree_log_for_identical_sequences = TRUE, run_splitstree = FALSE, 
+                            splitstree_path = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Open alignment
@@ -58,16 +60,23 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
       al <- as.DNAbin(read.nexus.data(alignment_path))
     }
     
-    ## NeighborNet network
-    ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
-    # Compute pairwise distances for the taxa using the specified model of sequence evolution
-    mldist <- dist.ml(al, model)
-    # Create a NeighbourNet network from the alignment
-    nnet <- neighborNet(mldist)
+    if (run.splitstree == FALSE){
+      ## Calculate NeighborNet network in R
+      ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
+      # Compute pairwise distances for the taxa using the specified model of sequence evolution
+      mldist <- dist.ml(al, model)
+      # Create a NeighbourNet network from the alignment
+      nnet <- neighborNet(mldist)
+      
+      ## Greedy tree using an adapted version of Kruskal's algorithm
+      # Extract the splits from the NeighborNet network
+      unordered_nw_splits <- as.splits(nnet)
+    } else if (run.splitstree == TRUE & is.na(splitstree_path) == FALSE){
+      ## Calculate NeighborNet network using Splitstree 
+    }
     
-    ## Greedy tree using an adapted version of Kruskal's algorithm
-    # Extract the splits from the NeighborNet network
-    unordered_nw_splits <- as.splits(nnet)
+    
+    
     # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
     nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
     # Find the list of compatible splits in the maximum weight tree
@@ -304,6 +313,7 @@ q_residuals <- function(alignment_path, phylogemetric_path, sequence_format = "D
 }
 
 
+
 ## TIGER (Cummins and McInerney 2011)
 TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   # Tree Independent Genertion of Evolutionary Rates
@@ -466,6 +476,8 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
   lapply(all_gene_paths, call.iqtree2, iqtree2_path, iqtree2_number_threads, redo_flag, safe_flag, bootstraps, model)
 }
 
+
+
 call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = "MFP"){
   ## Small function to call IQ-Tree2 for one alignment
   # Use _flag commands from function call to assemble IQ-Tree2 call
@@ -491,12 +503,16 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
   system(call)
 }
 
+
+
 estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path){
   ## Function to estimate a species tree using ASTRAL
   # Assemble ASTRAL command from input file names
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
 }
+
+
 
 estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path, bootstraps_file){
   ## Function to estimate a species tree using ASTRAl and perform multi-locus bootstrapping
@@ -672,6 +688,31 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 
 
 #### Utility functions ####
+alignment_path <- "/Users/caitlin/Downloads/exp1_00001_0005_008_0.001_output_alignment.fa"
+splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
+
+make.splitstree.neighbornet <- function(alignment_path, splitstree_path){
+  ## Construct a NeighborNet network
+  # Convert fasta to nexus
+  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  # Name output path
+  splits_output_path <- paste0(alignment_path, "_Splitstree_NeighborNet_splits.nex")
+  # Run Splitstree4 if the confidence_path and output_path files do not exist
+  if (file.exists(splits_output_path) == FALSE){
+    # Assemble the SplitsTree 4 command
+    splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path,
+                                 "; ASSUME chartransform =Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
+                                 "ASSUME disttransform=NeighbourNet; SAVE FILE=",
+                                 splits_output_path," REPLACE=yes; QUIT'")
+    # Call SplitsTree 4
+    system(splitstree_command)
+  }
+  
+  output_list <- c("splits_filepath" = splits_output_path, "all_splits" = splits)
+}
+
+
+
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_taxablock = FALSE){
   ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
@@ -770,6 +811,8 @@ genes.from.alignment <- function(alignment_path, partition_path, gene_folder, se
   }
 }
 
+
+
 save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder, sequence_format = "DNA"){
   ## Small function to process a single charpartition row and save the associated gene
   
@@ -802,7 +845,6 @@ save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder
 
 
 
-
 is.split.trivial <- function(split){
   ## Small function to determine whether a split is trivial or non-trivial (trivial = terminal branch)
   # Extract the bipartition subsets from the tree
@@ -818,6 +860,7 @@ is.split.trivial <- function(split){
   }
   return(trivial)
 }
+
 
 
 trivial.splits.wrapper <- function(index, set_of_splits){
@@ -868,6 +911,7 @@ are.splits.compatible <- function(split1_index, split2_index, set_of_splits){
 }
 
 
+
 pairwise.compatibility <- function(index, set_of_splits){
   ## Function to take one split and compare pairwise to all other splits within a set to determine
   #     whether they are compatible
@@ -882,6 +926,7 @@ pairwise.compatibility <- function(index, set_of_splits){
 }
 
 
+
 remove.duplicate.splits <- function(df){
   ## Small function to remove duplicate splits from the compatibility dataframe
   
@@ -892,6 +937,7 @@ remove.duplicate.splits <- function(df){
   # Return dataframe with each comparison of two splits included only once
   return(df)
 }
+
 
 
 process.one.compatibility.matrix.row <- function(row_id, df){
@@ -905,6 +951,5 @@ process.one.compatibility.matrix.row <- function(row_id, df){
   # Return the newly formatted string
   return(output_string)
 }
-
 
 

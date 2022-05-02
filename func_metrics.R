@@ -637,8 +637,9 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
     # Apply tree proportion (new test)
-    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method,
-                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = TRUE)
+    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
+                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = TRUE, 
+                                       run_splitstree = TRUE, splitstree_path = splitstree_path)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,

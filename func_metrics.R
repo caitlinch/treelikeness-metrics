@@ -19,10 +19,6 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
                             splitstree_path = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
-  ## Open alignment
-  # Identify file type of alignment
-  suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
-  
   ## Check whether multiple sequences in the alignment are identical
   if (check_iqtree_log_for_identical_sequences == TRUE){
     iqtree_log_file <- paste0(alignment_path, ".log")
@@ -52,31 +48,34 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   }
   
   if (run_tree_proportion == TRUE){
-    # Open alignment
-    if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
-      # Open alignment
-      al <- read.FASTA(alignment_path, type = sequence_format)
-    } else if (suffix == "nex" | suffix == "nexus") {
-      al <- as.DNAbin(read.nexus.data(alignment_path))
-    }
     
-    if (run.splitstree == FALSE){
+    if (run_splitstree == FALSE){
       ## Calculate NeighborNet network in R
-      ## Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
+      
+      # Identify file type of alignment
+      suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
+      # Open alignment
+      if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
+        # Open alignment
+        al <- read.FASTA(alignment_path, type = sequence_format)
+      } else if (suffix == "nex" | suffix == "nexus") {
+        al <- as.DNAbin(read.nexus.data(alignment_path))
+      }
+      
+      # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
       # Compute pairwise distances for the taxa using the specified model of sequence evolution
       mldist <- dist.ml(al, model)
       # Create a NeighbourNet network from the alignment
       nnet <- neighborNet(mldist)
       
-      ## Greedy tree using an adapted version of Kruskal's algorithm
       # Extract the splits from the NeighborNet network
       unordered_nw_splits <- as.splits(nnet)
-    } else if (run.splitstree == TRUE & is.na(splitstree_path) == FALSE){
+    } else if (run_splitstree == TRUE & is.na(splitstree_path) == FALSE){
       ## Calculate NeighborNet network using Splitstree 
+      unordered_nw_splits <- make.splitstree.neighbornet(alignment_path, splitstree_path, return.splits = TRUE)
     }
     
-    
-    
+    ## Greedy tree using an adapted version of Kruskal's algorithm (starting with unordered splits from NeighborNet network)
     # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
     nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
     # Find the list of compatible splits in the maximum weight tree
@@ -688,9 +687,6 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 
 
 #### Utility functions ####
-alignment_path <- "/Users/caitlin/Downloads/exp1_00001_0005_008_0.001_output_alignment.fa"
-splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree
   # Convert fasta to nexus

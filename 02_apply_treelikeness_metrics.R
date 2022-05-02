@@ -68,6 +68,8 @@ exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, 
                       tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE,
                       mc.cores = num_cores)
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
+exp1_df_name <- paste0(local_directory, "exp1_treelikeness_metrics_results.csv")
+write.csv(exp1_df, exp1_df_name, row.names = FALSE)
 
 # For experiment 2:
 exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
@@ -79,6 +81,8 @@ exp2_list <- mclapply(exp2_als, treelikeness.metrics.simulations, iqtree2_path, 
                       tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE,
                       mc.cores = num_cores)
 exp2_df <- as.data.frame(do.call("rbind", exp2_list))
+exp2_df_name <- paste0(local_directory, "exp2_treelikeness_metrics_results.csv")
+write.csv(exp2_df, exp2_df_name, row.names = FALSE)
 
 
 # Print list of alignments that do not have treelikeness results files

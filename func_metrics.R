@@ -691,8 +691,11 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree
   # Convert fasta to nexus (if the conversion has not already occured)
-  if (file.exists(paste0(alignment_path,"_converted.nex")) == FALSE){
+  check_nexus_path <- paste0(alignment_path,"_converted.nex")
+  if (file.exists(check_nexus_path) == FALSE){
     nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  } else if (file.exists(check_nexus_path) == TRUE) {
+    nexus_alignment_path <- check_nexus_path
   }
   # Name output path
   splits_output_path <- paste0(alignment_path, "_Splitstree_NeighborNet_splits.nex")

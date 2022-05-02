@@ -15,26 +15,17 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 #### Treelikeness metric functions ####
 tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
-                            check_iqtree_log_for_identical_sequences = TRUE, run_splitstree = FALSE, 
+                            check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, 
                             splitstree_path = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
   if (check_iqtree_log_for_identical_sequences == TRUE){
-    iqtree_log_file <- paste0(alignment_path, ".log")
-    log_lines <- readLines(iqtree_log_file) 
-    identical_check_1 <- grep("identical sequences \\(see below\\) will be ignored for subsequent analysis", log_lines)
-    identical_check_2.1 <- grep("is identical to", log_lines)
-    identical_check_2.2 <- grep("but kept for subsequent analysis", log_lines)
+    # Check whether this alignment contains any identical sequences
+    identical_check <- check.iqtree.log.for.identical.sequences(alignment_path, sequence_format = sequence_format)
+    identical_sequences_present <- as.logical(identical_check[["identical_sequences_present"]])
     
-    # Check for whether identical sequences are present
-    if ((length(identical_check_1) > 0) |
-        (length(identical_check_2.1) > 0 & length(identical_check_2.2) > 0)){
-      identical_sequences_present = TRUE
-    } else {
-      identical_sequences_present = FALSE
-    }
-    
+    # If there are any identical sequences, do not run the tree proportion code
     if (identical_sequences_present == TRUE){
       # If there are identical sequences, do not run tree proportion code: will not estimate network nicely
       run_tree_proportion = FALSE
@@ -42,13 +33,15 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
       # If there are no identical sequences, run tree proportion code
       run_tree_proportion = TRUE
     }
-  } else {
+    
+  } else  if (check_iqtree_log_for_identical_sequences == FALSE) {
     # If not checking for identical sequences in IQ-Tree log file, just proceed to tree proportion code
     run_tree_proportion = TRUE
+    identical_sequences_present = NA
   }
   
+  ## Run the tree proportion metric
   if (run_tree_proportion == TRUE){
-    
     if (run_splitstree == FALSE){
       ## Calculate NeighborNet network in R
       
@@ -112,11 +105,17 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
     ## Return result
     # Return the tree proportion value
     return(tree_proportion)
+    
   } else if (run_tree_proportion == FALSE){
-    # If there are identical sequences, the neighborNet function will not work nicely to calculate tree proportion
-    # Report that information
-    tree_proportion = "identical_seqs_no_tree_proportion"
-    return(tree_proportion)
+    if (identical_sequences_present == TRUE){
+      # If there are identical sequences, the neighborNet function will not work nicely to calculate tree proportion
+      # Report that information
+      tree_proportion = "identical_seqs_no_tree_proportion"
+      return(tree_proportion)
+    } else {
+      tree_proportion = "did_not_run"
+      return(tree.proportion)
+    }
   }
 }
 
@@ -368,24 +367,39 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
     system(call)
   }
   
-  ## Extract results from likelihood map
-  iq_log <- readLines(iq_file)
-  ind <- grep("Number of fully resolved  quartets",iq_log)
-  resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-  ind <- grep("Number of partly resolved quartets",iq_log)
-  partly_resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-  ind <- grep("Number of unresolved",iq_log)
-  unresolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-  total_q <- (resolved_q+partly_resolved_q+unresolved_q)
-  prop_resolved <- resolved_q/total_q
+  identical_check <- check.iqtree.log.for.identical.sequences(alignment_path, sequence_format = sequence_format)
+  identical_sequences_present <- as.logical(identical_check[["identical_sequences_present"]])
+  num_unique_taxa <- as.numeric(identical_check[["number_unique_taxa"]])
   
-  ## Collate results into a vector
-  lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
-  names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
-                         "total_num_quartets", "proportion_resolved_quartets")
-  
-  ## Return results
-  return(lm_results)
+  ## Need four or more taxa to conduct likelihood mapping
+  if (num_unique_taxa >= 4){
+    ## Extract results from likelihood map
+    iq_log <- readLines(iq_file)
+    ind <- grep("Number of fully resolved  quartets",iq_log)
+    resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+    ind <- grep("Number of partly resolved quartets",iq_log)
+    partly_resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+    ind <- grep("Number of unresolved",iq_log)
+    unresolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+    total_q <- (resolved_q+partly_resolved_q+unresolved_q)
+    prop_resolved <- resolved_q/total_q
+    
+    ## Collate results into a vector
+    lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
+    names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
+                           "total_num_quartets", "proportion_resolved_quartets")
+    
+    ## Return results
+    return(lm_results)
+  } else {
+    ## Collate results into a vector
+    lm_results <- rep(paste0(num_unique_taxa, "_unique_taxa_no_likelihood_map"), 5)
+    names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
+                           "total_num_quartets", "proportion_resolved_quartets")
+    
+    ## Return results
+    return(lm_results)
+  }
 }
 
 
@@ -704,7 +718,7 @@ make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.
     # Assemble the SplitsTree 4 command
     splitstree_command <- paste0(splitstree_path, " -g -x 'OPEN FILE=", nexus_alignment_path,
                                  "; ASSUME chartransform =Uncorrected_P HandleAmbiguousStates=Ignore Normalize=true;", 
-                                 "ASSUME disttransform=NeighbourNet; SAVE FILE=",
+                                 "ASSUME disttransform=NeighborNet; SAVE FILE=",
                                  splits_output_path," REPLACE=yes; QUIT'")
     # Call SplitsTree 4
     system(splitstree_command)
@@ -790,6 +804,83 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
   
   ## Output file name and path for nexus file
   return(nexus_alignment_path)
+}
+
+
+
+check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_format = "DNA"){
+  ## Function to check whether every sequence in an alignment is unique, using the IQ-Tree log file
+  
+  # Open IQ-Tree log file
+  iqtree_log_file <- paste0(alignment_path, ".log")
+  log_lines <- readLines(iqtree_log_file) 
+  
+  # Find number of sequences in original alignment
+  num_taxa_line <- strsplit(log_lines[grep("Constructing alignment: done in", log_lines) + 1], " ")[[1]]
+  num_total_taxa <- num_taxa_line[3]
+  
+  # Check log file to see if identical sequences are present
+  identical_check_1 <- grep("identical sequences \\(see below\\) will be ignored for subsequent analysis", log_lines)
+  identical_check_2.1 <- grep("is identical to", log_lines)
+  identical_check_2.2 <- grep("but kept for subsequent analysis", log_lines)
+  identical_check_3 <- grep("WARNING: Your alignment contains too many identical sequences!", log_lines)
+  identical_check_4.1 <- grep("\\(identical to", log_lines)
+  identical_check_4.2 <- grep("\\) is ignored but added at the end", log_lines)
+  
+  # If one or more line indicating identical sequences is present, then identical sequences are present
+  if ((length(identical_check_1) > 0) |
+      (length(identical_check_2.1) > 0 & length(identical_check_2.2) > 0) |
+      (length(identical_check_3) > 0) |
+      (length(identical_check_4.1) > 0 & length(identical_check_4.2) > 0)){
+    identical_sequences_present = TRUE
+  } else {
+    identical_sequences_present = FALSE
+  }
+  
+  # Determine the number of unique sequences 
+  # If no identical sequences are present, the number of unique sequences will be equal to the number of taxa
+  if (identical_sequences_present == TRUE){
+    # Find the alignment with only unique sequences
+    unique_seq_check_1 <- grep("For your convenience alignment with unique sequences printed to", log_lines)[1]
+    if (length(unique_seq_check_1) > 0){
+      unique_seq_path_1 <- gsub(" ", "", gsub("For your convenience alignment with unique sequences printed to","",log_lines[unique_seq_check_1]))
+    } else {
+      unique_seq_path_1 <- NA
+    }
+    unique_seq_check_2 <- grep("Alignment was printed to ", log_lines)[1]
+    if (length(unique_seq_check_2) > 0){
+      unique_seq_path_2 <- gsub(" ", "", gsub("Alignment was printed to ","",log_lines[unique_seq_check_2]))
+    } else {
+      unique_seq_path_2 <- NA
+    }
+    
+    # If one or more paths exist, open the phylip file containing the identical sequences
+    if (length(unique_seq_check_1) > 0 & length(unique_seq_check_2) > 0 &
+        is.na(unique_seq_check_1) == FALSE & is.na(unique_seq_check_2) == FALSE){
+      if (identical(unique_seq_path_1, unique_seq_path_2) == TRUE){
+        # If both paths are identical, doesn't matter which one is selected
+        unique_seq_path <- unique_seq_path_1
+      } else {
+        # If paths are not identical, select the one that explicitly was stated to contain unique sequences
+        unique_seq_path <- unique_seq_path_1
+      }
+      
+      # Open the unique sequences file and determine how many unique taxa are present
+      unique_seq_dna <- read.phyDat(unique_seq_path, format = "phylip", type = sequence_format)
+      number_unique_taxa <- length(names(unique_seq_dna))
+    } else {
+      number_unique_taxa = NA
+    }
+  } else if (identical_sequences_present == FALSE) {
+    # If no paths to uniqueseq files exist, set number of identical sequences to NA
+    number_unique_taxa <- num_total_taxa
+  }
+  
+  # Prepare output
+  output_vector <- c(identical_sequences_present, num_total_taxa, number_unique_taxa)
+  names(output_vector) <- c("identical_sequences_present", "number_total_taxa", "number_unique_taxa")
+  
+  return(output_vector)
 }
 
 

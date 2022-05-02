@@ -691,8 +691,8 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 alignment_path <- "/Users/caitlin/Downloads/exp1_00001_0005_008_0.001_output_alignment.fa"
 splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 
-make.splitstree.neighbornet <- function(alignment_path, splitstree_path){
-  ## Construct a NeighborNet network
+make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
+  ## Construct a NeighborNet network using SplitsTree
   # Convert fasta to nexus
   nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
   # Name output path
@@ -708,7 +708,15 @@ make.splitstree.neighbornet <- function(alignment_path, splitstree_path){
     system(splitstree_command)
   }
   
-  output_list <- c("splits_filepath" = splits_output_path, "all_splits" = splits)
+  # Open the splits from SplitsTree
+  splits <- read.nexus.splits(splits_output_path)
+  
+  # Return either the splits (when return.splits == TRUE) or the file name of the splits_output_path (when return.splits == FALSE)
+  if (return.splits == TRUE){
+    return(splits)
+  } else if (return.splits == FALSE){
+    return(splits_output_path)
+  }
 }
 
 

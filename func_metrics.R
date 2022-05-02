@@ -367,6 +367,7 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
     system(call)
   }
   
+  # Check for identical taxa
   identical_check <- check.iqtree.log.for.identical.sequences(alignment_path, sequence_format = sequence_format)
   identical_sequences_present <- as.logical(identical_check[["identical_sequences_present"]])
   num_unique_taxa <- as.numeric(identical_check[["number_unique_taxa"]])
@@ -425,6 +426,7 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
       system(call)
     }
   }
+  
   ## Check if the site concordance factors have already been calculated: if they have not, calculate them
   if (file.exists(paste0(alignment_path,".treefile.cf.stat")) == FALSE){
     # Create the command and call it in the system

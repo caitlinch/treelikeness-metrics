@@ -104,7 +104,6 @@ exp2_apply_metrics <- exp2_als[which(file.exists(gsub("output_alignment.fa", "tr
 write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
 
 
-
 # #### Tests ####
 # # test params
 # alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00004_0050_001_1/exp1_00004_0050_001_1_output_alignment.fa"
@@ -129,3 +128,20 @@ write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
 #                                  supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
 #                                  iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA, 
 #                                  tree_proportion_remove_trivial_splits = TRUE, sequence_format = "DNA", return_collated_data = TRUE)
+#
+# # To check number of completed runs:
+# d <- "/data/caitlin/treelikeness_metrics/exp_1/"
+# all_files <- list.files(d, recursive = TRUE)
+# aln_files <- grep("_output_alignment", all_files, value = TRUE)
+# als <- grep(".fa.",aln_files, value = TRUE, invert = TRUE)
+# col_files <- grep("collated", all_files, value = TRUE)
+# tl_files <- grep("treelikeness_metrics", all_files, value = TRUE)
+# tl_files <- grep("treelikeness_results", all_files, value = TRUE)
+# d <- "/data/caitlin/treelikeness_metrics/exp_2/"
+# all_files <- list.files(d, recursive = TRUE)
+# aln_files <- grep("_output_alignment", all_files, value = TRUE)
+# als <- grep(".fa.",aln_files, value = TRUE, invert = TRUE)
+# col_files <- grep("collated", all_files, value = TRUE)
+# tl_files <- grep("treelikeness_metrics", all_files, value = TRUE)
+# tl_files <- grep("treelikeness_results", all_files, value = TRUE)
+

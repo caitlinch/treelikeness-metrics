@@ -716,18 +716,11 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     write.csv(results_df, file = df_name, row.names = FALSE)
   }
   
-  ## Collate results df and parameter df into one file with all relevant information
-  # Check whether a parameters_csv file exists to collate
-  if (!identical((agrep("parameters", aln_folder_files)), integer(0))) {
-    # Open parameters file
-    aln_params_df <- read.csv(paste0(replicate_folder, grep("parameters", aln_folder_files, value = TRUE)))
-    raw_output_df <- cbind(aln_params_df, results_df)
-    write.csv(raw_output_df, file = collated_df_name, row.names = FALSE)
-  }
-  
   ## Return df so it can be collated using lapply
   if (return_collated_data == TRUE){
+    # Check whether a parameters_csv file exists to collate
     if (!identical((agrep("parameters", aln_folder_files)), integer(0))) {
+      ## Collate results df and parameter df into one file with all relevant information
       # If you have a parameters csv, you can output the collated df (cbind of parameter df with treelikeness test results df)
       # Open parameters file
       aln_params_df <- read.csv(paste0(replicate_folder, grep("parameters", aln_folder_files, value = TRUE)))

@@ -362,32 +362,42 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   ## Remove phylogenetically uninformative sites from the alignment
   # Uninformative sites can bias the TIGER values - see List (2021)
   alignment <- read.FASTA(alignment_path, type = sequence_format)
+  n_sites <- length(alignment[[1]])
   # Detect informative sites (the sites to keep)
   is_inds <- pis(as.matrix(alignment), what = "index")
-  # Index the alignment, to reduce it to just the informative sites
-  informative_alignment <- as.matrix.DNAbin(alignment)[,c(is_inds)]
-  # Write the informative alignment to disk
-  informative_alignment_path <- paste0(alignment_path, "_ParsimonyInformativeSites_only.phy")
-  write.phy(informative_alignment, file = informative_alignment_path)
   
-  ## Run fast_TIGER
-  # Change sequence format to either "dna" or "aa" (only allowable data type names)
-  if (sequence_format == "DNA"){
-    data_type = "dna"
-  } else if ((sequence_format == "AA") | (sequence_format == "Protein")){
-    data_type = "protein"
+  if (length(is_inds) > 0) {
+    ## If there is one or more informative sites:
+    # Index the alignment, to reduce it to just the informative sites
+    informative_alignment <- as.matrix.DNAbin(alignment)[,c(is_inds)]
+    # Write the informative alignment to disk
+    informative_alignment_path <- paste0(alignment_path, "_ParsimonyInformativeSites_only.phy")
+    write.phy(informative_alignment, file = informative_alignment_path)
+    
+    ## Run fast_TIGER
+    # Change sequence format to either "dna" or "aa" (only allowable data type names)
+    if (sequence_format == "DNA"){
+      data_type = "dna"
+    } else if ((sequence_format == "AA") | (sequence_format == "Protein")){
+      data_type = "protein"
+    }
+    # Create system command and call fast_TIGER
+    call <- paste0(fast_TIGER_path, " ", data_type, " ", informative_alignment_path)
+    system(call)
+    
+    ## Open the results file and output mean TIGER value
+    # TIGER values range from 0 to 1, with values closer to 1 indicating more stable/consistent sites
+    TIGER_file <- paste0(informative_alignment_path, "_r8s.txt")
+    TIGER_values <- as.numeric(readLines(TIGER_file))
+    # Calculate the mean TIGER value
+    mean_TIGER_value <- mean(TIGER_values)
+  } else if (length(is_inds) == 0){
+    ## If there are 0 informative sites:
+    # Record and return that information
+    mean_TIGER_value <- "0_informative_sites"
   }
-  # Create system command and call fast_TIGER
-  call <- paste0(fast_TIGER_path, " ", data_type, " ", informative_alignment_path)
-  system(call)
   
-  ## Open the results file and output mean TIGER value
-  # TIGER values range from 0 to 1, with values closer to 1 indicating more stable/consistent sites
-  TIGER_file <- paste0(informative_alignment_path, "_r8s.txt")
-  TIGER_values <- as.numeric(readLines(TIGER_file))
-  # Calculate the mean TIGER value
-  mean_TIGER_value <- mean(TIGER_values)
-  # Return the mean value
+  # Return the output value
   return(mean_TIGER_value)
 }
 

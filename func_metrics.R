@@ -430,18 +430,15 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
     lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
     names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
                            "total_num_quartets", "proportion_resolved_quartets")
-    
-    ## Return results
-    return(lm_results)
   } else {
     ## Collate results into a vector
     lm_results <- rep(paste0(num_unique_taxa, "_unique_taxa_no_likelihood_map"), 5)
     names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
                            "total_num_quartets", "proportion_resolved_quartets")
-    
-    ## Return results
-    return(lm_results)
   }
+  
+  ## Return results
+  return(lm_results)
 }
 
 

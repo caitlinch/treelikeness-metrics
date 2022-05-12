@@ -20,13 +20,13 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
-  if (check_iqtree_log_for_identical_sequences == TRUE){
+  if (check_iqtree_log_for_identical_sequences == TRUE) {
     # Check whether this alignment contains any identical sequences
     identical_check <- check.iqtree.log.for.identical.sequences(alignment_path, sequence_format = sequence_format)
     identical_sequences_present <- as.logical(identical_check[["identical_sequences_present"]])
     
     # If there are any identical sequences, do not run the tree proportion code
-    if (identical_sequences_present == TRUE){
+    if (identical_sequences_present == TRUE) {
       # If there are identical sequences, do not run tree proportion code: will not estimate network nicely
       run_tree_proportion = FALSE
     } else if (identical_sequences_present == FALSE) {
@@ -41,8 +41,8 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
   }
   
   ## Run the tree proportion metric
-  if (run_tree_proportion == TRUE){
-    if (run_splitstree == FALSE){
+  if (run_tree_proportion == TRUE) {
+    if (run_splitstree == FALSE) {
       ## Calculate NeighborNet network in R
       
       # Identify file type of alignment
@@ -63,60 +63,101 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
       
       # Extract the splits from the NeighborNet network
       unordered_nw_splits <- as.splits(nnet)
-    } else if (run_splitstree == TRUE & is.na(splitstree_path) == FALSE){
+    } else if (run_splitstree == TRUE & is.na(splitstree_path) == FALSE) {
       ## Calculate NeighborNet network using Splitstree 
       unordered_nw_splits <- make.splitstree.neighbornet(alignment_path, splitstree_path, return.splits = TRUE)
     }
     
-    ## Greedy tree using an adapted version of Kruskal's algorithm (starting with unordered splits from NeighborNet network)
-    # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
-    nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
-    # Find the list of compatible splits in the maximum weight tree
-    # Add the first edge (i.e. the edge with the largest weight) to the set of edges comprising the maximum weight spanning tree
-    compatible_splits <- c(1)
-    # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
-    # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
-    for (i in 2:length(nw_splits)){
-      # Assign the number of i to be the current split being tested for compatibility
-      current_split <- i
-      # Test whether the current split is compatible with all other splits that have been added
-      test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
-      # If the split is compatible, add it to the list of compatible splits
-      if (test_compatibility == TRUE){
-        compatible_splits <- c(compatible_splits, current_split)
+    ## Identify splits in greedy tree
+    if (length(unordered_nw_splits) == 1) {
+      # If only one split in network, then it is compatible with itself. Therefore the set of splits in the tree is identical to the set of splits in the network
+      nw_splits <- unordered_nw_splits
+      t_splits <- nw_splits
+    } else if (length(unordered_nw_splits) > 1) {
+      ## Greedy tree using an adapted version of Kruskal's algorithm (starting with unordered splits from NeighborNet network)
+      # Rearrange the splits in order from strongest to weakest (decreasing order by weight)
+      nw_splits <- unordered_nw_splits[c(order(attr(unordered_nw_splits, "weight"), decreasing = TRUE))]
+      # Find the list of compatible splits in the maximum weight tree
+      # Add the first edge (i.e. the edge with the largest weight) to the set of edges comprising the maximum weight spanning tree
+      compatible_splits <- c(1)
+      # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
+      # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
+      for (i in 2:length(nw_splits)) {
+        # Assign the number of i to be the current split being tested for compatibility
+        current_split <- i
+        # Test whether the current split is compatible with all other splits that have been added
+        test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
+        # If the split is compatible, add it to the list of compatible splits
+        if (test_compatibility == TRUE){
+          compatible_splits <- c(compatible_splits, current_split)
+        }
       }
-    }
-    # Take the tree as the set of compatible splits
-    t_splits <- nw_splits[compatible_splits]
-    
-    ## Manage trivial splits
-    # If requested, remove all trivial splits (using phangorn::removeTrivialSplits)
-    if (remove_trivial_splits == TRUE){
-      t_splits <- removeTrivialSplits(t_splits)
-      nw_splits <- removeTrivialSplits(nw_splits)
+      # Take the tree as the set of compatible splits
+      t_splits <- nw_splits[compatible_splits]
     }
     
-    ## Calculate tree proportion
-    # Calculate the proportion of split weights included in the network are present in the tree
-    t_split_weight_sum <- sum(attr(t_splits, "weight"))
-    nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
-    tree_proportion <- t_split_weight_sum/nw_split_weight_sum
-    
-    ## Return result
-    # Return the tree proportion value
-    return(tree_proportion)
-    
-  } else if (run_tree_proportion == FALSE){
-    if (identical_sequences_present == TRUE){
+    ## Remove trivial splits (if specified), then calculate tree proportion
+    if (remove_trivial_splits == TRUE) {
+      # Check for presence and number of trivial splits
+      check_t <- trivial.splits.present(t_splits)
+      check_nw <- trivial.splits.present(t_splits)
+      # If present, remove trivial splits in tree
+      if (check_t$TrivialSplitsPresent == TRUE & check_t$Num_non_trivial_splits > 0) {
+        # If one or more trivial splits present in tree, remove all trivial splits (using phangorn::removeTrivialSplits)
+        t_splits <- removeTrivialSplits(t_splits)
+      } else if (check_t$TrivialSplitsPresent == TRUE & check_t$Num_non_trivial_splits == 0) {
+        # If only one split is present in tree and it is trivial, set t_splits to NA
+        t_splits <- NA
+      }
+      # If present, remove trivial splits in network
+      if (check_nw$TrivialSplitsPresent == TRUE & check_nw$Num_non_trivial_splits > 0){
+        # If one or more trivial splits present in network, remove all trivial splits (using phangorn::removeTrivialSplits)
+        nw_splits <- removeTrivialSplits(nw_splits)
+      } else if (check_nw$TrivialSplitsPresent == TRUE & check_nw$Num_non_trivial_splits == 0) {
+        # If only one split is present in network and it is trivial, set nw_splits to NA
+        nw_splits <- NA
+      }
+      ## Calculate tree proportion
+      if (is.na(t_splits) & is.na(nw_splits)) {
+        # If both tree and network are NA, that means there were no non-trivial splits in the alignment
+        # Return that value
+        tree_proportion <- "Only_trivial_splits_in_network_and_tree"
+      } else if (!is.na(t_splits) & !is.na(nw_splits)) {
+        # If neither tree or network are NA, that means there were non-trivial splits in both
+        ## Calculate tree proportion
+        t_split_weight_sum <- sum(attr(t_splits, "weight"))
+        nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
+        tree_proportion <- t_split_weight_sum/nw_split_weight_sum
+      } else if (is.na(t_splits) & !is.na(nw_splits)) {
+        # If only trivial splits in tree and other splits in network, means no splits from network are included in tree
+        # Therefore tree proportion must be 0 (no trees in network also in tree: tree proportion = 0/x = 0)
+        tree_proportion <- "0_no_splits_in_tree"
+      } else if (!is.na(t_splits) & is.na(nw_splits)) {
+        # If only trivial splits in network and not in tree, something must have gone wrong
+        # Report that
+        tree_proportion <- "0_no_splits_in_network"
+      }
+    } else if (remove_trivial_splits == FALSE) {
+      ## Do NOT check for trivial splits
+      ## Calculate tree proportion
+      # Calculate the proportion of split weights included in the network are present in the tree
+      t_split_weight_sum <- sum(attr(t_splits, "weight"))
+      nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
+      tree_proportion <- t_split_weight_sum/nw_split_weight_sum
+    }
+  } else if (run_tree_proportion == FALSE) {
+    if (identical_sequences_present == TRUE) {
       # If there are identical sequences, the neighborNet function will not work nicely to calculate tree proportion
       # Report that information
       tree_proportion = "identical_seqs_no_tree_proportion"
-      return(tree_proportion)
     } else {
       tree_proportion = "did_not_run"
-      return(tree.proportion)
     }
   }
+  
+  ## Return result
+  # Return the tree proportion value
+  return(tree_proportion)
 }
 
 
@@ -654,7 +695,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
-                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = TRUE, 
+                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
                                        run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
     
     # Assemble results into a dataframe and save
@@ -1039,6 +1080,22 @@ remove.duplicate.splits <- function(df){
   df <- df[!duplicated(df$split_ids), ]
   # Return dataframe with each comparison of two splits included only once
   return(df)
+}
+
+
+
+trivial.splits.present <- function(s){
+  ## Small  function to check whether trivial splits are present and return the number of trivial splits and the number of non-trivial splits
+  nSplits <- length(s)
+  nTips <- length(attr(s, "labels"))
+  l <- lengths(s)
+  trivial_splits_present <- as.logical((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
+  num_trivial_splits <- which((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
+  num_non_trivial_splits <- nSplits - num_trivial_splits
+  # Return output
+  op <- list("TrivialSplitsPresent" = trivial_splits_present, "Num_splits" = nSplits, 
+             "Num_trivial_splits" = num_trivial_splits, "Num_non_trivial_splits" = num_non_trivial_splits)
+  return(op)
 }
 
 

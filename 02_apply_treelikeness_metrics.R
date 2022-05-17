@@ -55,8 +55,9 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
 exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
 exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-# Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 (too many identical sequences)
+# Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
 exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE)
+exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE)
 # Apply treelikeness metrics to all alignments with substitution rate of 1e-03 (0.001) or higher
 exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
                       supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 

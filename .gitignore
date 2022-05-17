@@ -23,5 +23,9 @@
 *.utf8.md
 *.knit.md
 
+# Previews/pdfs of README.md file
+README.html
+README.pdf
+
 # R Environment Variables
 .Renviron

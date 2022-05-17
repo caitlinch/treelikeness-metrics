@@ -58,7 +58,7 @@ exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
 # Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
 exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE)
 exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE)
-# Apply treelikeness metrics to all alignments with substitution rate of 1e-03 (0.001) or higher
+# Apply treelikeness metrics to all alignments with substitution rate of 1e-02 (0.01) or higher
 exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
                       supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
                       num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 

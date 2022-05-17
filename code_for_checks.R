@@ -27,6 +27,7 @@ return_collated_data = TRUE
 d <- "/data/caitlin/treelikeness_metrics/exp_1/"
 all_files <- list.files(d, recursive = TRUE)
 all_files <- grep("1e-04", all_files, value = TRUE, invert = TRUE)
+all_files <- grep("0.001", all_files, value = TRUE, invert = TRUE)
 aln_files <- grep("_output_alignment", all_files, value = TRUE)
 als <- grep(".fa.",aln_files, value = TRUE, invert = TRUE)
 col_files <- grep("collated", all_files, value = TRUE)
@@ -37,6 +38,7 @@ print(paste0(length(tl_files)/length(als)*100, " % Experiment 1 alignments compl
 # To get unrun alignments:
 al_dirs <- list.dirs(d, full.names = FALSE)[2:length(list.dirs(d, full.names = FALSE))]
 al_dirs <- grep("1e-04", al_dirs, value = TRUE, invert = TRUE)
+al_dirs <- grep("0.001", al_dirs, value = TRUE, invert = TRUE)
 all_tl_files <- paste0(d, al_dirs, "/", al_dirs, "_treelikeness_results.csv")
 missing_tl_files <- all_tl_files[!file.exists(all_tl_files)]
 missing_als <- gsub("_treelikeness_results.csv", "_output_alignment.fa", missing_tl_files)

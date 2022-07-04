@@ -8,7 +8,7 @@
 
 #### 1. Set parameters ####
 # local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run.
-# repo_directory          <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
+# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
 # iqtree2_path            <- Path to IQ-Tree2.2-beta executable (this is the IQ-Tree2 release containing Alisim). 
 # fast_TIGER_path         <- Path to fast TIGER executable.
 # phylogemetric_path      <- Path to phylogemetric executable

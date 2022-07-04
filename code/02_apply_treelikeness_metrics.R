@@ -20,6 +20,9 @@ library(parallel)
 # splitstree_path         <- Path to SplitsTree 4 version 4.17.2 or above
 # num_cores               <- Number of parallel threads to use at once
 
+# run_exp1 <- Whether to apply the treelikeness test statistics to the first set of alignments
+# run_exp2 <- Whether to apply the treelikeness test statistics to the second set of alignments
+
 run_location = "soma"
 if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
@@ -36,58 +39,63 @@ if (run_location == "local"){
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
-  num_cores <- 20
+  num_cores <- 50
 }
 
+run_exp1 <- TRUE
+run_exp2 <- TRUE
 
-#### 3. Source functions from caitlinch/treelikeness_metrics ####
+
+#### 3. Prepare analyses ####
+# Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "func_metrics.R"))
 
+# Find the folders of simulated alignments
+exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 
 #### 4. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
 
-# Find the folders of simulated alignments
-exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
+if (run_exp1 == TRUE){
+  # For experiment 1:
+  exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
+  exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
+  exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
+  # Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
+  exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE)
+  exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE)
+  # Apply treelikeness metrics to all alignments with substitution rate of 1e-02 (0.01) or higher
+  exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                        supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+                        num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                        distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                        tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+                        sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
+                        redo = FALSE,
+                        mc.cores = num_cores)
+  exp1_df <- as.data.frame(do.call("rbind", exp1_list))
+  exp1_df_name <- paste0(local_directory, "exp1_treelikeness_metrics_results.csv")
+  write.csv(exp1_df, exp1_df_name, row.names = FALSE)
+}
 
-# For experiment 1:
-exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
-exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
-exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-# Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
-exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE)
-exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE)
-# Apply treelikeness metrics to all alignments with substitution rate of 1e-02 (0.01) or higher
-exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                      supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
-                      num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                      distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
-                      sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-                      redo = TRUE,
-                      mc.cores = num_cores)
-exp1_df <- as.data.frame(do.call("rbind", exp1_list))
-exp1_df_name <- paste0(local_directory, "exp1_treelikeness_metrics_results.csv")
-write.csv(exp1_df, exp1_df_name, row.names = FALSE)
-
-
-# For experiment 2:
-exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
-exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
-exp2_als <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
-exp2_list <- mclapply(exp2_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                      supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
-                      num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-                      distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
-                      sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-                      redo = TRUE,
-                      mc.cores = num_cores)
-exp2_df <- as.data.frame(do.call("rbind", exp2_list))
-exp2_df_name <- paste0(local_directory, "exp2_treelikeness_metrics_results.csv")
-write.csv(exp2_df, exp2_df_name, row.names = FALSE)
-
+if (run_exp2 == TRUE){
+  # For experiment 2:
+  exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
+  exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
+  exp2_als <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
+  exp2_list <- mclapply(exp2_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                        supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+                        num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                        distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                        tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+                        sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
+                        redo = TRUE,
+                        mc.cores = num_cores)
+  exp2_df <- as.data.frame(do.call("rbind", exp2_list))
+  exp2_df_name <- paste0(local_directory, "exp2_treelikeness_metrics_results.csv")
+  write.csv(exp2_df, exp2_df_name, row.names = FALSE)
+}
 
 # Print list of alignments that do not have treelikeness results files
 # Collect experiment 1 missing files

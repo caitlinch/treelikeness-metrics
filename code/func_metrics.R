@@ -100,7 +100,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
     if (remove_trivial_splits == TRUE) {
       # Check for presence and number of trivial splits
       check_t <- trivial.splits.present(t_splits)
-      check_nw <- trivial.splits.present(t_splits)
+      check_nw <- trivial.splits.present(nw_splits)
       # If present, remove trivial splits in tree
       if (check_t$TrivialSplitsPresent == TRUE & check_t$Num_non_trivial_splits > 0) {
         # If one or more trivial splits present in tree, remove all trivial splits (using phangorn::removeTrivialSplits)
@@ -118,21 +118,22 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
         nw_splits <- NA
       }
       ## Calculate tree proportion
-      if (is.na(t_splits) & is.na(nw_splits)) {
+      ## Check class: can only calculate tree proportion if both t_splits and nw_splits are class "splits"
+      if (class(t_splits) != "splits" & class(nw_splits) != "splits") {
         # If both tree and network are NA, that means there were no non-trivial splits in the alignment
         # Return that value
         tree_proportion <- "Only_trivial_splits_in_network_and_tree"
-      } else if (!is.na(t_splits) & !is.na(nw_splits)) {
+      } else if (class(t_splits) == "splits" & class(nw_splits) == "splits") {
         # If neither tree or network are NA, that means there were non-trivial splits in both
         ## Calculate tree proportion
         t_split_weight_sum <- sum(attr(t_splits, "weight"))
         nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
         tree_proportion <- t_split_weight_sum/nw_split_weight_sum
-      } else if (is.na(t_splits) & !is.na(nw_splits)) {
+      } else if (class(t_splits) != "splits" & class(nw_splits) == "splits") {
         # If only trivial splits in tree and other splits in network, means no splits from network are included in tree
         # Therefore tree proportion must be 0 (no trees in network also in tree: tree proportion = 0/x = 0)
         tree_proportion <- "0_no_splits_in_tree"
-      } else if (!is.na(t_splits) & is.na(nw_splits)) {
+      } else if (class(t_splits) != "splits" & class(nw_splits) != "splits") {
         # If only trivial splits in network and not in tree, something must have gone wrong
         # Report that
         tree_proportion <- "0_no_splits_in_network"
@@ -358,6 +359,55 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
   # Tree Independent Genertion of Evolutionary Rates
   # Function to calculate TIGER values from a multiple sequence alignment using the 
   #   pbfrandsen/fast_TIGER software (available here: https://github.com/pbfrandsen/fast_TIGER)
+  
+  ## Remove phylogenetically uninformative sites from the alignment
+  # Uninformative sites can bias the TIGER values - see List (2021)
+  alignment <- read.FASTA(alignment_path, type = sequence_format)
+  n_sites <- length(alignment[[1]])
+  # Detect informative sites (the sites to keep)
+  is_inds <- pis(as.matrix(alignment), what = "index")
+  
+  if (length(is_inds) > 0) {
+    ## If there is one or more informative sites:
+    # Index the alignment, to reduce it to just the informative sites
+    informative_alignment <- as.matrix.DNAbin(alignment)[,c(is_inds)]
+    # Write the informative alignment to disk
+    informative_alignment_path <- paste0(alignment_path, "_ParsimonyInformativeSites_only.phy")
+    write.phy(informative_alignment, file = informative_alignment_path)
+    
+    ## Run fast_TIGER
+    # Change sequence format to either "dna" or "aa" (only allowable data type names)
+    if (sequence_format == "DNA"){
+      data_type = "dna"
+    } else if ((sequence_format == "AA") | (sequence_format == "Protein")){
+      data_type = "protein"
+    }
+    # Create system command and call fast_TIGER
+    call <- paste0(fast_TIGER_path, " ", data_type, " ", informative_alignment_path)
+    system(call)
+    
+    ## Open the results file and output mean TIGER value
+    # TIGER values range from 0 to 1, with values closer to 1 indicating more stable/consistent sites
+    TIGER_file <- paste0(informative_alignment_path, "_r8s.txt")
+    TIGER_values <- as.numeric(readLines(TIGER_file))
+    # Calculate the mean TIGER value
+    mean_TIGER_value <- mean(TIGER_values)
+  } else if (length(is_inds) == 0){
+    ## If there are 0 informative sites:
+    # Record and return that information
+    mean_TIGER_value <- "0_informative_sites"
+  }
+  
+  # Return the output value
+  return(mean_TIGER_value)
+}
+
+
+
+TIGGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
+  # Tree Independent Genertion of Evolutionary Rates
+  # Function to calculate TIGER values from a multiple sequence alignment using the 
+  #   brettc/tigger software (available here: https://github.com/brettc/tigger)
   
   ## Remove phylogenetically uninformative sites from the alignment
   # Uninformative sites can bias the TIGER values - see List (2021)
@@ -635,7 +685,8 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                                              distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                                              tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
-                                             sequence_format = "DNA", return_collated_data = FALSE){
+                                             sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
+                                             redo = FALSE){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
   
@@ -657,7 +708,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
   if (file.exists(df_name) == TRUE){
     ## Read in the results csv file
     results_df <- read.csv(df_name)
-  } else if (file.exists(df_name) == FALSE){
+  } else if (file.exists(df_name) == FALSE | redo == TRUE){
     ## Apply all treelikeness test statistics to generate the results csv file
     
     # Determine the number of taxa (needed for number of quartets in likelihood mapping and sCFs)
@@ -695,8 +746,12 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
     mean_q_residual <- q_residual_results$mean_q_residual
-    # Apply TIGER (Cummins and McInerney 2011)
-    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
+    if (apply.TIGER == TRUE){
+      # Apply TIGER (Cummins and McInerney 2011)
+      mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
+    } else if (apply.TIGER == FALSE){
+      mean_tiger_value <- "no_TIGER_run"
+    }
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
@@ -1089,8 +1144,9 @@ trivial.splits.present <- function(s){
   nSplits <- length(s)
   nTips <- length(attr(s, "labels"))
   l <- lengths(s)
-  trivial_splits_present <- as.logical((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
-  num_trivial_splits <- which((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
+  split_number_trivial <- as.logical((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
+  trivial_splits_present <- TRUE %in% split_number_trivial
+  num_trivial_splits <- length(which((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L))))
   num_non_trivial_splits <- nSplits - num_trivial_splits
   # Return output
   op <- list("TrivialSplitsPresent" = trivial_splits_present, "Num_splits" = nSplits, 

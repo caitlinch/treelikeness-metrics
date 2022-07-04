@@ -705,7 +705,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
   
   ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
-  if (file.exists(df_name) == TRUE){
+  if (file.exists(df_name) == TRUE & redo == FALSE){
     ## Read in the results csv file
     results_df <- read.csv(df_name)
   } else if (file.exists(df_name) == FALSE | redo == TRUE){

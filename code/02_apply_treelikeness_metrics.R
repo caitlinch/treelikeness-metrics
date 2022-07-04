@@ -82,7 +82,7 @@ exp2_list <- mclapply(exp2_als, treelikeness.metrics.simulations, iqtree2_path, 
                       distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                       tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
                       sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-                      redo = FALSE,
+                      redo = TRUE,
                       mc.cores = num_cores)
 exp2_df <- as.data.frame(do.call("rbind", exp2_list))
 exp2_df_name <- paste0(local_directory, "exp2_treelikeness_metrics_results.csv")

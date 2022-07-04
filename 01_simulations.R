@@ -56,7 +56,7 @@ gene_length <- 1000
 sequence_type <- "DNA"
 taxa_vec <- c(5,10,20,50,100)
 num_reps <- 10
-tree_depth_random <- c(0.0001, 0.001, 0.01, 0.1, 1)
+tree_depth_random <- c(0.01, 0.1, 1)
 tree_depth_coalescent <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
 number_gene_trees <- 1000
 r_vec <- seq(0, 0.5, 0.05)

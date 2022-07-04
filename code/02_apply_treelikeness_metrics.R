@@ -57,7 +57,7 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 #### 4. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
 
-if (run_exp1 == TRUE){
+if (run_exp1 == FALSE){
   # For experiment 1:
   exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
   exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)

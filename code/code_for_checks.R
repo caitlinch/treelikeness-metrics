@@ -1,20 +1,24 @@
 #### Tests ####
-# test params
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00004_0050_001_1/exp1_00004_0050_001_1_output_alignment.fa"
+# test params for local run
+#alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/exp_1/exp1_00004_0050_001_1/exp1_00004_0050_001_1_output_alignment.fa"
 iqtree2_path <- "iqtree2.2-beta"
 splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
 phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
 fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+
+# For running an individual alignment manually through treelikeness.metrics.simulations code
 supply_number_of_taxa = FALSE
 number_of_taxa = NA
 num_iqtree2_threads = "AUTO"
-num_iqtree2_scf_quartets = 100
 iqtree_substitution_model = "JC"
 distance_matrix_substitution_method = "JC69"
 num_phylogemetric_threads = NA
+run_splitstree_for_tree_proportion = TRUE
 tree_proportion_remove_trivial_splits = TRUE
 sequence_format = "DNA"
 return_collated_data = TRUE
+apply.TIGER = FALSE
+redo = FALSE
 
 
 # treelikeness.metrics.simulations(alignment_path,

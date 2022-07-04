@@ -17,3 +17,17 @@ repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_met
 
 #### 2. Prepare analyses ####
 # Open packages
+
+
+# List all data files
+data_files <- paste0(data_directory, list.files(data_directory))
+
+
+# Create folder for plots
+plot_directory <- paste0(output_directory, "plots/")
+if (dir.exists(plot_directory) == FALSE){dir.create(plot_directory)}
+
+#### 3. Analyse output from Experiment 1 ####
+# Open data file from Experiment 1 as a dataframe
+exp1_data_file <- grep("exp1", grep("treelikeness_metrics_results", data_files, value = TRUE), value = TRUE)
+exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)

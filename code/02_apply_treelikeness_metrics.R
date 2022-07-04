@@ -97,14 +97,18 @@ if (run_exp2 == TRUE){
   write.csv(exp2_df, exp2_df_name, row.names = FALSE)
 }
 
-# Print list of alignments that do not have treelikeness results files
+
+#### 5. Print list of alignments that do not have treelikeness results files ####
 # Collect experiment 1 missing files
 exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
 exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
 exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
+exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 1e-04 (too many identical sequences)
+exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 0.001 (too many identical sequences)
 exp1_apply_metrics <- exp1_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp1_als)) == FALSE)]
 # Output list of experiment 1 missing files
 write(exp1_apply_metrics, paste0(local_directory, "exp1_missing_results.csv"))
+
 # Collect experiment 2 missing files
 exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
 exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)

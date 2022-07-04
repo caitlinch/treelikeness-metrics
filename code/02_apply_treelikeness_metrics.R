@@ -63,9 +63,9 @@ exp1_list <- mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, 
                       supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
                       num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                       distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
-                      sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
-                      redo = FALSE,
+                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+                      sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
+                      redo = TRUE,
                       mc.cores = num_cores)
 exp1_df <- as.data.frame(do.call("rbind", exp1_list))
 exp1_df_name <- paste0(local_directory, "exp1_treelikeness_metrics_results.csv")
@@ -80,7 +80,7 @@ exp2_list <- mclapply(exp2_als, treelikeness.metrics.simulations, iqtree2_path, 
                       supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
                       num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                       distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
+                      tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
                       sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
                       redo = TRUE,
                       mc.cores = num_cores)

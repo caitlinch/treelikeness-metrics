@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness_metrics/01_simulations.R
+# /caitlinch/treelikeness-metrics/01_simulations.R
 # Caitlin Cherryh 2022
 
 # This program will simulate alignments with varying levels of treelikeness
@@ -10,14 +10,7 @@
 
 
 
-#### 1. Open packages ####
-library(ape)
-library(phytools)
-library(parallel)
-
-
-
-#### 2. Set parameters ####
+#### 1. Set parameters ####
 # local_directory                 <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory                  <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
 # ms_path                         <- Path to ms executable 
@@ -65,7 +58,14 @@ alisim_gene_tree_length <- NA
 
 
 
-#### 3. Source functions from caitlinch/treelikeness_metrics and prepare variables ####
+#### 2. Open packages ####
+library(ape)
+library(phytools)
+library(parallel)
+
+
+
+#### 3. Prepare analyses ####
 source(paste0(repo_directory, "func_simulating_alignments.R"))
 
 ## Prepare variables that remain stable for all experiments using the input parameters

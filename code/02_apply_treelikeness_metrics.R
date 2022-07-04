@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness_metrics/02_apply_treelikeness_metrics.R
+# /caitlinch/treelikeness-metrics/02_apply_treelikeness_metrics.R
 # Caitlin Cherryh 2022
 
 # This program will simulate alignments with varying levels of treelikeness
@@ -6,12 +6,7 @@
 
 
 
-#### 1. Open packages ####
-library(parallel)
-
-
-
-#### 2. Set parameters ####
+#### 1. Set parameters ####
 # local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory          <- Location of caitlinch/treelikeness_metrics github repository (for access to functions).
 # iqtree2_path            <- Path to IQ-Tree2.2-beta executable (this is the IQ-Tree2 release containing Alisim). 
@@ -46,7 +41,11 @@ run_exp1 <- TRUE
 run_exp2 <- TRUE
 
 
-#### 3. Prepare analyses ####
+
+#### 2. Prepare analyses ####
+# Open packages
+library(parallel)
+
 # Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "func_metrics.R"))
 
@@ -54,7 +53,8 @@ source(paste0(repo_directory, "func_metrics.R"))
 exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 
-#### 4. Apply tests for treelikeness to each simulated alignment ####
+
+#### 3. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
 
 if (run_exp1 == FALSE){
@@ -98,7 +98,8 @@ if (run_exp2 == TRUE){
 }
 
 
-#### 5. Print list of alignments that do not have treelikeness results files ####
+
+#### 4. Print list of alignments that do not have treelikeness results files ####
 # Collect experiment 1 missing files
 exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
 exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)

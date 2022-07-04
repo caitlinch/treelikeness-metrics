@@ -689,6 +689,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              redo = FALSE){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
+  print(alignment_path)
   
   ## Prepare variables
   # Get directory path

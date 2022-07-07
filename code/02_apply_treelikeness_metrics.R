@@ -39,6 +39,8 @@ if (run_location == "local"){
 
 run_exp1 <- FALSE
 run_exp2 <- FALSE
+collect_missing_runs <- FALSE
+rerun_missing_runs <- TRUE
 
 
 
@@ -62,7 +64,7 @@ if (run_exp1 == FALSE){
   exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
   exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
   exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-  # Exp1 encountering errors in all cores. Not running properly: tried removing all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
+  # Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
   exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE)
   exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE)
   # Apply treelikeness metrics to all alignments with substitution rate of 1e-02 (0.01) or higher
@@ -100,25 +102,117 @@ if (run_exp2 == TRUE){
 
 
 #### 4. Print list of alignments that do not have treelikeness results files ####
-# Collect experiment 1 missing files
-exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
-exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
-exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 1e-04 (too many identical sequences)
-exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 0.001 (too many identical sequences)
-exp1_apply_metrics <- exp1_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp1_als)) == FALSE)]
-# Output list of experiment 1 missing files
-write(exp1_apply_metrics, paste0(local_directory, "exp1_missing_results.csv"))
-
-# Collect experiment 2 missing files
-exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
-exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
-exp2_als <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
-exp2_apply_metrics <- exp2_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp2_als)) == FALSE)]
-# Output list of experiment 2 missing files
-write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
+if (collect_missing_runs == TRUE){
+  # Collect experiment 1 missing files
+  exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
+  exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
+  exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
+  exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 1e-04 (too many identical sequences)
+  exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 0.001 (too many identical sequences)
+  exp1_apply_metrics <- exp1_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp1_als)) == FALSE)]
+  # Output list of experiment 1 missing files
+  write(exp1_apply_metrics, paste0(local_directory, "exp1_missing_results.csv"))
+  
+  # Collect experiment 2 missing files
+  exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
+  exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
+  exp2_als <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
+  exp2_apply_metrics <- exp2_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp2_als)) == FALSE)]
+  # Output list of experiment 2 missing files
+  write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
+}
 
 
 
 #### 5. Cross check parameters csv with treelikeness results csv ####
+# Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
+
+# Check for results df
+results_dir <- paste0(local_directory, "01_results/")
+if (dir.exists(results_dir) == FALSE){dir.create(results_dir)}
+
+# Extract all filenames from results folder
+results_files <- list.files(results_dir)
+
+## For experiments 1 and 2 (simulations)
+exp_ids <- c("exp1", "exp2")
+for (e in exp_ids){
+  # Open parameters csv
+  e_params_file <- paste0(results_dir, grep(e, grep("parameters", results_files, value = TRUE), value = TRUE))
+  e_params_df <- read.csv(e_params_file, stringsAsFactors = FALSE)
+  # Open results csv
+  e_results_file <- paste0(results_dir, grep(e, grep("treelikeness_metrics_results", results_files, value = TRUE), value = TRUE))
+  e_results_df <- read.csv(e_results_file, stringsAsFactors = FALSE)
+  # Open output paths csv
+  e_op_file <- paste0(results_dir, grep(e, grep("file_output_paths", results_files, value = TRUE), value = TRUE))
+  e_op_df <- read.csv(e_op_file, stringsAsFactors = FALSE)
+  
+  # For experiment 1, remove rows with substitution rates that are too low
+  if (e == "exp1"){
+    e_params_df <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
+    e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
+  }
+  
+  # Check that all unique ids have a match
+  all_uids_present = setequal(e_results_df$uid, e_params_df$uid)
+  # If some uids are missing, report and print which
+  if (all_uids_present == FALSE){
+    # Get both lists of unique identifiers
+    params_ids <- e_params_df$uid
+    results_ids <- e_results_df$uid
+    # Check which is longer and save the list of uids missing from one dataframe
+    if (length(params_ids) > length(results_ids)){
+      # Set output id
+      output_id <- "missing.from.results"
+      # Get ids of alignments missing from params df (safety check - shouldn't be possible) and save
+      missing_ids <- params_ids[!(params_ids %in% results_ids)]
+      missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
+      write(missing_its, file = missing_ids_file)
+    } else if (length(results_ids) > length(params_ids)){
+      # Set output id
+      output_id <- "missing.from.params"
+      # Get ids of alignments missing from results df (unrun - need to run) and save
+      missing_ids <- results_ids[!(results_ids %in% params_ids)]
+      missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
+      write(missing_its, file = missing_ids_file)
+      # Make dataframe consisting of only missing alignments that need running and save
+      missing_als_df <- e_op_df[e_op_df$uid %in% missing_ids, ]
+      missing_als_file <- paste0(results_dir, e, "_parameters_rerun_", output_id, ".csv")
+      write.csv(missing_als_df, file = missing_als_file, row.names = TRUE)
+      
+      if (rerun_missing_runs == TRUE){
+        # Run missing alignments
+        mclapply(missing_als_df$output_alignment_file, treelikeness.metrics.simulations, 
+                 iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                 supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+                 num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                 distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                 tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+                 sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
+                 redo = FALSE,
+                 mc.cores = num_cores)
+        # Collate all alignments 
+        e_list <- mclapply(missing_als_df$output_alignment_file, treelikeness.metrics.simulations, 
+                           iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+                           supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+                           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+                           distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+                           tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+                           sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
+                           redo = FALSE,
+                           mc.cores = num_cores)
+        e_rerun_df <- as.data.frame(do.call("rbind", e_list))
+        e_rerun_df_name <- paste0(local_directory, e, "_treelikeness_metrics_results_collated.csv")
+        write.csv(e_rerun_df, e_rerun_df_name, row.names = FALSE)
+      } # end (rerun_missing_runs == TRUE)
+      
+    } # end (length(results_ids) > length(params_ids))
+    
+  } # end (all_uids_present == FALSE)
+  
+} # end for (e in exp_ids)
+
+
+
+
 

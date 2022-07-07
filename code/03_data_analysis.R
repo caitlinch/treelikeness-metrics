@@ -125,7 +125,27 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
 plot_path <- paste0(plot_directory, "exp1_plot3_supplementary_num_taxa.pdf")
 ggsave(p, filename = plot_path, height = 14, width = 11, units = "in")
 
-## Plot 3: Bar chart for Network Treelikeness test as the number of trees increases ##
+## Plot 4: Bar chart for Network Treelikeness test as the number of trees increases ##
+# Set dataset for plot
+plot_df <- exp1_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = NetworkTreelikenessTest)) +
+  geom_bar() +
+  facet_wrap(~num_trees) +
+  scale_y_continuous(name = "Count", breaks = seq(0,200,50), labels = seq(0,200,50), 
+                     minor_breaks = seq(0,200,25), limits = c(0, 150)) +
+  scale_x_discrete(name = "Network treelikeness test result") +
+  labs(title = "Number of taxa") + 
+  theme_bw() + 
+  theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 13, angle = 30, vjust = 1, hjust = 1),
+        axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 13),
+        strip.text = element_text(size = 14),
+        plot.title = element_text(size = 16, hjust = 0.5))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot4_main_figure_NetworkTreelikenessTest.pdf")
+ggsave(p, filename = plot_path)
+
+## Plot 3: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by number of taxa ##
 # Set dataset for plot
 plot_df <- exp1_long_df
 # Construct plot
@@ -142,7 +162,67 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
         legend.title = element_text(size = 16), legend.text = element_text(size = 14),
         strip.text = element_text(size = 13))
 # Save plot
-plot_path <- paste0(plot_directory, "exp1_plot4_main_figure_NetworkTreelikenessTest.pdf")
+plot_path <- paste0(plot_directory, "exp1_plot3_supplementary_num_taxa.pdf")
 ggsave(p, filename = plot_path, height = 14, width = 11, units = "in")
+
+## Plot 4: Bar chart for Network Treelikeness test as the number of trees increases, faceted by tree depth ##
+# Set dataset for plot
+plot_df <- exp1_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = NetworkTreelikenessTest)) +
+  geom_bar() +
+  facet_wrap(~num_trees) +
+  scale_y_continuous(name = "Count", breaks = seq(0,200,50), labels = seq(0,200,50), 
+                     minor_breaks = seq(0,200,25), limits = c(0, 150)) +
+  scale_x_discrete(name = "Network treelikeness test result") +
+  labs(title = "Number of taxa") + 
+  theme_bw() + 
+  theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 13, angle = 30, vjust = 1, hjust = 1),
+        axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 13),
+        strip.text = element_text(size = 14),
+        plot.title = element_text(size = 16, hjust = 0.5))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot4_main_figure_NetworkTreelikenessTest.pdf")
+ggsave(p, filename = plot_path)
+
+## Plot 5: Bar chart for Network Treelikeness test as the number of trees increases, faceted by tree depth ##
+# Set dataset for plot
+plot_df <- exp1_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = NetworkTreelikenessTest)) +
+  geom_bar() +
+  facet_grid(num_trees ~ tree_depth) +
+  scale_y_continuous(name = "Count", breaks = seq(0,60,30), labels = seq(0,60,30), 
+                     minor_breaks = seq(0,60,10), limits = c(0, 60)) +
+  scale_x_discrete(name = "Network treelikeness test result") +
+  labs(title = "Tree depth") + 
+  theme_bw() + 
+  theme(axis.title.x = element_text(size = 14), axis.text.x = element_text(size = 11, angle = 30, vjust = 1, hjust = 1),
+        axis.title.y = element_text(size = 14), axis.text.y = element_text(size = 11),
+        strip.text = element_text(size = 12),
+        plot.title = element_text(size = 14, hjust = 0.5))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot5_supplementary_NetworkTreelikenessTest_tree-depth.pdf")
+ggsave(p, filename = plot_path, height = 20, width = 11, units = "in")
+
+## Plot 6: Bar chart for Network Treelikeness test as the number of trees increases, faceted by number of taxa ##
+# Set dataset for plot
+plot_df <- exp1_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = NetworkTreelikenessTest)) +
+  geom_bar() +
+  facet_grid(num_trees ~ num_taxa) +
+  scale_y_continuous(name = "Count", breaks = seq(0,40,20), labels = seq(0,40,20), 
+                     minor_breaks = seq(0,40,10), limits = c(0, 40)) +
+  scale_x_discrete(name = "Network treelikeness test result") +
+  labs(title = "Number of taxa") + 
+  theme_bw() + 
+  theme(axis.title.x = element_text(size = 14), axis.text.x = element_text(size = 11, angle = 30, vjust = 1, hjust = 1),
+        axis.title.y = element_text(size = 14), axis.text.y = element_text(size = 11),
+        strip.text = element_text(size = 12),
+        plot.title = element_text(size = 14, hjust = 0.5))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot6_supplementary_NetworkTreelikenessTest_num-taxa.pdf")
+ggsave(p, filename = plot_path, height = 20, width = 11, units = "in")
 
 

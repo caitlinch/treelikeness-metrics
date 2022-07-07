@@ -18,7 +18,7 @@
 # run_exp1 <- Whether to apply the treelikeness test statistics to the first set of alignments
 # run_exp2 <- Whether to apply the treelikeness test statistics to the second set of alignments
 
-run_location = "local"
+run_location = "soma"
 if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
@@ -102,29 +102,6 @@ if (run_exp2 == TRUE){
 
 
 #### 4. Print list of alignments that do not have treelikeness results files ####
-if (collect_missing_runs == TRUE){
-  # Collect experiment 1 missing files
-  exp1_all_files <- paste0(exp_folders[1], list.files(exp_folders[1], recursive = TRUE))
-  exp1_aln_files <- grep("_output_alignment", exp1_all_files, value = TRUE)
-  exp1_als <- grep(".fa.", exp1_aln_files, value = TRUE, invert = TRUE)
-  exp1_als <- grep("1e-04", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 1e-04 (too many identical sequences)
-  exp1_als <- grep("0.001", exp1_als, value = TRUE, invert = TRUE) # Remove all alignments with substitution rate 0.001 (too many identical sequences)
-  exp1_apply_metrics <- exp1_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp1_als)) == FALSE)]
-  # Output list of experiment 1 missing files
-  write(exp1_apply_metrics, paste0(local_directory, "exp1_missing_results.csv"))
-  
-  # Collect experiment 2 missing files
-  exp2_all_files <- paste0(exp_folders[2], list.files(exp_folders[2], recursive = TRUE))
-  exp2_aln_files <- grep("_output_alignment", exp2_all_files, value = TRUE)
-  exp2_als <- grep(".fa.", exp2_aln_files, value = TRUE, invert = TRUE)
-  exp2_apply_metrics <- exp2_als[which(file.exists(gsub("output_alignment.fa", "treelikeness_results.csv", exp2_als)) == FALSE)]
-  # Output list of experiment 2 missing files
-  write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
-}
-
-
-
-#### 5. Cross check parameters csv with treelikeness results csv ####
 # Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
 
 # Check for results df

@@ -15,8 +15,10 @@
 # splitstree_path         <- Path to SplitsTree 4 version 4.17.2 or above
 # num_cores               <- Number of parallel threads to use at once
 
-# run_exp1 <- Whether to apply the treelikeness test statistics to the first set of alignments
-# run_exp2 <- Whether to apply the treelikeness test statistics to the second set of alignments
+# run_exp1             <- Whether to apply the treelikeness test statistics to the first set of alignments
+# run_exp2             <- Whether to apply the treelikeness test statistics to the second set of alignments
+# rerun_experiment_ids <- Which experiments to check for incomplete runs and rerun missing alignments. 
+#                      <- To check both exp1 and exp2, set <- c("exp1", "exp2")
 
 run_location = "soma"
 if (run_location == "local"){
@@ -39,8 +41,8 @@ if (run_location == "local"){
 
 run_exp1 <- FALSE
 run_exp2 <- FALSE
-collect_missing_runs <- FALSE
 rerun_missing_runs <- TRUE
+rerun_experiment_ids <- c("exp1")
 
 
 
@@ -112,7 +114,7 @@ if (dir.exists(results_dir) == FALSE){dir.create(results_dir)}
 results_files <- list.files(results_dir)
 
 ## For experiments 1 and 2 (simulations)
-exp_ids <- c("exp1", "exp2")
+exp_ids <- rerun_experiment_ids
 for (e in exp_ids){
   # Open parameters csv
   e_params_file <- paste0(results_dir, grep(e, grep("parameters", results_files, value = TRUE), value = TRUE))

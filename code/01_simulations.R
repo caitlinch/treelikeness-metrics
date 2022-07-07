@@ -32,7 +32,7 @@
 run_location = "soma"
 if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   ms_path <- "ms"
   iqtree2_path <- "iqtree2.2-beta"
   number_parallel_threads <- 1
@@ -66,7 +66,7 @@ library(parallel)
 
 
 #### 3. Prepare analyses ####
-source(paste0(repo_directory, "func_simulating_alignments.R"))
+source(paste0(repo_directory, "code/func_simulating_alignments.R"))
 
 ## Prepare variables that remain stable for all experiments using the input parameters
 # Determine number of trees - all whole numbers that are a divisor of the total alignment length

@@ -18,10 +18,10 @@
 # run_exp1 <- Whether to apply the treelikeness test statistics to the first set of alignments
 # run_exp2 <- Whether to apply the treelikeness test statistics to the second set of alignments
 
-run_location = "soma"
+run_location = "local"
 if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   iqtree2_path <- "iqtree2.2-beta"
   splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
   phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
@@ -37,8 +37,8 @@ if (run_location == "local"){
   num_cores <- 50
 }
 
-run_exp1 <- TRUE
-run_exp2 <- TRUE
+run_exp1 <- FALSE
+run_exp2 <- FALSE
 
 
 
@@ -47,7 +47,7 @@ run_exp2 <- TRUE
 library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
-source(paste0(repo_directory, "func_metrics.R"))
+source(paste0(repo_directory, "code/func_metrics.R"))
 
 # Find the folders of simulated alignments
 exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
@@ -118,4 +118,7 @@ exp2_apply_metrics <- exp2_als[which(file.exists(gsub("output_alignment.fa", "tr
 # Output list of experiment 2 missing files
 write(exp2_apply_metrics, paste0(local_directory, "exp2_missing_results.csv"))
 
+
+
+#### 5. Cross check parameters csv with treelikeness results csv ####
 

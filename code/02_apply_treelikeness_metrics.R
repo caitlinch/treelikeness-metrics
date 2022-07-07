@@ -22,20 +22,32 @@
 
 run_location = "soma"
 if (run_location == "local"){
+  # Directories
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  results_dir <- paste0(local_directory, "01_results/")
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+  
+  # Executable paths
   iqtree2_path <- "iqtree2.2-beta"
   splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
   phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
   fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+  
+  # Run parameters
   num_cores <- 1
 } else if (run_location == "soma"){
+  # Directories
   local_directory <- "/data/caitlin/treelikeness_metrics/"
-  repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
+  results_dir <- local_directory
+  repo_directory <- "/data/caitlin/treelikeness_metrics/"
+  
+  # Executable paths
   iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
+  
+  # Run parameters
   num_cores <- 50
 }
 
@@ -43,7 +55,6 @@ run_exp1 <- FALSE
 run_exp2 <- FALSE
 rerun_missing_runs <- TRUE
 rerun_experiment_ids <- c("exp1")
-
 
 
 #### 2. Prepare analyses ####
@@ -106,10 +117,6 @@ if (run_exp2 == TRUE){
 #### 4. Print list of alignments that do not have treelikeness results files ####
 # Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
 
-# Check for results df
-results_dir <- paste0(local_directory, "01_results/")
-if (dir.exists(results_dir) == FALSE){dir.create(results_dir)}
-
 # Extract all filenames from results folder
 results_files <- list.files(results_dir)
 
@@ -128,8 +135,9 @@ for (e in exp_ids){
   
   # For experiment 1, remove rows with substitution rates that are too low
   if (e == "exp1"){
-    e_params_df <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
+    e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
     e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
+    e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
   }
   
   # Check that all unique ids have a match
@@ -143,17 +151,12 @@ for (e in exp_ids){
     if (length(params_ids) > length(results_ids)){
       # Set output id
       output_id <- "missing.from.results"
-      # Get ids of alignments missing from params df (safety check - shouldn't be possible) and save
+      
+      # Get ids of alignments missing from results df (unrun - need to run) and save
       missing_ids <- params_ids[!(params_ids %in% results_ids)]
       missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
-      write(missing_its, file = missing_ids_file)
-    } else if (length(results_ids) > length(params_ids)){
-      # Set output id
-      output_id <- "missing.from.params"
-      # Get ids of alignments missing from results df (unrun - need to run) and save
-      missing_ids <- results_ids[!(results_ids %in% params_ids)]
-      missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
-      write(missing_its, file = missing_ids_file)
+      write(missing_ids, file = missing_ids_file)
+      
       # Make dataframe consisting of only missing alignments that need running and save
       missing_als_df <- e_op_df[e_op_df$uid %in% missing_ids, ]
       missing_als_file <- paste0(results_dir, e, "_parameters_rerun_", output_id, ".csv")
@@ -183,6 +186,16 @@ for (e in exp_ids){
         e_rerun_df <- as.data.frame(do.call("rbind", e_list))
         e_rerun_df_name <- paste0(local_directory, e, "_treelikeness_metrics_results_collated.csv")
         write.csv(e_rerun_df, e_rerun_df_name, row.names = FALSE)
+        
+    } else if (length(results_ids) > length(params_ids)){
+      # Set output id
+      output_id <- "missing.from.params"
+      
+      # Get ids of alignments missing from params df (safety check - shouldn't be possible) and save
+      missing_ids <- results_ids[!(results_ids %in% params_ids)]
+      missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
+      write(missing_its, file = missing_ids_file)
+
       } # end (rerun_missing_runs == TRUE)
       
     } # end (length(results_ids) > length(params_ids))

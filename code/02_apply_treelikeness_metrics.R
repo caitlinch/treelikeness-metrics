@@ -200,7 +200,7 @@ for (e in exp_ids){
                  num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
                  distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                  tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
-                 sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
+                 sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
                  redo = FALSE,
                  mc.cores = num_cores)
  

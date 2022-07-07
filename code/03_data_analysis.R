@@ -8,16 +8,16 @@
 #### 1. Set parameters ####
 # data_directory          <- Directory where alignments will be saved/treelikeness metrics will be run.
 # output_directory        <- Directory for output of data analysis
-# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
+# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
 
 
+
 #### 2. Prepare analyses ####
 # Open packages
-library(dplyr) # for mutate
 library(reshape2)
 library(ggplot2)
 library(patchwork)
@@ -25,27 +25,17 @@ library(patchwork)
 # List all data files
 data_files <- paste0(data_directory, list.files(data_directory))
 
-
 # Create folder for plots
 plot_directory <- paste0(output_directory, "plots/")
 if (dir.exists(plot_directory) == FALSE){dir.create(plot_directory)}
 
-#### 3. Analyse output from Experiment 1 ####
+
+
+#### 3. Prepare data from Experiment 1 for plotting ####
 # Open data file from Experiment 1 as a dataframe
-exp1_data_file <- grep("exp1", grep("treelikeness_metrics_results", data_files, value = TRUE), value = TRUE)
+exp1_data_file <- grep("exp1", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
 exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
-
-## Compare ids with those in parameters csv for experiment 1 to determine if there are any incomplete/missing alignments
-
-
-
-
-
-
-
-
-
-
+exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
 
 # Remove columns you don't want for plotting
 exp1_wide_df <- exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
@@ -54,33 +44,105 @@ exp1_wide_df <- exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_dept
                             "sCF_mean", "mean_TIGER_value")]
 exp1_ntlt_df <-exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
                            "NetworkTreelikenessTest")]
+
+# Convert sCF values to decimal from percentage
+exp1_wide_df$sCF_mean <- exp1_wide_df$sCF_mean / 100
+
 # Melt exp1_wide_df for better plotting
 exp1_long_df <- melt(exp1_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
+
 # Add fancy labels for facets
 exp1_long_df$var_label <- factor(exp1_long_df$variable, 
                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                             "LM_proportion_resolved_quartets", "mean_Q_residual", "sCF_mean",
                                             "mean_TIGER_value"), 
                                  ordered = TRUE, 
-                                 labels = c(expression("`Tree proportion`"), expression("`Cunningham metric`"), 
-                                            expression(paste('Mean ', delta["q"])), expression("`Proportion resolved quartets`"),
-                                            expression("`Mean Q-Residual value`"), expression("`Mean sCF value`"),
-                                            expression("`Mean TIGER value`")) )
+                                 labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+                                            expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                            expression(atop("Mean", "Q-Residual value")), expression(atop("Mean", "sCF value")),
+                                            expression(atop("Mean","TIGER value"))) )
 
 
-# Extract only tree depth 0.1 and taxa = 50
-exp1_long_df <- exp1_long_df[exp1_long_df$tree_depth == 0.1 & exp1_long_df$num_taxa == 50, ]
 
-# Plot 1: Faceted scatterplot
-ggplot(exp1_long_df, aes(x = num_trees, y = value, color = factor(num_taxa))) + 
+#### 4. Plot data from Experiment 1 ####
+## Plot 1: Smooth lines showing average values for each test statistic as the number of trees increases, colored by number of taxa ##
+# Set dataset for plot. Extract only tree depth 0.1
+plot_df <- exp1_long_df[exp1_long_df$tree_depth == 0.1, ]
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
   geom_smooth() + 
-  facet_wrap(~var_label, nrow = 2, scales = "free_y", labeller = label_parsed) +
-  theme_bw()
+  facet_wrap(~var_label, scales = "fixed", labeller = label_parsed, nrow = 3 ) +
+  scale_x_log10(name = "Number of trees present in the alignment") +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1), breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), labels = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+  scale_color_viridis_d(direction = -1) +
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 18), legend.text = element_text(size = 14),
+        strip.text = element_text(size = 13))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot1_main_figure_tree-depth-0.1.pdf")
+ggsave(p, filename = plot_path)
 
-ggplot(exp1_long_df, aes(x = num_trees, y = value)) + 
+## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree depth ##
+# Set dataset for plot
+plot_df <- exp1_long_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
   geom_smooth() + 
-  facet_grid(var_label ~ num_taxa, scales = "free_y", labeller = label_parsed) +
-  theme_bw()
+  facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
+  scale_x_log10(name = "Number of trees present in the alignment") +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_color_viridis_d(direction = -1) +
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 18), legend.text = element_text(size = 14),
+        strip.text = element_text(size = 13))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot2_supplementary_tree_depth.pdf")
+ggsave(p, filename = plot_path, height = 14, width = 11, units = "in")
+
+## Plot 3: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by number of taxa ##
+# Set dataset for plot
+plot_df <- exp1_long_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) + 
+  geom_smooth() + 
+  facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+  scale_x_log10(name = "Number of trees present in the alignment") +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_color_viridis_d(direction = -1, option = "C") +
+  guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 16), legend.text = element_text(size = 14),
+        strip.text = element_text(size = 13))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot3_supplementary_num_taxa.pdf")
+ggsave(p, filename = plot_path, height = 14, width = 11, units = "in")
+
+## Plot 3: Bar chart for Network Treelikeness test as the number of trees increases ##
+# Set dataset for plot
+plot_df <- exp1_long_df
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) + 
+  geom_smooth() + 
+  facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+  scale_x_log10(name = "Number of trees present in the alignment") +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_color_viridis_d(direction = -1, option = "C") +
+  guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 16), legend.text = element_text(size = 14),
+        strip.text = element_text(size = 13))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot4_main_figure_NetworkTreelikenessTest.pdf")
+ggsave(p, filename = plot_path, height = 14, width = 11, units = "in")
 
 
-plot_path <- paste0(plot_directory, "exp1_Plot_1_faceted_scatterplot")

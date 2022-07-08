@@ -111,7 +111,7 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
   scale_x_log10( minor_breaks = x_axis_minor_breaks) +
   scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
   scale_color_viridis_d(direction = -1) +
-  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
   labs(x = expression("Number of trees ("*log[10]*" scale)")) +
   theme_bw() +
   theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
@@ -120,7 +120,7 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
         strip.text = element_text(size = 11))
 # Save plot
 plot_path <- paste0(plot_directory, "exp1_plot2_main.figure_num_taxa.pdf")
-ggsave(p, filename = plot_path)
+ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 
 
 

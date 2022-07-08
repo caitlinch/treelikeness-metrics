@@ -75,6 +75,56 @@ exp1_long_df$var_label <- factor(exp1_long_df$variable,
                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 
+#### 4. Plot data from Experiment 1 ####
+## Plot 1: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree depth ##
+# Set dataset for plot
+plot_df <- exp1_long_df
+# Set log10 minor breaks for x axis
+x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
+  geom_smooth() + 
+  facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
+  scale_x_log10( minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_color_viridis_d(direction = -1) +
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  labs(x = expression("Number of trees ("*log[10]*" scale)")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 18), legend.text = element_text(size = 16),
+        strip.text = element_text(size = 11))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot1_main.figure_tree_depth.pdf")
+ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+
+## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
+# Set dataset for plot
+plot_df <- exp1_long_df
+# Set log10 minor breaks for x axis
+x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
+# Construct plot
+p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) + 
+  geom_smooth() + 
+  facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+  scale_x_log10( minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_color_viridis_d(direction = -1) +
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  labs(x = expression("Number of trees ("*log[10]*" scale)")) +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+        axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 18), legend.text = element_text(size = 16),
+        strip.text = element_text(size = 11))
+# Save plot
+plot_path <- paste0(plot_directory, "exp1_plot2_main.figure_num_taxa.pdf")
+ggsave(p, filename = plot_path)
+
+
+
+
 
 
 #### 4. Plot data from Experiment 1 ####

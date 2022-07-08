@@ -42,25 +42,38 @@ exp1_wide_df <- exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_dept
                             "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                             "LM_proportion_resolved_quartets", "mean_Q_residual", 
                             "sCF_mean", "mean_TIGER_value")]
-exp1_ntlt_df <-exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
-                           "NetworkTreelikenessTest")]
-
-# Convert sCF values to decimal from percentage
-exp1_wide_df$sCF_mean <- exp1_wide_df$sCF_mean / 100
 
 # Melt exp1_wide_df for better plotting
 exp1_long_df <- melt(exp1_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
 
+# Convert sCF values to decimal from percentage
+exp1_wide_df$sCF_mean <- exp1_wide_df$sCF_mean / 100
+
+# Transform the Network Treelikeness Test results into more plottable format
+# Make a table of all possible parameter values for the network treelikeness test
+ntlt_params <- expand.grid("num_taxa" = unique(exp1_df$num_taxa), "num_trees" = unique(exp1_df$num_trees), "tree_depth" = unique(exp1_df$tree_depth))
+# Calculate proportion of treelike alignments for each set of parameter values
+prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results, params_df = ntlt_params, results_df = exp1_df))
+# Add columns to match the exp1_long_df
+ntlt_params$row_id <- rep(NA, length(prop_tl_results))
+ntlt_params$uid <- rep(NA, length(prop_tl_results))
+ntlt_params$value <- prop_tl_results
+ntlt_params$variable <- "NetworkTreelikenessTest"
+# Restructure the dataframe to match the exp1_long_df
+ntlt_params <- ntlt_params[,c(names(exp1_long_df))]
+# Bind to the exp1_long_df
+exp1_long_df <- rbind(exp1_long_df, ntlt_params)
+
 # Add fancy labels for facets
 exp1_long_df$var_label <- factor(exp1_long_df$variable, 
                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                            "LM_proportion_resolved_quartets", "mean_Q_residual", "sCF_mean",
-                                            "mean_TIGER_value"), 
+                                            "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                            "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
                                  ordered = TRUE, 
                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                            expression(atop("Mean", "Q-Residual value")), expression(atop("Mean", "sCF value")),
-                                            expression(atop("Mean","TIGER value"))) )
+                                            expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+                                            expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 
 
 

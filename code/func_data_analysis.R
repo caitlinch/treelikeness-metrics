@@ -38,7 +38,25 @@ collate.treelikeness.results <- function(alignment_path){
   return(collated_df)
 }
 
-
-
-
+reformat.network.treelikeness.test.results <- function(id, params_df, results_df){
+  # Function to collect the proportion of treelike alignments for each set of parameters
+  # Reformat network treelikeness test results for pretty plotting
+  
+  # Extract relevant row
+  row <- params_df[id, ]
+  
+  # Filter results_df to only rows including the relevent params
+  row_results_df <- results_df[(results_df$num_taxa == row$num_taxa & 
+                                  results_df$num_trees == row$num_trees & 
+                                  results_df$tree_depth == row$tree_depth), ]
+  # Find number of treelike and non-treelike results
+  tl_results <- length(which(row_results_df$NetworkTreelikenessTest == "Treelike"))
+  ntl_results <- length(which(row_results_df$NetworkTreelikenessTest == "Non-treelike"))
+  # Find total number of alignments with these parameters
+  n_als <- nrow(row_results_df)
+  # Find proportion of treelike results
+  prop_tl_als <- tl_results/n_als
+  # Return the proportion of treelike alignments for this set of parameter values
+  return(prop_tl_als)
+}
 

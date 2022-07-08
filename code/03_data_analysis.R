@@ -110,7 +110,7 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
   facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
   scale_x_log10( minor_breaks = x_axis_minor_breaks) +
   scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-  scale_color_viridis_d(direction = -1) +
+  scale_color_viridis_d(direction = -1, option = "C") +
   guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
   labs(x = expression("Number of trees ("*log[10]*" scale)")) +
   theme_bw() +

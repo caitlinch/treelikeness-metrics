@@ -814,7 +814,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     
     if (save_timers == TRUE){
       # Save raw timings
-      time_df <- data.frame(time_name, timings)
+      time_df <- data.frame(unique_id, time_name, timings)
       write.csv(time_df, paste0(replicate_folder, unique_id, "_test_times.csv.csv"))
       
       # Find time for each test statistic
@@ -835,7 +835,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                  attr(c(time_df[time_df$time_name == "End_fast_tiger", 2] - time_df[time_df$time_name == "Start_fast_tiger", 2]), "units"),
                  attr(c(time_df[time_df$time_name == "End_Cunningham_test", 2] - time_df[time_df$time_name == "Start_Cunningham_test", 2]), "units"),
                  attr(c(time_df[time_df$time_name == "End_tree_proportion", 2] - time_df[time_df$time_name == "Start_tree_proportion", 2]), "units") )
-      diff_df <- data.frame(test, difftime, units)
+      diff_df <- data.frame(unique_id, test, difftime, units)
       # Save record of how long each test statistic takes to run
       write.csv(diff_df, paste0(replicate_folder, unique_id, "_test_difftimes.csv"))
     }

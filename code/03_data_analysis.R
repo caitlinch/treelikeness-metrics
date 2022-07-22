@@ -12,13 +12,13 @@
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
-repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness_metrics/"
+repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 
 
 #### 2. Prepare analyses ####
 # Source function files
-source(paste0(repo_directory, "/code/func_data_analysis.R"))
+source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 # Open packages
 library(reshape2)

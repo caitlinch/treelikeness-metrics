@@ -196,7 +196,7 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa)))
         legend.title = element_text(size = 18), legend.text = element_text(size = 16),
         strip.text = element_text(size = 11))
 # Save plot
-plot_path <- paste0(plot_directory, "exp1_plot1_main.figure_tree_depth.pdf")
+plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth.pdf")
 ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
 
 ## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
@@ -219,7 +219,7 @@ p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth)
         legend.title = element_text(size = 18), legend.text = element_text(size = 16),
         strip.text = element_text(size = 11))
 # Save plot
-plot_path <- paste0(plot_directory, "exp1_plot2_main.figure_num_taxa.pdf")
+plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_num_taxa.pdf")
 ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 
 

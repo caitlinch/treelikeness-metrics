@@ -686,12 +686,20 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                                              tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE,
                                              sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-                                             redo = FALSE){
+                                             redo = FALSE, save_timers = TRUE){
   ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
   
+  # Set empty vector to put timings in
+  timings <- c(Sys.time())
+  time_name <- c("Start_time")
+  
+  # Print alignment path
   print(alignment_path)
   
-  ## Prepare variables
+  ## Prepare variables and output file names for run
+  # Set timer
+  timings <- c(timings,Sys.time())
+  time_name <- c(time_name, "Prepare_variables")
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
   # Get unique id for the alignment
@@ -711,7 +719,9 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     results_df <- read.csv(df_name)
   } else if (file.exists(df_name) == FALSE | redo == TRUE){
     ## Apply all treelikeness test statistics to generate the results csv file
-    
+    # Set timer
+    timings <- c(timings,Sys.time())
+    time_name <- c(time_name, "Find_number_of_taxa")
     # Determine the number of taxa (needed for number of quartets in likelihood mapping and sCFs)
     if (supply_number_of_taxa == TRUE & !is.na(number_of_taxa)){
       # If the number of taxa is supplied as an input variable, use the input value
@@ -734,32 +744,59 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
     }
     
     # Apply all treelikeness tests:
+    # Set timer
+    timings <- c(timings,Sys.time())
+    time_name <- c(time_name, "Start_likelihood_mapping")
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips)
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_likelihood_mapping","Start_scfs")
     # Apply Site concordance factors (Minh et. al. 2020)
     scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_scfs","Start_ntlt")
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_ntlt","Start_delta_plot")
     # Apply Delta plots (Holland et. al. 2002)
     mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_delta_plot","Start_q_residual")
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
     mean_q_residual <- q_residual_results$mean_q_residual
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_q_residual","Start_fast_tiger")
     if (apply.TIGER == TRUE){
       # Apply TIGER (Cummins and McInerney 2011)
       mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
     } else if (apply.TIGER == FALSE){
       mean_tiger_value <- "no_TIGER_run"
     }
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_fast_tiger","Start_Cunningham_test")
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method)
+    # Set timer
+    timings <- c(timings,Sys.time(),Sys.time())
+    time_name <- c(time_name, "End_Cunningham_test","Start_tree_proportion")
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
                                        run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
+    # Set timer
+    timings <- c(timings,Sys.time(), Sys.time())
+    time_name <- c(time_name, "End_tree_proportion", "Assemble_results")
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
@@ -770,6 +807,38 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                    "Cunningham_test", "tree_proportion", "input_alignment_path")
     names(results_df) <- names_vec
     write.csv(results_df, file = df_name, row.names = FALSE)
+    
+    # Set timer
+    timings <- c(timings,Sys.time())
+    time_name <- c(time_name, "Results_saved_and_done")
+    
+    if (save_timers == TRUE){
+      # Save raw timings
+      time_df <- data.frame(time_name, timings)
+      write.csv(time_df, paste0(replicate_folder, unique_id, "_test_times.csv.csv"))
+      
+      # Find time for each test statistic
+      test <- c("likelihood_mapping", "scfs", "ntlt", "delta_plot", "q_residuals", "fast_tiger", "Cunningham_test", "tree_proportion")
+      difftime <- c(c(time_df[time_df$time_name == "End_likelihood_mapping", 2] - time_df[time_df$time_name == "Start_likelihood_mapping", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_scfs", 2] - time_df[time_df$time_name == "Start_scfs", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_ntlt", 2] - time_df[time_df$time_name == "Start_ntlt", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_delta_plot", 2] - time_df[time_df$time_name == "Start_delta_plot", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_q_residual", 2] - time_df[time_df$time_name == "Start_q_residual", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_fast_tiger", 2] - time_df[time_df$time_name == "Start_fast_tiger", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_Cunningham_test", 2] - time_df[time_df$time_name == "Start_Cunningham_test", 2])[[1]],
+                    c(time_df[time_df$time_name == "End_tree_proportion", 2] - time_df[time_df$time_name == "Start_tree_proportion", 2])[[1]])
+      units <- c(attr(c(time_df[time_df$time_name == "End_likelihood_mapping", 2] - time_df[time_df$time_name == "Start_likelihood_mapping", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_scfs", 2] - time_df[time_df$time_name == "Start_scfs", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_ntlt", 2] - time_df[time_df$time_name == "Start_ntlt", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_delta_plot", 2] - time_df[time_df$time_name == "Start_delta_plot", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_q_residual", 2] - time_df[time_df$time_name == "Start_q_residual", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_fast_tiger", 2] - time_df[time_df$time_name == "Start_fast_tiger", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_Cunningham_test", 2] - time_df[time_df$time_name == "Start_Cunningham_test", 2]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_tree_proportion", 2] - time_df[time_df$time_name == "Start_tree_proportion", 2]), "units") )
+      diff_df <- data.frame(test, difftime, units)
+      # Save record of how long each test statistic takes to run
+      write.csv(diff_df, paste0(replicate_folder, unique_id, "_test_difftimes.csv"))
+    }
   }
   
   ## Return df so it can be collated using lapply

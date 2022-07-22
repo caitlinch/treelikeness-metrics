@@ -32,7 +32,7 @@ run_location = "soma"
 if (run_location == "local"){
   # Directories
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  results_dir <- paste0(local_directory, "01_results/")
+  results_directory <- paste0(local_directory, "01_results/")
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   
   # Executable paths
@@ -46,7 +46,7 @@ if (run_location == "local"){
 } else if (run_location == "soma"){
   # Directories
   local_directory <- "/data/caitlin/treelikeness_metrics/"
-  results_dir <- local_directory
+  results_directory <- local_directory
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths
@@ -85,7 +85,7 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 if (run_exp1 == FALSE){
   ## For experiment 1:
   # Open output df and get names of alignments
-  exp1_op_file <- paste0(results_dir, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
   # Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
   exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
@@ -115,7 +115,7 @@ if (run_exp1 == FALSE){
 if (run_exp2 == TRUE){
   ## For experiment 2:
   # Open output df and get names of alignments
-  exp2_op_file <- paste0(results_dir, grep("rerun", grep("exp2", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  exp2_op_file <- paste0(results_directory, grep("rerun", grep("exp2", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)
   # Get list of alignments
   exp2_als <- exp2_op_df$output_alignment_file
@@ -146,19 +146,19 @@ if (run_exp2 == TRUE){
 # Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
 
 # Extract all filenames from results folder
-results_files <- list.files(results_dir)
+results_files <- list.files(results_directory)
 
 ## For experiments 1 and 2 (simulations)
 exp_ids <- rerun_experiment_ids
 for (e in exp_ids){
   # Open parameters csv
-  e_params_file <- paste0(results_dir, grep("rerun", grep(e, grep("parameters", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  e_params_file <- paste0(results_directory, grep("rerun", grep(e, grep("parameters", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   e_params_df <- read.csv(e_params_file, stringsAsFactors = FALSE)
   # Open results csv
-  e_results_file <- paste0(results_dir, grep("rerun", grep(e, grep("treelikeness_metrics_collated_results", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  e_results_file <- paste0(results_directory, grep("rerun", grep(e, grep("treelikeness_metrics_collated_results", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   e_results_df <- read.csv(e_results_file, stringsAsFactors = FALSE)
   # Open output paths csv
-  e_op_file <- paste0(results_dir, grep("rerun", grep(e, grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  e_op_file <- paste0(results_directory, grep("rerun", grep(e, grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   e_op_df <- read.csv(e_op_file, stringsAsFactors = FALSE)
   
   # For experiment 1, remove rows with substitution rates that are too low
@@ -182,12 +182,12 @@ for (e in exp_ids){
       
       # Get ids of alignments missing from results df (unrun - need to run) and save
       missing_ids <- params_ids[!(params_ids %in% results_ids)]
-      missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
+      missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt") 
       write(missing_ids, file = missing_ids_file)
       
       # Make dataframe consisting of only missing alignments that need running and save
       missing_als_df <- e_op_df[e_op_df$uid %in% missing_ids, ]
-      missing_als_file <- paste0(results_dir, e, "_parameters_rerun_", output_id, ".csv")
+      missing_als_file <- paste0(results_directory, e, "_parameters_rerun_", output_id, ".csv")
       write.csv(missing_als_df, file = missing_als_file, row.names = TRUE)
       
       if (rerun_missing_runs == TRUE){
@@ -220,7 +220,7 @@ for (e in exp_ids){
         
         # Get ids of alignments missing from params df (safety check - shouldn't be possible) and save
         missing_ids <- results_ids[!(results_ids %in% params_ids)]
-        missing_ids_file <- paste0(results_dir, e, "_uids_", output_id, ".txt") 
+        missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt") 
         write(missing_its, file = missing_ids_file)
         
       } # end (rerun_missing_runs == TRUE)

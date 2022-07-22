@@ -161,13 +161,14 @@ exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num
 
 # Transform the Network Treelikeness Test results into more plottable format
 # Make a table of all possible parameter values for the network treelikeness test
-ntlt_params <- expand.grid("num_taxa" = unique(exp2_df$num_taxa), "tree_depth" = unique(exp2_df$tree_depth), 
-                           "recombination_value" = unique(exp2_df$recombination_value), "recombination_type" = unique(exp2_df$recombination_type))
+ntlt_params <- expand.grid("num_taxa" = sort(unique(exp2_df$num_taxa)), "tree_depth" = sort(unique(exp2_df$tree_depth)), 
+                           "recombination_value" = sort(unique(exp2_df$recombination_value)), "recombination_type" = unique(exp2_df$recombination_type))
 # Calculate proportion of treelike alignments for each set of parameter values
 prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp2, params_df = ntlt_params, results_df = exp2_df))
 # Add columns to match the exp2_long_df
 ntlt_params$row_id <- rep(NA, length(prop_tl_results))
 ntlt_params$uid <- rep(NA, length(prop_tl_results))
+ntlt_params$num_trees <- 1000
 ntlt_params$value <- prop_tl_results
 ntlt_params$variable <- "NetworkTreelikenessTest"
 # Restructure the dataframe to match the exp2_long_df

@@ -98,7 +98,7 @@ if (run_exp1 == FALSE){
            distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
            tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
            sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
-           redo = FALSE,
+           redo = FALSE, save_timers = TRUE, 
            mc.cores = num_cores)
   
   # Collect and collate results
@@ -126,7 +126,7 @@ if (run_exp2 == TRUE){
            distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
            tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
            sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-           redo = TRUE,
+           redo = TRUE, save_timers = TRUE, 
            mc.cores = num_cores)
   
   # Collect and collate results
@@ -201,7 +201,7 @@ for (e in exp_ids){
                  distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
                  tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
                  sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = FALSE,
-                 redo = FALSE,
+                 redo = FALSE, save_timers = TRUE, 
                  mc.cores = num_cores)
  
         # Collect and collate results

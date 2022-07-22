@@ -62,7 +62,7 @@ if (plot_exp1 == TRUE){
   # Make a table of all possible parameter values for the network treelikeness test
   ntlt_params <- expand.grid("num_taxa" = unique(exp1_df$num_taxa), "num_trees" = unique(exp1_df$num_trees), "tree_depth" = unique(exp1_df$tree_depth))
   # Calculate proportion of treelike alignments for each set of parameter values
-  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results, params_df = ntlt_params, results_df = exp1_df))
+  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp1, params_df = ntlt_params, results_df = exp1_df))
   # Add columns to match the exp1_long_df
   ntlt_params$row_id <- rep(NA, length(prop_tl_results))
   ntlt_params$uid <- rep(NA, length(prop_tl_results))
@@ -145,30 +145,33 @@ exp2_data_file <- grep("exp2", grep("treelikeness_metrics_collated_results", dat
 exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
 exp2_df$mean_TIGER_value <- as.numeric(exp2_df$mean_TIGER_value)
 
+# Convert sCF values to decimal from percentage
+exp2_df$sCF_mean <- exp2_df$sCF_mean / 100
+
 # Remove columns you don't want for plotting
 exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
+                            "recombination_value", "recombination_type",
                             "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                             "LM_proportion_resolved_quartets", "mean_Q_residual", 
                             "sCF_mean", "mean_TIGER_value")]
 
 # Melt exp2_wide_df for better plotting
-exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
+exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type"))
 
-# Convert sCF values to decimal from percentage
-exp2_wide_df$sCF_mean <- exp2_wide_df$sCF_mean / 100
 
 # Transform the Network Treelikeness Test results into more plottable format
 # Make a table of all possible parameter values for the network treelikeness test
-ntlt_params <- expand.grid("num_taxa" = unique(exp2_df$num_taxa), "num_trees" = unique(exp2_df$num_trees), "tree_depth" = unique(exp2_df$tree_depth))
+ntlt_params <- expand.grid("num_taxa" = unique(exp2_df$num_taxa), "tree_depth" = unique(exp2_df$tree_depth), 
+                           "recombination_value" = unique(exp2_df$recombination_value), "recombination_type" = unique(exp2_df$recombination_type))
 # Calculate proportion of treelike alignments for each set of parameter values
-prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results, params_df = ntlt_params, results_df = exp2_df))
+prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp2, params_df = ntlt_params, results_df = exp2_df))
 # Add columns to match the exp2_long_df
 ntlt_params$row_id <- rep(NA, length(prop_tl_results))
 ntlt_params$uid <- rep(NA, length(prop_tl_results))
 ntlt_params$value <- prop_tl_results
 ntlt_params$variable <- "NetworkTreelikenessTest"
 # Restructure the dataframe to match the exp2_long_df
-ntlt_params <- ntlt_params[,c(names(exp2_long_df))]
+ntlt_params <- ntlt_params[,c(names(exp2_long_df)),]
 # Bind to the exp2_long_df
 exp2_long_df <- rbind(exp2_long_df, ntlt_params)
 
@@ -188,16 +191,17 @@ exp2_long_df$var_label <- factor(exp2_long_df$variable,
 
 #### 6. Plot data from Experiment 2 ####
 if (plot_exp2 == TRUE){
-## Plot 1: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree depth ##
+## Plot 1: Ancient events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
 # Set dataset for plot
 plot_df <- exp2_long_df
-# Set log10 minor breaks for x axis
-x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
+plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
 # Construct plot
-p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
+ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
   geom_smooth() + 
-  facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
-  scale_x_log10( minor_breaks = x_axis_minor_breaks) +
+  facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed)
+
+
+  scale_x_continuous(breaks = seq(0,0.5, 0.1), limits = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
   scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
   scale_color_viridis_d(direction = -1) +
   guides(color = guide_legend(title = "Number of\ntaxa")) +

@@ -3,7 +3,7 @@
 
 # This file contains functions for data manipulation and data analysis
 
-collate.treelikeness.results <- function(alignment_path){
+collate.treelikeness.results <- function(alignment_path, experiment_number){
   # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame
   
   # Get paths to csv files
@@ -16,8 +16,15 @@ collate.treelikeness.results <- function(alignment_path){
     p_df <- read.csv(alignment_params_file)
     tl_df <- read.csv(alignment_treelikeness_file)
     
-    # Remove some columns from the p_df
-    p_df <- p_df[,c("row_id", "uid" , "num_taxa", "num_trees", "tree_depth",  "num_reps", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length", "sequence_type")]
+    # Check which experiment is being processed
+    if (experiment_number == 1){
+      # Remove unneeded columns from the p_df
+      p_df <- p_df[,c("row_id", "uid" , "num_taxa", "num_trees", "tree_depth",  "num_reps", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length", "sequence_type")]
+    } else if (experiment_number == 2){
+      # Remove unneeded columns from the p_df, making sure to retain the columns with recombination information
+      p_df <- p_df[,c("row_id", "uid" , "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type", "num_reps", "alisim_gene_models", "alisim_gene_tree_length", 
+                      "total_alignment_length", "sequence_type")]
+    }
     
     # Check the uids match
     uids_identical <- grepl(p_df$uid, tl_df$input_alignment_path)

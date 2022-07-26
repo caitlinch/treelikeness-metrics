@@ -154,6 +154,7 @@ mclapply(exp1_als, treelikeness.metrics.empirical, iqtree2_path, splitstree_path
          mc.cores = num_cores)
 
 # For testing
+alignment_path <- all_oaks_alignments[1]
 supply_number_of_taxa = FALSE
 number_of_taxa = NA
 num_iqtree2_threads = "AUTO"

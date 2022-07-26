@@ -121,7 +121,7 @@ if (file.exists(oaks_csv_file)){
                         num_taxa = gene_num_taxa, 
                         codon_position = codon_partitions, 
                         DNA_type = gene_type, 
-                        alignment_path = subset_gene_paths)
+                        old_alignment_path = subset_gene_paths)
   # Save dataframe
   write.csv(oaks_df, file = oaks_csv_file, row.names = FALSE)
 }
@@ -129,7 +129,13 @@ if (file.exists(oaks_csv_file)){
 
 
 #### 4. Copy alignments and save the parameters for each alignment ####
-# Get list of all the Oaks 2011 alignments to run
+# Make a new folder for the Oaks 2011 analyses
+copy_directory <-  paste0(results_directory, "Oaks2011/")
+if (dir.exists(copy_directory) == FALSE){dir.create(copy_directory)}
+# Make a new column in the dataframe. This column is the location where each alignment will be copied and stored
+oaks_df$output_alignment_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, ".fa")
+oaks_df$parameters_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_parameters.csv")
+# Feed each row into the function to copy the alignment and save the corresponding alignment parameters 
 
 
 

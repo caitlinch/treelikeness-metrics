@@ -993,22 +993,22 @@ treelikeness.metrics.empirical <- function(alignment_path, iqtree2_path, splitst
       
       # Find time for each test statistic
       test <- c("likelihood_mapping", "scfs", "ntlt", "delta_plot", "q_residuals", "fast_tiger", "Cunningham_test", "tree_proportion")
-      difftime <- c(c(time_df[time_df$time_name == "End_likelihood_mapping", 2] - time_df[time_df$time_name == "Start_likelihood_mapping", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_scfs", 2] - time_df[time_df$time_name == "Start_scfs", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_ntlt", 2] - time_df[time_df$time_name == "Start_ntlt", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_delta_plot", 2] - time_df[time_df$time_name == "Start_delta_plot", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_q_residual", 2] - time_df[time_df$time_name == "Start_q_residual", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_fast_tiger", 2] - time_df[time_df$time_name == "Start_fast_tiger", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_Cunningham_test", 2] - time_df[time_df$time_name == "Start_Cunningham_test", 2])[[1]],
-                    c(time_df[time_df$time_name == "End_tree_proportion", 2] - time_df[time_df$time_name == "Start_tree_proportion", 2])[[1]])
-      units <- c(attr(c(time_df[time_df$time_name == "End_likelihood_mapping", 2] - time_df[time_df$time_name == "Start_likelihood_mapping", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_scfs", 2] - time_df[time_df$time_name == "Start_scfs", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_ntlt", 2] - time_df[time_df$time_name == "Start_ntlt", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_delta_plot", 2] - time_df[time_df$time_name == "Start_delta_plot", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_q_residual", 2] - time_df[time_df$time_name == "Start_q_residual", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_fast_tiger", 2] - time_df[time_df$time_name == "Start_fast_tiger", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_Cunningham_test", 2] - time_df[time_df$time_name == "Start_Cunningham_test", 2]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_tree_proportion", 2] - time_df[time_df$time_name == "Start_tree_proportion", 2]), "units") )
+      difftime <- c(c(time_df[time_df$time_name == "End_likelihood_mapping", 3] - time_df[time_df$time_name == "Start_likelihood_mapping", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_scfs", 3] - time_df[time_df$time_name == "Start_scfs", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_ntlt", 3] - time_df[time_df$time_name == "Start_ntlt", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_delta_plot", 3] - time_df[time_df$time_name == "Start_delta_plot", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_q_residual", 3] - time_df[time_df$time_name == "Start_q_residual", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_fast_tiger", 3] - time_df[time_df$time_name == "Start_fast_tiger", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_Cunningham_test", 3] - time_df[time_df$time_name == "Start_Cunningham_test", 3])[[1]],
+                    c(time_df[time_df$time_name == "End_tree_proportion", 3] - time_df[time_df$time_name == "Start_tree_proportion", 3])[[1]])
+      units <- c(attr(c(time_df[time_df$time_name == "End_likelihood_mapping", 3] - time_df[time_df$time_name == "Start_likelihood_mapping", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_scfs", 3] - time_df[time_df$time_name == "Start_scfs", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_ntlt", 3] - time_df[time_df$time_name == "Start_ntlt", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_delta_plot", 3] - time_df[time_df$time_name == "Start_delta_plot", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_q_residual", 3] - time_df[time_df$time_name == "Start_q_residual", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_fast_tiger", 3] - time_df[time_df$time_name == "Start_fast_tiger", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_Cunningham_test", 3] - time_df[time_df$time_name == "Start_Cunningham_test", 3]), "units"),
+                 attr(c(time_df[time_df$time_name == "End_tree_proportion", 3] - time_df[time_df$time_name == "Start_tree_proportion", 3]), "units") )
       diff_df <- data.frame(unique_id, test, difftime, units)
       # Save record of how long each test statistic takes to run
       write.csv(diff_df, paste0(replicate_folder, unique_id, "_test_difftimes.csv"))

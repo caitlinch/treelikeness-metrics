@@ -47,6 +47,38 @@ collate.treelikeness.results <- function(alignment_path, experiment_number){
   return(collated_df)
 }
 
+collate.empirical.treelikeness.results <- function(alignment_path){
+  # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame
+  
+  # Get paths to csv files
+  alignment_params_file <- gsub("_output_alignment.fa", "_parameters.csv", alignment_path)
+  alignment_treelikeness_file <- gsub("_output_alignment.fa", "_treelikeness_results.csv", alignment_path)
+  
+  # Check if files exist
+  if (file.exists(alignment_params_file) == TRUE & file.exists(alignment_treelikeness_file) == TRUE){
+    # Open the two csv files
+    p_df <- read.csv(alignment_params_file)
+    tl_df <- read.csv(alignment_treelikeness_file)
+    
+    # Check the uids match
+    uids_identical <- grepl(p_df$uid, tl_df$input_alignment_path)
+    
+    # If uids are identical, combine the two dataframes
+    if (uids_identical == TRUE){
+      collated_df <- cbind(p_df, tl_df)
+    } else {
+      collated_df <- NULL
+    }
+    
+  } else {
+    # If the two files do not exist, return NULL
+    collated_df <- NULL
+  }
+  
+  # Return the collated df
+  return(collated_df)
+}
+
 reformat.network.treelikeness.test.results.exp1 <- function(id, params_df, results_df){
   # For processing experiment 1 results
   # Function to collect the proportion of treelike alignments for each set of parameters

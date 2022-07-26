@@ -75,65 +75,83 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 #### 3. Construct parameters dataframe for empirical alignments ####
-## Find the genes for analysis
-# Collect all alignments from Oaks 2011 dataset
-all_files <- list.files(oaks_directory, recursive = TRUE)
-# Get all genes (will have the phrase "gene_alignments" in file name)
-all_genes <- grep("gene_alignments", all_files, value = TRUE)
-# Make list of the names of the genes you want to extract
-gene_names <- c("cmos", "CYTB", "ND2", "ND3")
-# Identify the files for those genes
-run_genes <- grep(paste(gene_names, collapse = "|"), all_genes, value = TRUE)
-# Extract the partitions of interest for those genes
-partition_genes <- grep("_12", run_genes, value = TRUE, invert = TRUE)
-# Extract the subsets of interest for those genes
-subset_genes <- c(grep("8taxa", partition_genes, value = TRUE), grep("23taxa", partition_genes, value = TRUE), grep("79taxa", partition_genes, value = TRUE))
-# Add location to get full file path to each gene 
-subset_gene_paths <- paste0(oaks_directory, subset_genes)
+# Create filename for Oaks 2011 parameters csv
+oaks_csv_file <- paste0(results_directory, "Oaks2011_parameters.csv")
 
-## Construct a dataframe containing information for analysis
-# Identify whether each gene is mtDNA or nDNA
-gene_type <- gsub("_gene_alignments", "", unlist(strsplit(subset_genes, "/"))[c(T,F)])
-# Get just the file name of each alignment file (include no part of the file path)
-gene_file_name <- basename(subset_genes)
-# Get the name of each gene
-gene_split <- strsplit(gene_file_name, "_")
-gene_name <- unlist(lapply(gene_split, `[[`, 1))
-# Identify the number of taxa in each gene
-gene_num_taxa <- as.numeric(gsub("taxa.fa", "", grep("taxa", unlist(strsplit(gene_file_name, "_")), value = TRUE)))
-# Identify the partitioning scheme for each gene
-codon_partitions <- gene_file_name
-codon_partitions[grep("_1_", gene_file_name)] <- "1"
-codon_partitions[grep("_2_", gene_file_name)] <- "2"
-codon_partitions[grep("_3_", gene_file_name)] <- "3"
-codon_partitions[grep("_1_|_2_|_3_", gene_file_name, invert = TRUE)] <- "All"
-# Assemble into a dataframe
-oaks_df <- data.frame(gene_name = gene_name, num_taxa = gene_num_taxa, codon_position = codon_partitions, DNA_type = gene_type, alignment_path = subset_gene_paths)
+# Find or create the Oaks 2011 parameters csv
+if (file.exists(oaks_csv_file)){
+  oaks_df <- read.csv(oaks_csv_file)
+} else {
+  ## Find the genes for analysis
+  # Collect all alignments from Oaks 2011 dataset
+  all_files <- list.files(oaks_directory, recursive = TRUE)
+  # Get all genes (will have the phrase "gene_alignments" in file name)
+  all_genes <- grep("gene_alignments", all_files, value = TRUE)
+  # Make list of the names of the genes you want to extract
+  gene_names <- c("cmos", "CYTB", "ND2", "ND3")
+  # Identify the files for those genes
+  run_genes <- grep(paste(gene_names, collapse = "|"), all_genes, value = TRUE)
+  # Extract the partitions of interest for those genes
+  partition_genes <- grep("_12", run_genes, value = TRUE, invert = TRUE)
+  # Extract the subsets of interest for those genes
+  subset_genes <- c(grep("8taxa", partition_genes, value = TRUE), grep("23taxa", partition_genes, value = TRUE), grep("79taxa", partition_genes, value = TRUE))
+  # Add location to get full file path to each gene 
+  subset_gene_paths <- paste0(oaks_directory, subset_genes)
+  
+  ## Construct a dataframe containing information for analysis
+  # Identify whether each gene is mtDNA or nDNA
+  gene_type <- gsub("_gene_alignments", "", unlist(strsplit(subset_genes, "/"))[c(T,F)])
+  # Get just the file name of each alignment file (include no part of the file path)
+  gene_file_name <- basename(subset_genes)
+  # Get the name of each gene
+  gene_split <- strsplit(gene_file_name, "_")
+  gene_name <- unlist(lapply(gene_split, `[[`, 1))
+  # Identify the number of taxa in each gene
+  gene_num_taxa <- as.numeric(gsub("taxa.fa", "", grep("taxa", unlist(strsplit(gene_file_name, "_")), value = TRUE)))
+  # Identify the partitioning scheme for each gene
+  codon_partitions <- gene_file_name
+  codon_partitions[grep("_1_", gene_file_name)] <- "1"
+  codon_partitions[grep("_2_", gene_file_name)] <- "2"
+  codon_partitions[grep("_3_", gene_file_name)] <- "3"
+  codon_partitions[grep("_1_|_2_|_3_", gene_file_name, invert = TRUE)] <- "All"
+  # Assemble into a dataframe
+  oaks_df <- data.frame(row_id = 1:length(subset_gene_paths),
+                        uid = paste0(gene_name, "_", gene_type, "_", gene_num_taxa, "_", codon_partitions), 
+                        gene_name = gene_name, 
+                        num_taxa = gene_num_taxa, 
+                        codon_position = codon_partitions, 
+                        DNA_type = gene_type, 
+                        alignment_path = subset_gene_paths)
+  # Save dataframe
+  write.csv(oaks_df, file = oaks_csv_file, row.names = FALSE)
+}
+
+
 
 #### 4. Apply tests for treelikeness to each empirical alignment ####
-  # Open output df and get names of alignments
-  exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-  exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
-  # Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
-  exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
-  # Get list of alignments
-  exp1_als <- exp1_op_df$output_alignment_file
-  # Apply treelikeness metrics to all alignments 
-  mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-           supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
-           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
-           distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
-           tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
-           sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
-           redo = FALSE, save_timers = TRUE, 
-           mc.cores = num_cores)
-  
-  # Collect and collate results
-  exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
-  # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
-  keep_indexes <- which(!sapply(exp1_list, is.null))
-  exp1_list_filtered <- exp1_list[keep_indexes]
-  # Save output dataframe
-  exp1_df <- as.data.frame(do.call("rbind", exp1_list_filtered))
-  exp1_df_name <- paste0(results_directory, "exp1_treelikeness_metrics_collated_results.csv")
-  write.csv(exp1_df, exp1_df_name, row.names = FALSE)
+# Open output df and get names of alignments
+exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
+# Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
+exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
+# Get list of alignments
+exp1_als <- exp1_op_df$output_alignment_file
+# Apply treelikeness metrics to all alignments 
+mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+         supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
+         num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC", 
+         distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
+         tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE,
+         sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
+         redo = FALSE, save_timers = TRUE, 
+         mc.cores = num_cores)
+
+# Collect and collate results
+exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
+# Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
+keep_indexes <- which(!sapply(exp1_list, is.null))
+exp1_list_filtered <- exp1_list[keep_indexes]
+# Save output dataframe
+exp1_df <- as.data.frame(do.call("rbind", exp1_list_filtered))
+exp1_df_name <- paste0(results_directory, "exp1_treelikeness_metrics_collated_results.csv")
+write.csv(exp1_df, exp1_df_name, row.names = FALSE)

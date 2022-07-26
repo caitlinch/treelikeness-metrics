@@ -157,6 +157,9 @@ copy.empirical.alignment <- function(row_id, data_df){
   al_dir <- dirname(row$output_alignment_path)
   if (dir.exists(al_dir) == FALSE){dir.create(al_dir)}
   
+  # Copy the alignment 
+  file.copy(from = row$old_alignment_path, to = row$output_alignment_path)
+  
   # Save the row as the parameters.csv file
   write.csv(row, file = row$parameters_path, row.names = FALSE)
 }

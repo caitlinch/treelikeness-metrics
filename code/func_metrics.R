@@ -886,9 +886,6 @@ treelikeness.metrics.empirical <- function(alignment_path, iqtree2_path, splitst
   print(alignment_path)
   
   ## Prepare variables and output file names for run
-  # Set timer
-  timings <- c(timings,Sys.time())
-  time_name <- c(time_name, "Prepare_variables")
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
   # Get unique id for the alignment

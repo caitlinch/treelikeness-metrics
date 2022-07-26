@@ -211,7 +211,7 @@ clade_species <- c("Alligator mississippiensis", "Alligator sinensis", "Caiman c
 subset_list = list(all = list(individuals = all_individuals, species = all_species, num_taxa = length(all_individuals), id = paste0(length(all_individuals), "taxa")),
                    species = list(individuals = one_individuals, species = one_species, num_taxa = length(one_individuals), id = paste0(length(one_individuals), "taxa")),
                    clade = list(individuals = clade_individuals, species = clade_species, num_taxa = length(clade_individuals), id = paste0(length(clade_individuals), "taxa")) )
-keys = c("all", "species", "clade")
+keys = c("all", "species", "clade") 
 
 # Iterate through each of the three subsets
 for (k in keys){
@@ -227,12 +227,14 @@ for (k in keys){
     
     # Get the list for k
     k_list <- subset_list[[k]]
-    # Get the list of taxa for k
-    k_individuals <- k_list[["individuals"]]
     # Get the id for k
     k_id <- k_list[["id"]]
+    # Get the list of taxa for k
+    k_individuals <- k_list[["individuals"]]
+    # Take the whole list of taxa and return those that are NOT in k_individuals but ARE in the whole list
+    remove_taxa <- setdiff(subset_list$all$individuals, k_individuals)
     
     # For each gene, open that gene and remove all unnecessary taxa
-    lapply(all_genes, remove.unnecessary.taxa, taxa, id)
+    lapply(all_genes, remove.unnecessary.taxa, taxa_to_remove = remove_taxa, id)
   }
 }

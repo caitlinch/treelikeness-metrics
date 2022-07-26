@@ -3,7 +3,7 @@
 
 # This file contains functions for data manipulation and data analysis
 
-#library(phylotools)
+library(phylotools)
 
 collate.treelikeness.results <- function(alignment_path, experiment_number){
   # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame

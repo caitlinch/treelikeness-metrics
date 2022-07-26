@@ -77,15 +77,11 @@ for (c in charset_type){
         gene_end <- as.numeric(gene_range_split[[2]])
         # Get the whole range of numbers as the gene_positions to extract
         gene_positions <- gene_start:gene_end
-        # Length will just be each position in that range
-        gene_length <- length(gene_positions)
       } else if (get_codon_position == TRUE){
         # If getting only one codon position, get only last number (do not include the "\\3")
         gene_end <- as.numeric(gsub("\\\\3", "", gene_range_split[[2]]))
         # Get every third number starting from the gene_start and moving towards the gene_end
         gene_positions <- seq(gene_start, gene_end, 3)
-        # Length will just be each position in that range
-        gene_length <- length(gene_positions)
       }
     } else if (length(gene_range_split) > 2){
       # If there are multiple components to the partition, extract all the sites for inclusion
@@ -112,12 +108,17 @@ for (c in charset_type){
       }
     }
     
+    # Length of gene will just be the number of sites included in the gene_positions
+    gene_length <- length(gene_positions)
+    
     # Save name and length of gene
     all_gene_lengths <- c(all_gene_lengths, gene_length)
     all_gene_names <- c(all_gene_names, gene_name)
     
+    # Sort gene positions into numerical order
     # Subset the supermatrix to get the sites (columns) for this gene
-    gene_mat <- dna_mat[, c(gene_positions)]
+    sorted_gene_positions <- sort(gene_positions, decreasing = FALSE)
+    gene_mat <- dna_mat[, c(sorted_gene_positions)]
     
     # Assemble file name for gene
     gene_file <- paste0(output_directory, gene_name, ".fa")

@@ -1,4 +1,4 @@
-name: treelikeness_metrics
+name: treelikeness-metrics
 channels:
   - conda-forge
   - defaults
@@ -8,4 +8,5 @@ dependencies:
   - r-ape
   - r-phangorn
   - r-phytools
+  - r-phylotools
   - r-ips

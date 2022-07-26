@@ -886,7 +886,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
       n_tree_tips = number_of_taxa
     } else {
       # If the number of taxa isn't supplied as an input variable, determine it by identifying the number of taxa in the fasta alignment
-      n_tree_tips <- length(read.fasta(alignment_path)[["seq.name"]])
+      n_tree_tips <- length(read.FASTA(alignment_path))
     }
     
     # Apply all treelikeness tests:

@@ -3,7 +3,7 @@
 
 # This file contains functions for data manipulation and data analysis
 
-library(phylotools)
+
 
 collate.treelikeness.results <- function(alignment_path, experiment_number){
   # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame
@@ -130,20 +130,6 @@ reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, resul
   prop_tl_als <- tl_results/n_als
   # Return the proportion of treelike alignments for this set of parameter values
   return(prop_tl_als)
-}
-
-
-
-
-remove.unnecessary.taxa <- function(gene_path, taxa_to_remove, id){
-  # Small function to take a single gene, remove only the relevant taxa, and save the reduced matrix
-  
-  # Make new file name for gene
-  gene_new_id <- gsub(".fa", "_", gene_path)
-  gene_new_path <- paste0(gene_new_id, id, ".fa")
-  
-  # Make a new alignment with only the desired taxa included
-  rm.sequence.fasta(infile = gene_path, outfile = gene_new_path, to.rm = taxa_to_remove)
 }
 
 

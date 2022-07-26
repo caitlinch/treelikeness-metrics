@@ -144,7 +144,7 @@ lapply(1:nrow(oaks_df), copy.empirical.alignment, data_df = oaks_df)
 # Get list of all the Oaks 2011 alignments to run
 all_oaks_alignments <- oaks_df$output_alignment_path
 # Apply treelikeness metrics to all alignments 
-mclapply(exp1_als, treelikeness.metrics.empirical, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+mclapply(all_oaks_alignments, treelikeness.metrics.empirical, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
          supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
          num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "MFP", 
          distance_matrix_substitution_method = "JC69", num_phylogemetric_threads = NA,
@@ -152,23 +152,6 @@ mclapply(exp1_als, treelikeness.metrics.empirical, iqtree2_path, splitstree_path
          sequence_format = "DNA", return_collated_data = TRUE, apply.TIGER = TRUE,
          redo = FALSE, save_timers = TRUE, 
          mc.cores = num_cores)
-
-# For testing
-alignment_path <- all_oaks_alignments[1]
-supply_number_of_taxa = FALSE
-number_of_taxa = NA
-num_iqtree2_threads = "AUTO"
-num_iqtree2_scf_quartets = 100
-iqtree_substitution_model = "MFP"
-distance_matrix_substitution_method = "JC69"
-num_phylogemetric_threads = NA
-tree_proportion_remove_trivial_splits = TRUE
-run_splitstree_for_tree_proportion = TRUE
-sequence_format = "DNA"
-return_collated_data = TRUE
-apply.TIGER = TRUE
-redo = FALSE
-save_timers = TRUE
 
 # Collect and collate results
 oaks_list <- mclapply(all_oaks_alignments, collate.empirical.treelikeness.results, mc.cores = num_cores)

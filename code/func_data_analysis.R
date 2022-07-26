@@ -47,6 +47,8 @@ collate.treelikeness.results <- function(alignment_path, experiment_number){
   return(collated_df)
 }
 
+
+
 collate.empirical.treelikeness.results <- function(alignment_path){
   # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame
   
@@ -79,6 +81,8 @@ collate.empirical.treelikeness.results <- function(alignment_path){
   return(collated_df)
 }
 
+
+
 reformat.network.treelikeness.test.results.exp1 <- function(id, params_df, results_df){
   # For processing experiment 1 results
   # Function to collect the proportion of treelike alignments for each set of parameters
@@ -101,6 +105,8 @@ reformat.network.treelikeness.test.results.exp1 <- function(id, params_df, resul
   # Return the proportion of treelike alignments for this set of parameter values
   return(prop_tl_als)
 }
+
+
 
 reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, results_df){
   # For processing experiment 2 results

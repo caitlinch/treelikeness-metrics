@@ -688,7 +688,7 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
                                              run_splitstree_for_tree_proportion = FALSE, sequence_format = "DNA", 
                                              apply.TIGER = FALSE, redo = FALSE, 
                                              save_timers = TRUE){
-  ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
+  ## Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
   # Set empty vector to put timings in
   timings <- c(Sys.time())
@@ -850,9 +850,8 @@ treelikeness.metrics.empirical <- function(alignment_path, iqtree2_path, splitst
                                            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
                                            num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
                                            run_splitstree_for_tree_proportion = FALSE, sequence_format = "DNA", 
-                                           apply.TIGER = FALSE, redo = FALSE, 
-                                           save_timers = TRUE){
-  ## Function to take one alignment, apply all treelikeness metrics and return results in a dataframe
+                                           apply.TIGER = FALSE, redo = FALSE){
+  ## Function to take one empirical alignment, apply all treelikeness metrics and return results in a dataframe
   
   # Print alignment path
   print(alignment_path)

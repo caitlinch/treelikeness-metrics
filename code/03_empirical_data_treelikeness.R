@@ -136,12 +136,13 @@ if (dir.exists(copy_directory) == FALSE){dir.create(copy_directory)}
 oaks_df$output_alignment_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, ".fa")
 oaks_df$parameters_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_parameters.csv")
 # Feed each row into the function to copy the alignment and save the corresponding alignment parameters 
+lapply(1:nrow(oaks_df), copy.empirical.alignment, data_df = oaks_df)
 
 
 
 #### 5. Apply tests for treelikeness to each empirical alignment ####
 # Get list of all the Oaks 2011 alignments to run
-all_oaks_alignments <- oaks_df$alignment_path
+all_oaks_alignments <- oaks_df$output_alignment_path
 # Apply treelikeness metrics to all alignments 
 mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
          supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 

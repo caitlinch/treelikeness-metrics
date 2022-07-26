@@ -25,6 +25,9 @@ repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-met
 library(phylotools)
 library(phangorn)
 
+# Source functions from caitlinch/treelikeness_metrics
+source(paste0(repo_directory, "code/func_empirical_datasets.R"))
+
 # Convert nexus to fasta
 fasta_file <- gsub("\\.nex", "\\.fa", alignment_file)
 # Open alignment file as matrix

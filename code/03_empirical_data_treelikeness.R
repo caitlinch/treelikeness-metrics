@@ -128,7 +128,12 @@ if (file.exists(oaks_csv_file)){
 
 
 
-#### 4. Apply tests for treelikeness to each empirical alignment ####
+#### 4. Copy alignments and save the parameters for each alignment ####
+# Get list of all the Oaks 2011 alignments to run
+
+
+
+#### 5. Apply tests for treelikeness to each empirical alignment ####
 # Get list of all the Oaks 2011 alignments to run
 all_oaks_alignments <- oaks_df$alignment_path
 # Apply treelikeness metrics to all alignments 

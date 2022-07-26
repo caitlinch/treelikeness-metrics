@@ -913,20 +913,8 @@ treelikeness.metrics.empirical <- function(alignment_path, iqtree2_path, splitst
       # If the number of taxa is supplied as an input variable, use the input value
       n_tree_tips = number_of_taxa
     } else {
-      # If the number of taxa isn't supplied as an input variable, determine it by finding the number of taxa from a tree in the folder files for the alignment
-      if ((grepl("exp1", unique_id)) | (!identical(agrep("random_trees", aln_folder_files), integer(0)))) {
-        # If either the unique id contains "exp1" OR there is a file name containing the phrase "random_trees",
-        #    open the first random tree and see how many taxa are present
-        random_trees_file <- paste0(replicate_folder, grep("random_trees", aln_folder_files, value = TRUE))
-        random_trees <- read.tree(random_trees_file)
-        n_tree_tips <- unique(Ntip(random_trees))[[1]]
-      } else if ((grepl("exp2", unique_id)) | (!identical(agrep("starting_tree", aln_folder_files), integer(0)))) {
-        # If either the unique id contains "exp2" OR there is a file name containing the phrase "starting_tree",
-        #    open the starting tree and see how many number of taxa present
-        start_tree_file <- paste0(replicate_folder, grep("starting_tree", aln_folder_files, value = TRUE))
-        start_tree <- read.tree(start_tree_file)
-        n_tree_tips <- Ntip(start_tree)
-      } 
+      # If the number of taxa isn't supplied as an input variable, determine it by identifying the number of taxa in the fasta alignment
+      n_tree_tips <- length(read.fasta(alignment_path)[["seq.name"]])
     }
     
     # Apply all treelikeness tests:
@@ -1171,7 +1159,7 @@ check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_fo
   log_lines <- readLines(iqtree_log_file) 
   
   # Find number of sequences in original alignment
-  num_taxa_line <- strsplit(log_lines[grep("Constructing alignment: done in", log_lines) + 1], " ")[[1]]
+  num_taxa_line <- strsplit(log_lines[grepl("Alignment has", log_lines)], " ")[[1]]
   num_total_taxa <- num_taxa_line[3]
   
   # Check log file to see if identical sequences are present

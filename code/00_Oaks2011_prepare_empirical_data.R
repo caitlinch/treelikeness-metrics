@@ -3,7 +3,11 @@
 
 # This program takes in a partition file and separates an alignment based on the charsets in the partition
 
+# Paper:
+#   Oaks, J.R. (2011), A time-calibrated species tree of Crocodylia reveals a recent radiation of the true crocodiles. Evolution, 65: 3285-3297. https://doi.org/10.1111/j.1558-5646.2011.01373.x
 
+# Data available from: 
+#   Oaks, Jamie R (2011), Data from: A time-calibrated species tree of Crocodylia reveals a recent radiation of the true crocodiles, Dryad, Dataset, https://doi.org/10.5061/dryad.5k9s0
 
 #### 1. Set parameters ####
 # alignment_file          <- nexus alignment file

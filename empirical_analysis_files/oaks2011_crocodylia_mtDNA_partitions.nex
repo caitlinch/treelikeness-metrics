@@ -1,0 +1,24 @@
+#nexus
+begin sets;
+	charset CYTB = 3948-5144;
+	charset CYTB_1 = 3948-5144\3;
+	charset CYTB_2 = 3949-5144\3;
+	charset CYTB_12 = 3948-5144\3 3949-5144\3;
+	charset CYTB_3 = 3950-5144\3;
+	charset tRNAglu = 6588-6646;
+	charset ND2 = 5145-6200;
+	charset ND2_1 = 5145-6200\3;
+	charset ND2_2 = 5146-6200\3;
+	charset ND2_12 = 5145-6200\3 5146-6200\3;
+	charset ND2_3 = 5147-6200\3;
+	charset tRNAmet = 6675-6698;
+	charset tRNAtrp = 6699-6718;
+	charset ND3 = 6201-6548;
+	charset ND3_1 = 6201-6548\3;
+	charset ND3_2 = 6202-6548\3;
+	charset ND3_12 = 6201-6548\3 6202-6548\3;
+	charset ND3_3 = 6203-6548\3;
+	charset tRNAgly = 6647-6674;
+	charset tRNAarg = 6549-6587;
+	charset DLOOP = 6719-7282;
+end;

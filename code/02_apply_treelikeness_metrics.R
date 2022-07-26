@@ -1,7 +1,7 @@
-# /caitlinch/treelikeness-metrics/02_apply_treelikeness_metrics.R
+# /caitlinch/treelikeness-metrics/code/02_apply_treelikeness_metrics.R
 # Caitlin Cherryh 2022
 
-# This program will simulate alignments with varying levels of treelikeness
+# This program will apply various tests for treelikeness to simulated alignments
 # This program requires IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, and SplitsTree (4.17.2 or above).
 
 

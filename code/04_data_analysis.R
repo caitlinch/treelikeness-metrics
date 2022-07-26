@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness-metrics/03_data_analysis.R
+# /caitlinch/treelikeness-metrics/code/04_data_analysis.R
 # Caitlin Cherryh 2022
 
 # This program takes results from applying various treelikeness tests and performs data analysis

@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness-metrics/00_prepare_empirical_data.R
+# /caitlinch/treelikeness-metrics/code/00_prepare_empirical_data.R
 # Caitlin Cherryh 2022
 
 # This program takes in a partition file and separates an alignment based on the charsets in the partition

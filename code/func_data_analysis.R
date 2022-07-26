@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness_metrics/func_metrics.R
+# /caitlinch/treelikeness_metrics/code/func_metrics.R
 # Caitlin Cherryh 2022
 
 # This file contains functions for data manipulation and data analysis

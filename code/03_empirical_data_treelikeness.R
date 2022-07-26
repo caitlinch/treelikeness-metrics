@@ -121,7 +121,7 @@ if (file.exists(oaks_csv_file)){
                         num_taxa = gene_num_taxa, 
                         codon_position = codon_partitions, 
                         DNA_type = gene_type, 
-                        old_alignment_path = subset_gene_paths)
+                        old_alignment_file = subset_gene_paths)
   # Save dataframe
   write.csv(oaks_df, file = oaks_csv_file, row.names = FALSE)
 }
@@ -132,11 +132,16 @@ if (file.exists(oaks_csv_file)){
 # Make a new folder for the Oaks 2011 analyses
 copy_directory <-  paste0(results_directory, "Oaks2011/")
 if (dir.exists(copy_directory) == FALSE){dir.create(copy_directory)}
-# Make a new column in the dataframe. This column is the location where each alignment will be copied and stored
-oaks_df$output_alignment_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_output_alignment.fa")
-oaks_df$parameters_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_parameters.csv")
+# If the columns for output alignments and output csvs do not exist, add them
+if (length(grep("output_alignment_file", names(oaks_df))) == 0){
+  # Make a new column in the dataframe. This column is the location where each alignment will be copied and stored
+  oaks_df$output_alignment_file <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_output_alignment.fa")
+  oaks_df$parameters_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_parameters.csv")
+  # Save Oaks 2011 dataframe with the two new columns
+  write.csv(oaks_df, file = oaks_csv_file, row.names = FALSE)
+}
 # If the output alignment paths do not exist, create them by copying the alignments to their new home
-if ((FALSE %in% file.exists(oaks_df$output_alignment_path)) == TRUE){
+if ((FALSE %in% file.exists(oaks_df$output_alignment_file)) == TRUE){
   # Feed each row into the function to copy the alignment and save the corresponding alignment parameters 
   lapply(1:nrow(oaks_df), copy.empirical.alignment, data_df = oaks_df)
 }
@@ -145,7 +150,7 @@ if ((FALSE %in% file.exists(oaks_df$output_alignment_path)) == TRUE){
 
 #### 5. Apply tests for treelikeness to each empirical alignment ####
 # Get list of all the Oaks 2011 alignments to run
-all_oaks_alignments <- oaks_df$output_alignment_path
+all_oaks_alignments <- oaks_df$output_alignment_file
 # Apply treelikeness metrics to all alignments 
 mclapply(all_oaks_alignments, treelikeness.metrics.empirical, 
          iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 

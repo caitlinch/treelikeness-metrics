@@ -12,7 +12,6 @@
 
 
 
-
 #### 1. Set parameters ####
 ## Directories
 # local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run
@@ -76,10 +75,40 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 #### 3. Construct parameters dataframe for empirical alignments ####
+## Find the genes for analysis
+# Collect all alignments from Oaks 2011 dataset
+all_files <- list.files(oaks_directory, recursive = TRUE)
+# Get all genes (will have the phrase "gene_alignments" in file name)
+all_genes <- grep("gene_alignments", all_files, value = TRUE)
+# Make list of the names of the genes you want to extract
+gene_names <- c("cmos", "CYTB", "ND2", "ND3")
+# Identify the files for those genes
+run_genes <- grep(paste(gene_names, collapse = "|"), all_genes, value = TRUE)
+# Extract the partitions of interest for those genes
+partition_genes <- grep("_12", run_genes, value = TRUE, invert = TRUE)
+# Extract the subsets of interest for those genes
+subset_genes <- c(grep("8taxa", partition_genes, value = TRUE), grep("23taxa", partition_genes, value = TRUE), grep("79taxa", partition_genes, value = TRUE))
+# Add location to get full file path to each gene 
+subset_gene_paths <- paste0(oaks_directory, subset_genes)
 
-
-
-
+## Construct a dataframe containing information for analysis
+# Identify whether each gene is mtDNA or nDNA
+gene_type <- gsub("_gene_alignments", "", unlist(strsplit(subset_genes, "/"))[c(T,F)])
+# Get just the file name of each alignment file (include no part of the file path)
+gene_file_name <- basename(subset_genes)
+# Get the name of each gene
+gene_split <- strsplit(gene_file_name, "_")
+gene_name <- unlist(lapply(gene_split, `[[`, 1))
+# Identify the number of taxa in each gene
+gene_num_taxa <- as.numeric(gsub("taxa.fa", "", grep("taxa", unlist(strsplit(gene_file_name, "_")), value = TRUE)))
+# Identify the partitioning scheme for each gene
+codon_partitions <- gene_file_name
+codon_partitions[grep("_1_", gene_file_name)] <- "1"
+codon_partitions[grep("_2_", gene_file_name)] <- "2"
+codon_partitions[grep("_3_", gene_file_name)] <- "3"
+codon_partitions[grep("_1_|_2_|_3_", gene_file_name, invert = TRUE)] <- "All"
+# Assemble into a dataframe
+oaks_df <- data.frame(gene_name = gene_name, num_taxa = gene_num_taxa, codon_position = codon_partitions, DNA_type = gene_type, alignment_path = subset_gene_paths)
 
 #### 4. Apply tests for treelikeness to each empirical alignment ####
   # Open output df and get names of alignments

@@ -11,9 +11,8 @@
 
 #### 1. Set parameters ####
 # alignment_file          <- nexus alignment file, downloaded from the DataDryad above
-# partition_files         <- nexus partition files for nuclear and mtDNA
-# output_directory        <- Directory for output alignments
-# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
+# output_directory        <- Directory for saving output alignments
+# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository
 
 alignment_file <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/oaks2011_crocodylia_alignment.nex"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/"
@@ -34,8 +33,10 @@ write.dna(dna_nex, file = fasta_file, format = "fasta", colsep = "")
 # Open fasta file
 dna_mat <- as.matrix(read.dna(file = fasta_file, format = "fasta"))
 
-#
-
+# Find partition files
+all_empirical_files <- list.files(paste0(repo_directory, "empirical_analysis_files/"))
+oaks_files <- paste0(repo_directory, "empirical_analysis_files/", grep("oaks2011", all_empirical_files, value = TRUE))
+partition_files <- grep("partition", oaks_files, value = TRUE)
 
 
 #### 4. Save each gene individually ####

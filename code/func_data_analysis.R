@@ -134,6 +134,7 @@ reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, resul
 
 
 
+
 remove.unnecessary.taxa <- function(gene_path, taxa_to_remove, id){
   # Small function to take a single gene, remove only the relevant taxa, and save the reduced matrix
   
@@ -163,3 +164,5 @@ copy.empirical.alignment <- function(row_id, data_df){
   # Save the row as the parameters.csv file
   write.csv(row, file = row$parameters_path, row.names = FALSE)
 }
+
+

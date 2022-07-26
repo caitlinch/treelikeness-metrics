@@ -102,7 +102,7 @@ if (run_exp1 == FALSE){
            mc.cores = num_cores)
   
   # Collect and collate results
-  exp1_list <- mclapply(exp1_als, collate.treelikeness.results, mc.cores = num_cores)
+  exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
   keep_indexes <- which(!sapply(exp1_list, is.null))
   exp1_list_filtered <- exp1_list[keep_indexes]
@@ -130,7 +130,7 @@ if (run_exp2 == TRUE){
            mc.cores = num_cores)
   
   # Collect and collate results
-  exp2_list <- mclapply(exp2_als, collate.treelikeness.results, mc.cores = num_cores)
+  exp2_list <- mclapply(exp2_als, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
   keep_indexes <- which(!sapply(exp2_list, is.null))
   exp2_list_filtered <- exp2_list[keep_indexes]

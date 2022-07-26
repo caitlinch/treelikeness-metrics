@@ -224,6 +224,8 @@ for (k in keys){
     
     # List all files in that directory
     all_genes <- paste0(gene_directory, list.files(gene_directory))
+    # Remove any genes with any of the ids
+    all_genes <- grep(subset_list[[1]]$id, grep(subset_list[[2]]$id, grep(subset_list[[3]]$id, all_genes, invert = TRUE, value = TRUE), invert = TRUE, value = TRUE), invert = TRUE, value = TRUE)
     
     # Get the list for k
     k_list <- subset_list[[k]]
@@ -235,6 +237,6 @@ for (k in keys){
     remove_taxa <- setdiff(subset_list$all$individuals, k_individuals)
     
     # For each gene, open that gene and remove all unnecessary taxa
-    lapply(all_genes, remove.unnecessary.taxa, taxa_to_remove = remove_taxa, id)
+    lapply(all_genes, remove.unnecessary.taxa, taxa_to_remove = remove_taxa, id = k_id)
   }
 }

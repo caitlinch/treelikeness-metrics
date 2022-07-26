@@ -680,7 +680,9 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 
 
 #### Functions to apply multiple test statistics ####
-treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+treelikeness.metrics.simulations <- function(alignment_path, 
+                                             iqtree2_path, splitstree_path, 
+                                             phylogemetric_path, fast_TIGER_path, 
                                              supply_number_of_taxa = FALSE, number_of_taxa = NA, 
                                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                                              iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
@@ -844,7 +846,9 @@ treelikeness.metrics.simulations <- function(alignment_path, iqtree2_path, split
 
 
 
-treelikeness.metrics.empirical <- function(alignment_path, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+treelikeness.metrics.empirical <- function(alignment_path, 
+                                           iqtree2_path, splitstree_path, 
+                                           phylogemetric_path, fast_TIGER_path, 
                                            supply_number_of_taxa = FALSE, number_of_taxa = NA, 
                                            num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                                            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 

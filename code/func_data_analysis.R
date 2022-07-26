@@ -92,3 +92,7 @@ reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, resul
   return(prop_tl_als)
 }
 
+
+
+remove.unnecessary.taxa <- function(gene_path, taxa)
+

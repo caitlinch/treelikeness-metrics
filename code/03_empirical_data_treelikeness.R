@@ -135,8 +135,11 @@ if (dir.exists(copy_directory) == FALSE){dir.create(copy_directory)}
 # Make a new column in the dataframe. This column is the location where each alignment will be copied and stored
 oaks_df$output_alignment_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_output_alignment.fa")
 oaks_df$parameters_path <- paste0(copy_directory, oaks_df$uid, "/", oaks_df$uid, "_parameters.csv")
-# Feed each row into the function to copy the alignment and save the corresponding alignment parameters 
-lapply(1:nrow(oaks_df), copy.empirical.alignment, data_df = oaks_df)
+# If the output alignment paths do not exist, create them by copying the alignments to their new home
+if ((FALSE %in% file.exists(oaks_df$output_alignment_path)) == TRUE){
+  # Feed each row into the function to copy the alignment and save the corresponding alignment parameters 
+  lapply(1:nrow(oaks_df), copy.empirical.alignment, data_df = oaks_df)
+}
 
 
 

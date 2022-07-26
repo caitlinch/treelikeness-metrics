@@ -35,6 +35,7 @@ if (run_location == "local"){
   # Directories
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   results_directory <- paste0(local_directory, "01_results/")
+  oaks_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/"
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   
   # Executable paths
@@ -49,6 +50,7 @@ if (run_location == "local"){
   # Directories
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   results_directory <- local_directory
+  oaks_directory <- "/data/caitlin/treelikeness_metrics/Oaks2011/"
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths

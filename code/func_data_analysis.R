@@ -145,3 +145,18 @@ remove.unnecessary.taxa <- function(gene_path, taxa_to_remove, id){
   rm.sequence.fasta(infile = gene_path, outfile = gene_new_path, to.rm = taxa_to_remove)
 }
 
+
+
+copy.empirical.alignment <- function(row_id, data_df){
+  # Small function to take a row from a dataframe, save a copy of the alignment, and save the row containing the alignment parameters as a csv
+  
+  # Extract the row
+  row <- data_df[row_id, ]
+  
+  # Check whether folder for this alignment exists and create it if necessary
+  al_dir <- dirname(row$output_alignment_path)
+  if (dir.exists(al_dir) == FALSE){dir.create(al_dir)}
+  
+  # Save the row as the parameters.csv file
+  write.csv(row, file = row$parameters_path, row.names = FALSE)
+}

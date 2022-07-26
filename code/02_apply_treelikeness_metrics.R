@@ -212,11 +212,11 @@ for (e in exp_ids){
                  save_timers = TRUE,
                  mc.cores = num_cores)
         
-        # Collect and collate results
+        # Collect and collate ALL results
         if (e == "exp1"){
-          e_list <- mclapply(rerun_al_paths, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)  
+          e_list <- mclapply(e_op_df$output_alignment_file, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)  
         } else if (e == "exp2"){
-          e_list <- mclapply(rerun_al_paths, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
+          e_list <- mclapply(e_op_df$output_alignment_file, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
         }
         
         # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)

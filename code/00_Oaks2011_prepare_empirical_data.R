@@ -10,15 +10,13 @@
 #   Oaks, Jamie R (2011), Data from: A time-calibrated species tree of Crocodylia reveals a recent radiation of the true crocodiles, Dryad, Dataset, https://doi.org/10.5061/dryad.5k9s0
 
 #### 1. Set parameters ####
-# alignment_file          <- nexus alignment file
+# alignment_file          <- nexus alignment file, downloaded from the DataDryad above
 # partition_files         <- nexus partition files for nuclear and mtDNA
 # output_directory        <- Directory for output alignments
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
 alignment_file <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/oaks2011_crocodylia_alignment.nex"
-partition_files <- c("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/oaks2011_crocodylia_mtDNA.nex",
-                     "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/oaks2011_crocodylia_nDNA.nex")
-alignment_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/"
+output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/00_data_oaks2011/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 
@@ -36,14 +34,16 @@ write.dna(dna_nex, file = fasta_file, format = "fasta", colsep = "")
 # Open fasta file
 dna_mat <- as.matrix(read.dna(file = fasta_file, format = "fasta"))
 
+#
+
 
 
 #### 4. Save each gene individually ####
 charset_type = c("mtDNA", "nDNA")
 for (c in charset_type){
   # Make new output directory
-  output_directory <- paste0(alignment_directory, c, "_gene_alignments/")
-  if (dir.exists(output_directory) == FALSE){dir.create(output_directory)}
+  gene_directory <- paste0(output_directory, c, "_gene_alignments/")
+  if (dir.exists(gene_directory) == FALSE){dir.create(gene_directory)}
   
   # Select partition file
   c_partition_file <- grep(c, partition_files, value = TRUE)
@@ -125,12 +125,12 @@ for (c in charset_type){
     gene_mat <- dna_mat[, c(sorted_gene_positions)]
     
     # Assemble file name for gene
-    gene_file <- paste0(output_directory, gene_name, ".fa")
+    gene_file <- paste0(gene_directory, gene_name, ".fa")
     # Write gene to file
     write.FASTA(gene_mat, file = gene_file)
   }
   
   # Create dataframe with gene name and lengths
   df <- data.frame(dataset = "Oaks2011", gene_name = all_gene_names, gene_length = all_gene_lengths)
-  write.csv(df, file = paste0(alignment_directory, "Oaks2011_", c,"_gene_lengths.csv"), row.names = FALSE)
+  write.csv(df, file = paste0(output_directory, "Oaks2011_", c,"_gene_lengths.csv"), row.names = FALSE)
 }

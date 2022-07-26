@@ -39,7 +39,7 @@ oaks_files <- paste0(repo_directory, "empirical_analysis_files/", grep("oaks2011
 partition_files <- grep("partition", oaks_files, value = TRUE)
 
 
-#### 4. Save each gene individually ####
+#### 3. Save each gene individually ####
 charset_type = c("mtDNA", "nDNA")
 for (c in charset_type){
   # Make new output directory
@@ -134,4 +134,105 @@ for (c in charset_type){
   # Create dataframe with gene name and lengths
   df <- data.frame(dataset = "Oaks2011", gene_name = all_gene_names, gene_length = all_gene_lengths)
   write.csv(df, file = paste0(output_directory, "Oaks2011_", c,"_gene_lengths.csv"), row.names = FALSE)
+}
+
+
+
+#### 3. Create subsets of taxa for each gene  ####
+# Need to separate each alignment into the three subsets for analysis
+
+# This subset contains every individual from the alignment
+all_individuals <- c("LSUMZ_H18733", 
+                     "LSUMZ_H7868", "LSUMZ_H21699", "LSUMZ_H21700",
+                     "LSUMZ_H13961", "LSUMZ_H13962", "LSUMZ_H13964", "LSUMZ_H21701", "LSUMZ_H21702", 
+                     "LSUMZ_H21705", "LSUMZ_H21706",
+                     "LSUMZ_H21707", 
+                     "LSUMZ_H21751", "LSUMZ_H21752", "LSUMZ_H21753",
+                     "LSUMZ_H6998", "LSUMZ_H21761", 
+                     "LSUMZ_H6420", "LSUMZ_H7873",
+                     "LSUMZ_H21748", 
+                     "LSUMZ_H21763", "LSUMZ_H21764", "LSUMZ_H21765", 
+                     "LSUMZ_H6760", "LSUMZ_H6982", "LSUMZ_H21708", "LSUMZ_H21709", "LSUMZ_H21710", "LSUMZ_H21711", "LSUMZ_H21712", "LSUMZ_H21713", "LSUMZ_H21714", "LSUMZ_H21715",
+                     "LSUMZ_H6976", "LSUMZ_H21718", "LSUMZ_H21719", "LSUMZ_H21720", 
+                     "LSUMZ_H20683", "LSUMZ_H20684", "LSUMZ_H20685", "LSUMZ_H20686", "LSUMZ_H21724", 
+                     "LSUMZ_H7070", "LSUMZ_H21725", "LSUMZ_H21726",
+                     "LSUMZ_H6903", "LSUMZ_H21727", "LSUMZ_H21729", "LSUMZ_H21730",
+                     "LSUMZ_H21731", "LSUMZ_H21733", "LSUMZ_H21734", "LSUMZ_H21735", "LSUMZ_H21736", "LSUMZ_H21737", "LSUMZ_H21738", "LSUMZ_H21739",
+                     "LSUMZ_H21766", "LSUMZ_H21768", "LSUMZ_H21769", "LSUMZ_H21831", "LSUMZ_H21771", "LSUMZ_H21815", "LSUMZ_H21872",
+                     "LSUMZ_H6995", "LSUMZ_H7071", 
+                     "LSUMZ_H21741", "LSUMZ_H21742",
+                     "LSUMZ_H6758", "LSUMZ_H6984",
+                     "LSUMZ_H21745", "LSUMZ_H21746", "LSUMZ_H21747", 
+                     "LSUMZ_H6978", "LSUMZ_H6985", 
+                     "LSUMZ_H21755", "LSUMZ_H21756", "LSUMZ_H6990", "LSUMZ_H6992")
+all_species <- c("Alligator mississippiensis", 
+                 rep("Alligator sinensis", 3),
+                 rep("Caiman crocodilus", 5),
+                 rep("Caiman latirostris", 2),
+                 "Caiman yacare", 
+                 rep("Melanosuchus niger", 3),
+                 rep("Paleosuchus palpebrosus", 2),
+                 rep("Paleosuchus trigonatus", 2), 
+                 "Gavialis gangeticus", 
+                 rep("Tomistoma schlegelii", 3),
+                 rep("Crocodylus acutus", 10),
+                 rep("Mecistops cataphractus", 4), 
+                 rep("Crocodylus intermedius", 5),
+                 rep("Crocodylus johnstoni", 3),
+                 rep("Crocodylus moreletii", 4),
+                 rep("Crocodylus niloticus", 8),
+                 rep("Crocodylus mindorensis", 7),
+                 rep("Crocodylus novaeguineae", 2),
+                 rep("Crocodylus palustris", 2),
+                 rep("Crocodylus porosus", 2),
+                 rep("Crocodylus rhombifer", 3),
+                 rep("Crocodylus siamensis", 2),
+                 rep("Osteolaemus tetraspis", 4) )
+# This subset contains one individual per species (the individual present within the alignment with the lowest LSUMZ ID number)
+one_individuals <- c("LSUMZ_H18733", "LSUMZ_H7868", "LSUMZ_H13961", "LSUMZ_H21705",
+                     "LSUMZ_H21707", "LSUMZ_H21751", "LSUMZ_H6998", "LSUMZ_H6420",
+                     "LSUMZ_H21748", "LSUMZ_H21763", "LSUMZ_H6760", "LSUMZ_H6976",
+                     "LSUMZ_H20683", "LSUMZ_H7070", "LSUMZ_H6903", "LSUMZ_H21731",
+                     "LSUMZ_H21766", "LSUMZ_H6995", "LSUMZ_H21741", "LSUMZ_H6758", 
+                     "LSUMZ_H21745", "LSUMZ_H6978", "LSUMZ_H6990")
+one_species <- c("Alligator mississippiensis", "Alligator sinensis", "Caiman crocodilus", "Caiman latirostris",
+                 "Caiman yacare", "Melanosuchus niger", "Paleosuchus palpebrosus", "Paleosuchus trigonatus",
+                 "Gavialis gangeticus", "Tomistoma schlegelii", "Crocodylus acutus", "Mecistops cataphractus",
+                 "Crocodylus intermedius", "Crocodylus johnstoni", "Crocodylus moreletii", "Crocodylus niloticus",
+                 "Crocodylus mindorensis", "Crocodylus novaeguineae", "Crocodylus palustris", "Crocodylus porosus",
+                 "Crocodylus rhombifer", "Crocodylus siamensis", "Osteolaemus tetraspis")
+# This subset contains one individual per species (the individual present within the alignment with the lowest LSUMZ ID number) for a single clade within the main tree
+clade_individuals <- c("LSUMZ_H18733", "LSUMZ_H7868", "LSUMZ_H13961", "LSUMZ_H21705",
+                       "LSUMZ_H21707", "LSUMZ_H21751", "LSUMZ_H6998", "LSUMZ_H6420")
+clade_species <- c("Alligator mississippiensis", "Alligator sinensis", "Caiman crocodilus", "Caiman latirostris",
+                   "Caiman yacare", "Melanosuchus niger", "Paleosuchus palpebrosus", "Paleosuchus trigonatus")
+
+# Create a list of all the information for each subset
+subset_list = list(all = list(individuals = all_individuals, species = all_species, num_taxa = length(all_individuals), id = paste0(length(all_individuals), "taxa")),
+                   species = list(individuals = one_individuals, species = one_species, num_taxa = length(one_individuals), id = paste0(length(one_individuals), "taxa")),
+                   clade = list(individuals = clade_individuals, species = clade_species, num_taxa = length(clade_individuals), id = paste0(length(clade_individuals), "taxa")) )
+keys = c("all", "species", "clade")
+
+# Iterate through each of the three subsets
+for (k in keys){
+  # Iterate through each of the charsets
+  charset_type = c("mtDNA", "nDNA")
+  for (c in charset_type){
+    # Make new output directory
+    gene_directory <- paste0(output_directory, c, "_gene_alignments/")
+    if (dir.exists(gene_directory) == FALSE){dir.create(gene_directory)}
+    
+    # List all files in that directory
+    all_genes <- paste0(gene_directory, list.files(gene_directory))
+    
+    # Get the list for k
+    k_list <- subset_list[[k]]
+    # Get the list of taxa for k
+    k_individuals <- k_list[["individuals"]]
+    # Get the id for k
+    k_id <- k_list[["id"]]
+    
+    # For each gene, open that gene and remove all unnecessary taxa
+    lapply(all_genes, remove.unnecessary.taxa, taxa, id)
+  }
 }

@@ -129,13 +129,8 @@ if (file.exists(oaks_csv_file)){
 
 
 #### 4. Apply tests for treelikeness to each empirical alignment ####
-# Open output df and get names of alignments
-exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
-# Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
-exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
-# Get list of alignments
-exp1_als <- exp1_op_df$output_alignment_file
+# Get list of all the Oaks 2011 alignments to run
+all_oaks_alignments <- oaks_df$alignment_path
 # Apply treelikeness metrics to all alignments 
 mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
          supply_number_of_taxa = FALSE, number_of_taxa = NA, num_iqtree2_threads = "AUTO", 
@@ -147,11 +142,11 @@ mclapply(exp1_als, treelikeness.metrics.simulations, iqtree2_path, splitstree_pa
          mc.cores = num_cores)
 
 # Collect and collate results
-exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
+oaks_list <- mclapply(all_oaks_alignments, collate.empirical.treelikeness.results, mc.cores = num_cores)
 # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
-keep_indexes <- which(!sapply(exp1_list, is.null))
-exp1_list_filtered <- exp1_list[keep_indexes]
+keep_indexes <- which(!sapply(oaks_list, is.null))
+oaks_list_filtered <- oaks_list[keep_indexes]
 # Save output dataframe
-exp1_df <- as.data.frame(do.call("rbind", exp1_list_filtered))
-exp1_df_name <- paste0(results_directory, "exp1_treelikeness_metrics_collated_results.csv")
-write.csv(exp1_df, exp1_df_name, row.names = FALSE)
+oaks_tl_df <- as.data.frame(do.call("rbind", oaks_list_filtered))
+oaks_df_name <- paste0(results_directory, "Oaks2011_treelikeness_metrics_collated_results.csv")
+write.csv(oaks_tl_df, oaks_df_name, row.names = FALSE)

@@ -1108,6 +1108,7 @@ check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_fo
       # If there is no unique sequences file, identify the number of unique sequences by opening and looking at the original alignment
       number_unique_taxa <- length(unique(as.list(read.dna(alignment_path, "fasta"))))
     } else {
+      # Backup condition for if something goes wrong
       number_unique_taxa = NA
     }
   } else if (identical_sequences_present == FALSE) {

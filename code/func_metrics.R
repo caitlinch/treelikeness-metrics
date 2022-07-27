@@ -15,8 +15,8 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 #### Treelikeness metric functions ####
 tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
-                            check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, 
-                            splitstree_path = NA, base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
+                            check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, splitstree_path = NA, 
+                            base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
@@ -757,7 +757,8 @@ treelikeness.metrics.simulations <- function(alignment_path,
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_ntlt","Start_delta_plot")
     # Apply Delta plots (Holland et. al. 2002)
-    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
+    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
+                                                   base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
     # Set timer
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_delta_plot","Start_q_residual")
@@ -777,15 +778,18 @@ treelikeness.metrics.simulations <- function(alignment_path,
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_fast_tiger","Start_Cunningham_test")
     # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
-                                         distance_matrix_substitution_model = distance_matrix_substitution_method)
+    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
+                                         iqtree_substitution_model = iqtree_substitution_model, 
+                                         distance_matrix_substitution_model = distance_matrix_substitution_method,
+                                         base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
     # Set timer
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_Cunningham_test","Start_tree_proportion")
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
+                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
+                                       base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
     # Set timer
     timings <- c(timings,Sys.time(), Sys.time())
     time_name <- c(time_name, "End_tree_proportion", "Assemble_results")
@@ -940,7 +944,8 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
     # Apply Delta plots (Holland et. al. 2002)
-    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
+    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
+                                                   base_frequencies = NA, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
     mean_q_residual <- q_residual_results$mean_q_residual
@@ -952,11 +957,13 @@ treelikeness.metrics.empirical <- function(alignment_path,
     }
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
-                                         distance_matrix_substitution_model = distance_matrix_substitution_method)
+                                         distance_matrix_substitution_model = distance_matrix_substitution_method,
+                                         base_frequencies = NA, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                        remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
+                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
+                                       base_frequencies = NA, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
@@ -1370,7 +1377,7 @@ calculate.dna.pairwise.distance.matrix <- function(alignment_path, substitution_
   # Can also use number of rate categories, Q matrix, and base frequencies (or any combination of the above) by specifying in the function call
   if (is.na(number_of_rate_categories) & is.na(Q_matrix) & is.na(base_frequencies)){
     # If none of the number_of_rate_categories, Q_matrix or base frequencies are provided, simply estimate distance matrix using model of substitution
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, "only"))
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, " only"))
     pdm <- dist.ml(alignment, model = substitution_model)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == TRUE)){
     # Use number of rate categories only

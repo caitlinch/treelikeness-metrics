@@ -1431,6 +1431,12 @@ get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_forma
     # Find the start and end of the number of rate categories
     start_line_id <- grep("Category  Relative_rate  Proportion", iqtree_lines)
     end_line_id <- grep("LIKELIHOOD MAPPING ANALYSIS", iqtree_lines) - 2
+    if (grepl("Relative rates are computed", iqtree_lines[end_line_id])){
+      # If the end_line_id line is "Relative rates are computed as MEAN of the portion of the Gamma distribution falling in the category.",
+      #   then subtract one from the end_line_id
+      # This ensures only the lines for the gamma categories are selected
+      end_line_id = end_line_id - 1
+    }
     if (length(start_line_id) > 0){
       # If there are rate categories, get them and use that information for the dist.ml function
       # Get lines with rate categories

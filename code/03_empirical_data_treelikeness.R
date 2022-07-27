@@ -159,7 +159,7 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
          iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81",
          num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE,
          run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA",
-         apply.TIGER = TRUE, redo = TRUE,
+         apply.TIGER = TRUE, redo = FALSE,
          mc.cores = num_cores)
 
 # ## Parameters for testing
@@ -174,8 +174,8 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
 # run_splitstree_for_tree_proportion = TRUE
 # sequence_format = "DNA"
 # apply.TIGER = TRUE
-# redo = TRUE
-# alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/Oaks2011/cmos_nDNA_8_2/cmos_nDNA_8_2_output_alignment.fa"
+# redo = FALSE
+# alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/Oaks2011/cmos_nDNA_8_3/cmos_nDNA_8_3_output_alignment.fa"
 # 
 # treelikeness.metrics.empirical(alignment_path,
 #                                iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
@@ -184,7 +184,7 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
 #                                iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81",
 #                                num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE,
 #                                run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA",
-#                                apply.TIGER = TRUE, redo = TRUE)
+#                                apply.TIGER = TRUE, redo = FALSE)
 
 # Collect and collate results
 oaks_list <- mclapply(all_oaks_alignments, collate.empirical.treelikeness.results, mc.cores = num_cores)

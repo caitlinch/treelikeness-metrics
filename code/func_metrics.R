@@ -1434,31 +1434,38 @@ get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_forma
     Q_vector <- c(Q_df[2,1], Q_df[3,1], Q_df[3,2], Q_df[4,1], Q_df[4,2], Q_df[4,3])
     
     ## Rate categories
-    # Find the start and end of the number of rate categories
-    start_line_id <- grep("Category  Relative_rate  Proportion", iqtree_lines)
-    end_line_id <- grep("LIKELIHOOD MAPPING ANALYSIS", iqtree_lines) - 2
-    if (grepl("Relative rates are computed", iqtree_lines[end_line_id])){
-      # If the end_line_id line is "Relative rates are computed as MEAN of the portion of the Gamma distribution falling in the category.",
-      #   then subtract one from the end_line_id
-      # This ensures only the lines for the gamma categories are selected
-      end_line_id = end_line_id - 1
-    }
-    if (length(start_line_id) > 0){
-      # If there are rate categories, get them and use that information for the dist.ml function
-      # Get lines with rate categories
-      rc_lines <- iqtree_lines[start_line_id:end_line_id]
-      # Save Q matrix as file
-      rc_lines_file <- paste0(al_directory, "rate_categories_results.txt")
-      write(rc_lines, file = rc_lines_file)
-      # Read rate categories matrix in as tsv
-      rc_df <- read.table(rc_lines_file, sep = "", skip = 1)
-      names(rc_df) <- c("Category", "Relative rate", "Proportion")
-      # Get the number of rate categories
-      num_rate_categories <- nrow(rc_df)
+    # Check whether rate categories are uniform 
+    start_line_id <- grep("Model of rate heterogeneity:", iqtree_lines)
+    if (grepl("Uniform", iqtree_lines[start_line_id])){
+      # If the model of rate heterogeneity is uniform, there is one rate category
+      num_rate_categories = 1
     } else {
-      # If there are no rate categories, do not make rate category dataframe and return NA
-      num_rate_categories = NA
-    } 
+      # Find the start and end of the number of rate categories
+      start_line_id <- grep("Category  Relative_rate  Proportion", iqtree_lines)
+      end_line_id <- grep("LIKELIHOOD MAPPING ANALYSIS", iqtree_lines) - 2
+      if (grepl("Relative rates are computed", iqtree_lines[end_line_id])){
+        # If the end_line_id line is "Relative rates are computed as MEAN of the portion of the Gamma distribution falling in the category.",
+        #   then subtract one from the end_line_id
+        # This ensures only the lines for the gamma categories are selected
+        end_line_id = end_line_id - 1
+      }
+      if (length(start_line_id) > 0){
+        # If there are rate categories, get them and use that information for the dist.ml function
+        # Get lines with rate categories
+        rc_lines <- iqtree_lines[start_line_id:end_line_id]
+        # Save Q matrix as file
+        rc_lines_file <- paste0(al_directory, "rate_categories_results.txt")
+        write(rc_lines, file = rc_lines_file)
+        # Read rate categories matrix in as tsv
+        rc_df <- read.table(rc_lines_file, sep = "", skip = 1)
+        names(rc_df) <- c("Category", "Relative rate", "Proportion")
+        # Get the number of rate categories
+        num_rate_categories <- nrow(rc_df)
+      } else {
+        # If there are no rate categories, do not make rate category dataframe and return NA
+        num_rate_categories = NA
+      } 
+    }
     
     ## Best model according to BIC
     # Find the start and end of the number of rate categories

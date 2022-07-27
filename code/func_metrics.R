@@ -1371,35 +1371,35 @@ calculate.pairwise.distance.matrix <- function(alignment_path, substitution_mode
   if (is.na(number_of_rate_categories) & is.na(Q_matrix) & is.na(base_frequencies)){
     # If none of the number_of_rate_categories, Q_matrix or base frequencies are provided, simply estimate distance matrix using model of substitution
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, "only"))
-    pdm <- dist.ml(alignment, model = substitution_model)
+    pdm <- dist.ml(alignment_path, model = substitution_model)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == TRUE)){
     # Use number of rate categories only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", number of rate categories"))
-    pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment_path, model = substitution_model, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
     # Use Q matrix only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix"))
-    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
+    pdm <- dist.ml(alignment_path, model = substitution_model, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
     # Use base frequencies only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies"))
-    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies)
+    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
     # Use number of rate categories and Q matrix
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix, number of rate categories"))
-    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment_path, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
     # Use number of rate categories and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, number of rate categories"))
-    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
     # Use Q matrix and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix"))
-    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
+    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
     # Use number of rate categories, Q matrix, and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix, and number of rate categories"))
-    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
   }
   
   # Return the pairwise distance matrix

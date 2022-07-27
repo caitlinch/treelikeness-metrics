@@ -936,12 +936,12 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
                      cunningham_metric, tree_proportion, alignment_path, iqtree_substitution_model, best_iqtree_model, 
-                     distance_matrix_substitution_method, paste(base_frequencies, collapse = ","), paste(Q_matrix, collapse = ","), number_of_rate_categories)
+                     paste(state_frequencies, collapse = ","), paste(Q_vector, collapse = ","), num_rate_categories, distance_matrix_substitution_method)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
     names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
                    "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value",
                    "Cunningham_test", "tree_proportion", "input_alignment_path", "IQ-Tree_input_model", "IQ-Tree_best_fit_BIC_model",
-                   "distance_matrix_substitution_model", "base_frequencies", "Q_matrix_lower_diagonal", "number_of_rate_categories")
+                   "IQ-Tree_base_frequencies", "IQ-Tree_Q_matrix_lower_diagonal", "IQ-Tree_number_of_rate_categories", "distance_matrix_substitution_model")
     names(results_df) <- names_vec
     write.csv(results_df, file = df_name, row.names = FALSE)
     
@@ -1463,7 +1463,7 @@ get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_forma
     # Get line of text containing best model
     model_line <- iqtree_lines[start_line_id]
     # Extract model from line of text
-    model <- gsub(" ", "", unlist(strsplit(model_line, ":"))[[2]])
+    best_model <- gsub(" ", "", unlist(strsplit(model_line, ":"))[[2]])
     
   } # end if sequence_format == "DNA"
   

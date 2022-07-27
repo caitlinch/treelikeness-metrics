@@ -154,7 +154,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 ## Cunningham test (Cunningham 1978) ##
-cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69",
+cunningham.test <- function(alignment_path, sequence_format = "DNA", iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69",
                             base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
@@ -778,7 +778,7 @@ treelikeness.metrics.simulations <- function(alignment_path,
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_fast_tiger","Start_Cunningham_test")
     # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
+    cunningham_metric <- cunningham.test(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
                                          iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method,
                                          base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
@@ -924,7 +924,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
       mean_tiger_value <- "no_TIGER_run"
     }
     # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
+    cunningham_metric <- cunningham.test(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method,
                                          base_frequencies = state_frequencies, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     # Apply tree proportion (new test)

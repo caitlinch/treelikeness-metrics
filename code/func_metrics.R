@@ -893,6 +893,9 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips)
+    
+    
+    
     # Apply Site concordance factors (Minh et. al. 2020)
     scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
@@ -1093,6 +1096,9 @@ check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_fo
       if (identical(unique_seq_path_1, unique_seq_path_2) == TRUE){
         # If both paths are identical, doesn't matter which one is selected
         unique_seq_path <- unique_seq_path_1
+      } else if (is.na(unique_seq_check_1) == TRUE | is.na(unique_seq_check_2) == TRUE){
+        # If there is no unique sequences file, identify the number of unique sequences by opening and looking at the original alignment
+        unique_seq_path <- length(unique(as.list(read.dna(alignment_path, "fasta"))))
       } else {
         # If paths are not identical, select the one that explicitly was stated to contain unique sequences
         unique_seq_path <- unique_seq_path_1

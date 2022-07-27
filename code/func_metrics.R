@@ -16,7 +16,7 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 #### Treelikeness metric functions ####
 tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
                             check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, 
-                            splitstree_path = NA){
+                            splitstree_path = NA, number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
@@ -57,7 +57,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
       
       # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
       # Compute pairwise distances for the taxa using the specified model of sequence evolution
-      mldist <- dist.ml(al, model)
+      mldist <- calculate.pairwise.distance.matrix(al, model, number_of_rate_categories, Q_matrix, base_frequencies)
       # Create a NeighbourNet network from the alignment
       nnet <- neighborNet(mldist)
       

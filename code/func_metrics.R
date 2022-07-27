@@ -16,7 +16,7 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 #### Treelikeness metric functions ####
 tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
                             check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, 
-                            splitstree_path = NA, number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
+                            splitstree_path = NA, base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
@@ -45,19 +45,9 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
     if (run_splitstree == FALSE) {
       ## Calculate NeighborNet network in R
       
-      # Identify file type of alignment
-      suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
-      # Open alignment
-      if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
-        # Open alignment
-        al <- read.FASTA(alignment_path, type = sequence_format)
-      } else if (suffix == "nex" | suffix == "nexus") {
-        al <- as.DNAbin(read.nexus.data(alignment_path))
-      }
-      
       # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
       # Compute pairwise distances for the taxa using the specified model of sequence evolution
-      mldist <- calculate.pairwise.distance.matrix(al, model, number_of_rate_categories, Q_matrix, base_frequencies)
+      mldist <- calculate.dna.pairwise.distance.matrix(alignment_path, model, base_frequencies, Q_matrix, number_of_rate_categories)
       # Create a NeighbourNet network from the alignment
       nnet <- neighborNet(mldist)
       
@@ -165,7 +155,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 ## Cunningham test (Cunningham 1978) ##
 cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69",
-                            number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
+                            base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
   ## Test steps:
@@ -177,8 +167,7 @@ cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads
   
   ## Test:
   # 1. Calculate the observed distances (d_ij)
-  dna <- read.dna(alignment_path, format = "fasta")
-  dna_mat <- calculate.pairwise.distance.matrix(dna, distance_matrix_substitution_model, number_of_rate_categories, Q_matrix, base_frequencies)
+  dna_mat <- calculate.dna.pairwise.distance.matrix(alignment_path, distance_matrix_substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
   d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
   
   # 2. Calculate the predicted distances (p_ij)
@@ -547,15 +536,14 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 
 
 ## Delta plots (Holland et. al. 2002)
-mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
+mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", 
+                                  base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   
-  ## Open the alignment as a DNAbin object
-  alignment <- read.FASTA(alignment_path, type = sequence_format)
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
-  pdm <- calculate.pairwise.distance.matrix(alignment_path, substitution_model, number_of_rate_categories, Q_matrix, base_frequencies)
+  pdm <- calculate.dna.pairwise.distance.matrix(alignment_path, substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100
@@ -1362,8 +1350,20 @@ process.one.compatibility.matrix.row <- function(row_id, df){
 
 
 
-calculate.pairwise.distance.matrix <- function(alignment_path, substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
+calculate.dna.pairwise.distance.matrix <- function(alignment_path, substitution_model = "JC69", base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
+  
+  # Identify file type of alignment
+  suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
+  # Open alignment
+  if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
+    # Open alignment
+    al <- read.FASTA(alignment_path, type = sequence_format)
+  } else if (suffix == "nex" | suffix == "nexus") {
+    al <- as.DNAbin(read.nexus.data(alignment_path))
+  } else if (suffix == "phy"){
+    al <- as.DNAbin(read.phy(alignment_path))
+  }
   
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
   # Default is to use model of substitution only
@@ -1371,35 +1371,35 @@ calculate.pairwise.distance.matrix <- function(alignment_path, substitution_mode
   if (is.na(number_of_rate_categories) & is.na(Q_matrix) & is.na(base_frequencies)){
     # If none of the number_of_rate_categories, Q_matrix or base frequencies are provided, simply estimate distance matrix using model of substitution
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, "only"))
-    pdm <- dist.ml(alignment_path, model = substitution_model)
+    pdm <- dist.ml(alignment, model = substitution_model)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == TRUE)){
     # Use number of rate categories only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", number of rate categories"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
     # Use Q matrix only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, Q = Q_matrix)
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
     # Use base frequencies only
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies)
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
     # Use number of rate categories and Q matrix
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix, number of rate categories"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
     # Use number of rate categories and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, number of rate categories"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
     # Use Q matrix and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
     # Use number of rate categories, Q matrix, and base frequencies
     print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix, and number of rate categories"))
-    pdm <- dist.ml(alignment_path, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
   }
   
   # Return the pairwise distance matrix

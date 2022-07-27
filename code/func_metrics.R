@@ -164,7 +164,8 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
 
 
 ## Cunningham test (Cunningham 1978) ##
-cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69"){
+cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", iqtree_substitution_model = "JC", distance_matrix_substitution_model = "JC69",
+                            number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
   ## Test steps:
@@ -177,7 +178,7 @@ cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads
   ## Test:
   # 1. Calculate the observed distances (d_ij)
   dna <- read.dna(alignment_path, format = "fasta")
-  dna_mat <- dist.ml(dna, model = distance_matrix_substitution_model) 
+  dna_mat <- calculate.pairwise.distance.matrix(dna, distance_matrix_substitution_model, number_of_rate_categories, Q_matrix, base_frequencies)
   d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
   
   # 2. Calculate the predicted distances (p_ij)

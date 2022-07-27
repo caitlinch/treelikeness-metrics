@@ -162,28 +162,28 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
          apply.TIGER = TRUE, redo = TRUE, 
          mc.cores = num_cores)
 
-
-supply_number_of_taxa = FALSE
-number_of_taxa = NA
-num_iqtree2_threads = "AUTO"
-num_iqtree2_scf_quartets = 100
-iqtree_substitution_model = "MFP"
-distance_matrix_substitution_method = "F81"
-num_phylogemetric_threads = NA
-tree_proportion_remove_trivial_splits = TRUE
-run_splitstree_for_tree_proportion = TRUE
-sequence_format = "DNA"
-apply.TIGER = TRUE
-redo = TRUE
-
-treelikeness.metrics.empirical(all_oaks_alignments[10],
-                               iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
-                               supply_number_of_taxa = FALSE, number_of_taxa = NA, 
-                               num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                               iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81", 
-                               num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-                               run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
-                               apply.TIGER = TRUE, redo = TRUE)
+# ## Parameters for testing
+# supply_number_of_taxa = FALSE
+# number_of_taxa = NA
+# num_iqtree2_threads = "AUTO"
+# num_iqtree2_scf_quartets = 100
+# iqtree_substitution_model = "MFP"
+# distance_matrix_substitution_method = "F81"
+# num_phylogemetric_threads = NA
+# tree_proportion_remove_trivial_splits = TRUE
+# run_splitstree_for_tree_proportion = TRUE
+# sequence_format = "DNA"
+# apply.TIGER = TRUE
+# redo = TRUE
+# 
+# treelikeness.metrics.empirical(all_oaks_alignments[10],
+#                                iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
+#                                supply_number_of_taxa = FALSE, number_of_taxa = NA, 
+#                                num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+#                                iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81", 
+#                                num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
+#                                run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
+#                                apply.TIGER = TRUE, redo = TRUE)
 
 # Collect and collate results
 oaks_list <- mclapply(all_oaks_alignments, collate.empirical.treelikeness.results, mc.cores = num_cores)

@@ -1332,11 +1332,11 @@ calculate.dna.pairwise.distance.matrix <- function(alignment_path, substitution_
   # Open alignment
   if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
     # Open alignment
-    al <- read.FASTA(alignment_path, type = sequence_format)
+    alignment <- read.FASTA(alignment_path, type = sequence_format)
   } else if (suffix == "nex" | suffix == "nexus") {
-    al <- as.DNAbin(read.nexus.data(alignment_path))
+    alignment <- as.DNAbin(read.nexus.data(alignment_path))
   } else if (suffix == "phy"){
-    al <- as.DNAbin(read.phy(alignment_path))
+    alignment <- as.DNAbin(read.phy(alignment_path))
   }
   
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations

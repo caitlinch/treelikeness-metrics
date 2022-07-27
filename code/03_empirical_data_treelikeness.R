@@ -162,7 +162,7 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
          apply.TIGER = TRUE, redo = TRUE, 
          mc.cores = num_cores)
 
-treelikeness.metrics.empirical("/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/Oaks2011/ND3_mtDNA_8_1/ND3_mtDNA_8_1_output_alignment.fa",
+treelikeness.metrics.empirical(all_oaks_alignments[1],
                                iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path, 
                                supply_number_of_taxa = FALSE, number_of_taxa = NA, 
                                num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 

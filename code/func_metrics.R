@@ -546,7 +546,7 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 
 
 ## Delta plots (Holland et. al. 2002)
-mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69"){
+mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   
@@ -554,7 +554,23 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   alignment <- read.FASTA(alignment_path, type = sequence_format)
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
-  pdm <- dist.ml(alignment, model = substitution_model)
+  if (is.na(number_of_rate_categories) & is.na(Q_matrix)){
+    # If neither number_of_rate_categories or Q_matrix are provided, simply estimate distance matrix using model 
+    #   of substitution
+    pdm <- dist.ml(alignment, model = substitution_model)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE)){
+    # If number_of_rate_categories is provided but Q_matrix is not provided, estimate distance matrix using model
+    #   of substitution and number of rate categories
+    pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
+  } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE)){
+    # If number_of_rate_categories is not provided but Q_matrix is provided, estimate distance matrix using model
+    #   of substitution and Q matrix
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE)){
+    # If number_of_rate_categories and Q_matrix are provided, estimate distance matrix using model 
+    #   of substitution and number of rate categories and Q matrix
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
+  }
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100
@@ -1358,5 +1374,52 @@ process.one.compatibility.matrix.row <- function(row_id, df){
   # Return the newly formatted string
   return(output_string)
 }
+
+
+
+calculate.pairwise.distance.matrix <- function(alignment_path, substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
+  ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
+  
+  # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
+  # Default is to use model of substitution only
+  # Can also use number of rate categories, Q matrix, and base frequencies (or any combination of the above) by specifying in the function call
+  if (is.na(number_of_rate_categories) & is.na(Q_matrix) & is.na(base_frequencies)){
+    # If none of the number_of_rate_categories, Q_matrix or base frequencies are provided, simply estimate distance matrix using model of substitution
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, "only"))
+    pdm <- dist.ml(alignment, model = substitution_model)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == TRUE)){
+    # Use number of rate categories only
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", number of rate categories"))
+    pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
+  } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
+    # Use Q matrix only
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix"))
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
+  } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
+    # Use base frequencies only
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies"))
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == TRUE)){
+    # Use number of rate categories and Q matrix
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", Q matrix, number of rate categories"))
+    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE) & (is.na(base_frequencies) == FALSE)){
+    # Use number of rate categories and base frequencies
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, number of rate categories"))
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
+  } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
+    # Use Q matrix and base frequencies
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix"))
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
+  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE) & (is.na(base_frequencies) == FALSE)){
+    # Use number of rate categories, Q matrix, and base frequencies
+    print(paste0("Estimating pairwise distance matrix with model of sequence evolution", substitution_model, ", base frequencies, Q matrix, and number of rate categories"))
+    pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
+  }
+  
+  # Return the pairwise distance matrix
+  return(pdm)
+}
+
 
 

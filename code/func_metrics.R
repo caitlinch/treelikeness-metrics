@@ -47,7 +47,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC
       
       # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
       # Compute pairwise distances for the taxa using the specified model of sequence evolution
-      mldist <- calculate.dna.pairwise.distance.matrix(alignment_path, model, base_frequencies, Q_matrix, number_of_rate_categories)
+      mldist <- calculate.dna.pairwise.distance.matrix(alignment_path, sequence_format, model, base_frequencies, Q_matrix, number_of_rate_categories)
       # Create a NeighbourNet network from the alignment
       nnet <- neighborNet(mldist)
       
@@ -167,7 +167,7 @@ cunningham.test <- function(alignment_path, iqtree2_path, iqtree2_number_threads
   
   ## Test:
   # 1. Calculate the observed distances (d_ij)
-  dna_mat <- calculate.dna.pairwise.distance.matrix(alignment_path, distance_matrix_substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
+  dna_mat <- calculate.dna.pairwise.distance.matrix(alignment_path, sequence_format, distance_matrix_substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
   d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
   
   # 2. Calculate the predicted distances (p_ij)
@@ -543,7 +543,7 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
-  pdm <- calculate.dna.pairwise.distance.matrix(alignment_path, substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
+  pdm <- calculate.dna.pairwise.distance.matrix(alignment_path, sequence_format, substitution_model, base_frequencies, Q_matrix, number_of_rate_categories)
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100
@@ -903,7 +903,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
       Q_vector <- model_params$Q_vector
       num_rate_categories <- model_params$num_rate_categories
       best_iqtree_model = model_params$best_fit_model
-
+      
     } # end if sequence alignment == "DNA"
     
     # Apply Site concordance factors (Minh et. al. 2020)
@@ -1327,19 +1327,22 @@ process.one.compatibility.matrix.row <- function(row_id, df){
 
 
 
-calculate.dna.pairwise.distance.matrix <- function(alignment_path, substitution_model = "JC69", base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
+calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   
   # Identify file type of alignment
   suffix <- tolower(tail(strsplit(alignment_path,"\\.")[[1]],1))
-  # Open alignment
-  if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
-    # Open alignment
-    alignment <- read.FASTA(alignment_path, type = sequence_format)
-  } else if (suffix == "nex" | suffix == "nexus") {
-    alignment <- as.DNAbin(read.nexus.data(alignment_path))
-  } else if (suffix == "phy"){
-    alignment <- as.DNAbin(read.phy(alignment_path))
+  # Read alignment file
+  if (sequence_format == "DNA"){
+    # Open DNA alignment
+    if (suffix == "fa" | suffix == "fasta" | suffix == "fas" | suffix == "fna" | suffix == "faa" | suffix == "frn"){
+      # Open alignment
+      alignment <- read.FASTA(alignment_path, type = sequence_format)
+    } else if (suffix == "nex" | suffix == "nexus") {
+      alignment <- as.DNAbin(read.nexus.data(alignment_path))
+    } else if (suffix == "phy"){
+      alignment <- as.DNAbin(read.phy(alignment_path))
+    }
   }
   
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations

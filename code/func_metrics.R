@@ -894,31 +894,49 @@ treelikeness.metrics.empirical <- function(alignment_path,
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips)
     
-    # If no distance_matrix_substitution_method is provided, find the best fitting one from the list
-    
-    # Open log file
-    iqtree_file <- paste0(alignment_path, ".iqtree")
-    iqtree_lines <- readLines(iqtree_file)
-    # Find start and end of list of models 
-    start_line_id <- grep("List of models sorted by BIC scores: ", iqtree_lines) + 2
-    end_line_id <- grep("AIC, w-AIC   : Akaike information criterion scores and weights.", iqtree_lines) - 2
-    # Get lines with models 
-    model_lines <- iqtree_lines[start_line_id:end_line_id]
-    # Remove all + and - signs
-    model_lines <- gsub("\\+", "", model_lines)
-    model_lines <- gsub("-", "", model_lines)
-    # Save as file
-    model_lines_file <- paste0(replicate_folder, unique_id, "_ModelFinder_results.txt")
-    write(model_lines, file = model_lines_file)
-    # Read in model lines file as a tsv
-    model_df <- read.table(model_lines_file, sep = "", skip = 1)
-    names(model_df) <- c("Model", "LogL", "AIC", "wAIC", "AICc", "wAICc", "BIC", "wBIC")
-    # Make log likelihood column negative (to make up for removing negative log likelihoods before)
-    model_df$LogL = model_df$LogL * -1
-    # Possible models in dist.ml function: "JC69", "F81"
-    
-    
-    
+    if (sequence_format == "DNA"){
+      # Possible DNA models in dist.ml function: "JC69", "F81"
+      if (is.na(distance_matrix_substitution_method) == TRUE){
+        # If no distance_matrix_substitution_method is provided, use the default
+        distance_matrix_substitution_method = "JC69"
+      } else {
+        # Open log file
+        iqtree_file <- paste0(alignment_path, ".iqtree")
+        iqtree_lines <- readLines(iqtree_file)
+        # Find start and end of list of models 
+        start_line_id <- grep("Rate matrix Q:", iqtree_lines) + 2
+        end_line_id <- grep("Model of rate heterogeneity:", iqtree_lines) - 2
+        # Get lines with Q matrix 
+        Q_lines <- iqtree_lines[start_line_id:end_line_id]
+        # Save Q matrix as file
+        Q_lines_file <- paste0(replicate_folder, unique_id, "_Q_Matrix_results.txt")
+        write(Q_lines, file = Q_lines_file)
+        # Read in Q matrix file as a tsv and neaten the matrix
+        Q_df <- read.table(Q_lines_file, sep = "")
+        names(Q_df) <- c("base", "A", "C", "G", "T")
+        rownames(Q_df) <- c("A", "C", "G", "T")
+        Q_df <- Q_df[,2:5]
+        # Get the vector of lower diagonal Q matrix
+        # Q vector should be: CA, GA, GC, TA, TC, TG (where for ij i is the row and j is the column)
+        Q_vector <- c(Q_df[2,1], Q_df[3,1], Q_df[3,2], Q_df[4,1], Q_df[4,2], Q_df[4,3])
+        # Find the start and end of the number of rate categories
+        start_line_id <- grep("Category  Relative_rate  Proportion", iqtree_lines)
+        end_line_id <- grep("LIKELIHOOD MAPPING ANALYSIS", iqtree_lines) - 2
+        if (length(start_line_id) > 0){
+          # If there are rate categories, get them and use that information for the dist.ml function
+          # Get lines with rate categories
+          rc_lines <- iqtree_lines[start_line_id:end_line_id]
+          # Save Q matrix as file
+          rc_lines_file <- paste0(replicate_folder, unique_id, "_rate_categories_results.txt")
+          write(rc_lines, file = rc_lines_file)
+          # Read rate categories matrix in as tsv
+          rc_df <- read.table(rc_lines_file, sep = "", skip = 1)
+          names(rc_df) <- c("Category", "Relative rate", "Proportion")
+        }
+        
+      }
+    }
+
     # Apply Site concordance factors (Minh et. al. 2020)
     scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                 substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)

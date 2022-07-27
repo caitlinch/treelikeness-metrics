@@ -894,6 +894,29 @@ treelikeness.metrics.empirical <- function(alignment_path,
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips)
     
+    # If no distance_matrix_substitution_method is provided, find the best fitting one from the list
+    
+    # Open log file
+    iqtree_file <- paste0(alignment_path, ".iqtree")
+    iqtree_lines <- readLines(iqtree_file)
+    # Find start and end of list of models 
+    start_line_id <- grep("List of models sorted by BIC scores: ", iqtree_lines) + 2
+    end_line_id <- grep("AIC, w-AIC   : Akaike information criterion scores and weights.", iqtree_lines) - 2
+    # Get lines with models 
+    model_lines <- iqtree_lines[start_line_id:end_line_id]
+    # Remove all + and - signs
+    model_lines <- gsub("\\+", "", model_lines)
+    model_lines <- gsub("-", "", model_lines)
+    # Save as file
+    model_lines_file <- paste0(replicate_folder, unique_id, "_ModelFinder_results.txt")
+    write(model_lines, file = model_lines_file)
+    # Read in model lines file as a tsv
+    model_df <- read.table(model_lines_file, sep = "", skip = 1)
+    names(model_df) <- c("Model", "LogL", "AIC", "wAIC", "AICc", "wAICc", "BIC", "wBIC")
+    # Make log likelihood column negative (to make up for removing negative log likelihoods before)
+    model_df$LogL = model_df$LogL * -1
+    # Possible models in dist.ml function: "JC69", "F81"
+    
     
     
     # Apply Site concordance factors (Minh et. al. 2020)

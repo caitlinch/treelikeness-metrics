@@ -547,7 +547,7 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 
 
 ## Delta plots (Holland et. al. 2002)
-mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA){
+mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", number_of_rate_categories = NA, Q_matrix = NA, base_frequencies = NA){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   
@@ -555,23 +555,7 @@ mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", subst
   alignment <- read.FASTA(alignment_path, type = sequence_format)
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution
   # Default model of DNA substitution is JC ("JC69") - it's used to simulate the sequences for the simulations
-  if (is.na(number_of_rate_categories) & is.na(Q_matrix)){
-    # If neither number_of_rate_categories or Q_matrix are provided, simply estimate distance matrix using model 
-    #   of substitution
-    pdm <- dist.ml(alignment, model = substitution_model)
-  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == TRUE)){
-    # If number_of_rate_categories is provided but Q_matrix is not provided, estimate distance matrix using model
-    #   of substitution and number of rate categories
-    pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
-  } else if ((is.na(number_of_rate_categories) == TRUE) & (is.na(Q_matrix) == FALSE)){
-    # If number_of_rate_categories is not provided but Q_matrix is provided, estimate distance matrix using model
-    #   of substitution and Q matrix
-    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
-  } else if ((is.na(number_of_rate_categories) == FALSE) & (is.na(Q_matrix) == FALSE)){
-    # If number_of_rate_categories and Q_matrix are provided, estimate distance matrix using model 
-    #   of substitution and number of rate categories and Q matrix
-    pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
-  }
+  pdm <- calculate.pairwise.distance.matrix(alignment_path, substitution_model, number_of_rate_categories, Q_matrix, base_frequencies)
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100

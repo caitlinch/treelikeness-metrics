@@ -163,7 +163,7 @@ mclapply(all_oaks_alignments, treelikeness.metrics.empirical,
          mc.cores = num_cores)
 
 
-upply_number_of_taxa = FALSE
+supply_number_of_taxa = FALSE
 number_of_taxa = NA
 num_iqtree2_threads = "AUTO"
 num_iqtree2_scf_quartets = 100

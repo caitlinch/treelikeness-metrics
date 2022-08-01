@@ -38,7 +38,7 @@ if (run_location == "local"){
   number_parallel_threads <- 1
 } else if (run_location == "soma"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
-  repo_directory <- "/data/caitlin/treelikeness_metrics/code/"
+  repo_directory <- "/data/caitlin/treelikeness_metrics/"
   ms_path <- "/data/caitlin/executables/msdir/ms"
   iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
   number_parallel_threads <- 20

@@ -157,15 +157,17 @@ oaks_alignments_to_run <- unique(c(all_oaks_alignments[!file.exists(paste0(all_o
 # Remove the alignments that are not partitioned by codon position
 oaks_alignments_to_run <- grep("All", oaks_alignments_to_run, value = TRUE, invert = TRUE)
 # Apply treelikeness metrics to all alignments 
-mclapply(oaks_alignments_to_run, treelikeness.metrics.empirical,
-         iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
-         supply_number_of_taxa = FALSE, number_of_taxa = NA,
-         num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,
-         iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81",
-         num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE,
-         run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA",
-         apply.TIGER = TRUE, redo = FALSE,
-         mc.cores = num_cores)
+if (length(oaks_alignments_to_run) > 0){
+  mclapply(oaks_alignments_to_run, treelikeness.metrics.empirical,
+           iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
+           supply_number_of_taxa = FALSE, number_of_taxa = NA,
+           num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,
+           iqtree_substitution_model = "MFP", distance_matrix_substitution_method = "F81",
+           num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE,
+           run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA",
+           apply.TIGER = TRUE, redo = FALSE,
+           mc.cores = num_cores)
+}
 
 # ## Parameters for testing
 # supply_number_of_taxa = FALSE

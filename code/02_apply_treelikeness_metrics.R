@@ -26,7 +26,7 @@
 # run_exp2             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
 # rerun_missing_runs   <- Whether or not to rerun alignments that do not have treelikeness test metrics complete (logical)
 # rerun_experiment_ids <- Which experiments to check for incomplete runs and rerun missing alignments. 
-#                      <- To check both exp1 and exp2, set <- c("exp1", "exp2")
+#                           To check both exp1 and exp2, set <- c("exp1", "exp2")
 
 run_location = "soma"
 if (run_location == "local"){
@@ -56,12 +56,12 @@ if (run_location == "local"){
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
   
   # Run parameters
-  num_cores <- 50
+  num_cores <- 30
 }
 
 # Control variables
 run_exp1 <- FALSE
-run_exp2 <- FALSE
+run_exp2 <- TRUE
 rerun_missing_runs <- TRUE
 rerun_experiment_ids <- c("exp2")
 
@@ -84,6 +84,8 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 if (run_exp1 == FALSE){
   ## For experiment 1:
+  # Extract all file names from results folder
+  results_files <- list.files(results_directory)
   # Open output df and get names of alignments
   exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
@@ -117,6 +119,8 @@ if (run_exp1 == FALSE){
 
 if (run_exp2 == TRUE){
   ## For experiment 2:
+  # Extract all file names from results folder
+  results_files <- list.files(results_directory)
   # Open output df and get names of alignments
   exp2_op_file <- paste0(results_directory, grep("rerun", grep("exp2", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)

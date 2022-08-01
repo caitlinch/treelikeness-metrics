@@ -310,25 +310,29 @@ if (plot_empirical == TRUE){
   # Open data file from Experiment 1 as a dataframe
   emp_data_file <- grep("Oaks2011", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   emp_df <- read.csv(file = emp_data_file, stringsAsFactors = FALSE)
+  # Convert TIGER values to numeric
   emp_df$mean_TIGER_value <- as.numeric(emp_df$mean_TIGER_value)
+  # Convert sCF values to decimal from percentage
+  emp_df$sCF_mean <- emp_df$sCF_mean / 100
   
-  # Remove columns you don't want for plotting
-  emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type", 
+  # Remove rows with ALL codon positions
+  emp_df <- emp_df[emp_df$codon_position != "All",]
+  
+  # Create wide df with only necessary columns
+  emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type",
                             "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                            "LM_proportion_resolved_quartets", "NetworkTreelikenessTest", 
+                            "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value")]
   
-  # Convert sCF values to decimal from percentage
-  emp_wide_df$sCF_mean <- emp_wide_df$sCF_mean / 100
-  
   # Rename the Network Treelikeness Test results
-  emp_wide_df$NetworkTreelikenessTest_raw <- emp_wide_df$NetworkTreelikenessTest
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Zero_splits_where_confidence_intervals_exclude_0"] <- 0
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Treelike"] <- 1
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Non-treelike"] <- 0
+  emp_wide_df$NetworkTreelikenessTest <- emp_wide_df$NetworkTreelikenessTest
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Zero_splits_where_confidence_intervals_exclude_0"] <- 0
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Treelike"] <- 1
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Non-treelike"] <- 0
   
   # Melt exp1_wide_df for better plotting
   emp_long_df <- melt(emp_wide_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
+  emp_long_df$value <- as.numeric(emp_long_df$value)
   
   # Add fancy labels for facets
   emp_long_df$var_label <- factor(emp_long_df$variable, 
@@ -345,7 +349,52 @@ if (plot_empirical == TRUE){
 
 
 #### 8. Plot data from empirical datasets ####
-
+if (plot_empirical == TRUE){
+  ## Plot 1: box plots of average value for each test statistic
+  # Set dataset for plot
+  plot_df <- emp_long_df
+  
+  # Create test dataset for plot (with all variables) to make sure formatting will look nice
+  extend_df <- emp_wide_df[10:12,]
+  extend_df$num_taxa <- 23
+  test_df <- rbind(emp_wide_df, extend_df)
+  plot_df <- melt(test_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
+  plot_df$value <- as.numeric(plot_df$value)
+  plot_df$var_label <- factor(plot_df$variable, 
+                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                                             "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
+                                  ordered = TRUE, 
+                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+  
+  # Construct plot
+  ggplot(plot_df, aes(x = codon_position, y = value, fill = num_taxa)) + 
+    geom_boxplot() +
+    facet_wrap(~var_label, scales = "fixed", labeller = label_parsed) +
+    scale_x_discrete(name = "Codon position") +
+    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+    guides(fill = guide_legend(title = "Number\nof taxa"))
+  
+  
+  
+  facet_grid(var_label~DNA_type, scales = "fixed", labeller = label_parsed) +
+    scale_x_continuous(name = "Codon position") +
+    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1))
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+    labs(title = " ") +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(size = 18, hjust = 0.5))
+  # Save plot
+  plot_path <- paste0(plot_directory, "emp_plot1_main.figure.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+}
 
 
 

@@ -321,18 +321,25 @@ if (plot_empirical == TRUE){
   # Create wide df with only necessary columns
   emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type",
                             "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                            "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                            "mean_Q_residual", "sCF_mean", "mean_TIGER_value")]
-  
-  # Rename the Network Treelikeness Test results
-  emp_wide_df$NetworkTreelikenessTest <- emp_wide_df$NetworkTreelikenessTest
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Zero_splits_where_confidence_intervals_exclude_0"] <- 0
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Treelike"] <- 1
-  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest == "Non-treelike"] <- 0
+                            "LM_proportion_resolved_quartets", "mean_Q_residual", "sCF_mean",
+                            "mean_TIGER_value")]
   
   # Melt exp1_wide_df for better plotting
   emp_long_df <- melt(emp_wide_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
   emp_long_df$value <- as.numeric(emp_long_df$value)
+  
+  # Rename the Network Treelikeness Test results
+  ntlt_params <- expand.grid("num_taxa" = sort(unique(emp_wide_df$num_taxa)), "codon_position" = sort(unique(emp_wide_df$codon_position)), 
+                             "DNA_type" = sort(unique(emp_wide_df$DNA_type)))
+  ntlt_params$value <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.empirical, params_df = ntlt_params, results_df = emp_df))
+  ntlt_params$variable <- "NetworkTreelikenessTest"
+  ntlt_params$row_id <- NA
+  ntlt_params$uid <- NA
+  ntlt_params$gene_name <- NA
+  ntlt_params <- ntlt_params[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type", "variable", "value")] 
+  
+  # Combine the two dataframes
+  emp_long_df <- rbind(emp_long_df, ntlt_params)
   
   # Add fancy labels for facets
   emp_long_df$var_label <- factor(emp_long_df$variable, 
@@ -356,12 +363,14 @@ if (plot_empirical == TRUE){
 
   # Add color blind friendly palette
   colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # grey, orange, sky blue, bluish green, yellow, blue, vermilion, reddish purple
+  
   # Construct plot
-  p <- ggplot(plot_df, aes(x = codon_position, y = value, fill = DNA_type)) + 
+  p <- ggplot(plot_df, aes(x = as.factor(codon_position), y = value, fill = DNA_type)) + 
     geom_boxplot() +
+    geom_jitter(color="black", size=1, alpha=0.5) +
     facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
     scale_x_discrete(name = "Codon position") +
-    scale_y_continuous(name = "Test statistic value")+
+    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
     guides(fill = guide_legend(title = "Type of DNA\nalignment")) +
     labs(title = "Number of taxa") +
     scale_fill_manual(values = c(colorBlindGrey8[2], colorBlindGrey8[6]), breaks = c("mtDNA", "nDNA"), labels = c("mtDNA", "nDNA")) +
@@ -372,7 +381,26 @@ if (plot_empirical == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 16, hjust = 0.5))
   # Save plot
-  plot_path <- paste0(plot_directory, "emp_plot1_main.figure.pdf")
+  plot_path <- paste0(plot_directory, "emp_plot1_main.figure_by.taxa.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  
+  # Construct plot
+  p <- ggplot(plot_df, aes(x = as.factor(codon_position), y = value, fill = DNA_type)) + 
+    geom_boxplot() +
+    geom_jitter(color="black", size=1, alpha=0.5) +
+    facet_wrap(~var_label, scales = "fixed", labeller = label_parsed) +
+    scale_x_discrete(name = "Codon position") +
+    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
+    guides(fill = guide_legend(title = "Type of DNA\nalignment")) +
+    scale_fill_manual(values = c(colorBlindGrey8[2], colorBlindGrey8[6]), breaks = c("mtDNA", "nDNA"), labels = c("mtDNA", "nDNA")) +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 14),
+          axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 16, hjust = 0.5), legend.text = element_text(size = 14),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(size = 16, hjust = 0.5))
+  # Save plot
+  plot_path <- paste0(plot_directory, "emp_plot1_main.figure_all.taxa.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 }
 

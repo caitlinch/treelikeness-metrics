@@ -12,13 +12,15 @@
 
 # plot_exp1 <- either TRUE to plot experiment 1 results, or FALSE to skip
 # plot_exp2 <- either TRUE to plot experiment 2 results, or FALSE to skip
+# plot_empirical <- either TRUE to plot empirical dataset results, or FALSE to skip
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 plot_exp1 = FALSE
-plot_exp2 = TRUE
+plot_exp2 = FALSE
+plot_empirical = TRUE
 
 
 #### 2. Prepare analyses ####
@@ -300,6 +302,65 @@ if (plot_exp2 == TRUE){
   plot_path <- paste0(plot_directory, "exp2_plot4_main.figure_num_taxa_Recent.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 }
+
+
+
+#### 7. Prepare data from empirical datasets ####
+if (plot_empirical == TRUE){
+  # Open data file from Experiment 1 as a dataframe
+  emp_data_file <- grep("Oaks2011", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
+  emp_df <- read.csv(file = emp_data_file, stringsAsFactors = FALSE)
+  emp_df$mean_TIGER_value <- as.numeric(emp_df$mean_TIGER_value)
+  
+  # Remove columns you don't want for plotting
+  emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type", 
+                              "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                              "LM_proportion_resolved_quartets", "mean_Q_residual", 
+                              "sCF_mean", "mean_TIGER_value")]
+  
+  # Convert sCF values to decimal from percentage
+  emp_wide_df$sCF_mean <- emp_wide_df$sCF_mean / 100
+  
+  # Melt exp1_wide_df for better plotting
+  emp_long_df <- melt(emp_wide_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
+  
+  # Transform the Network Treelikeness Test results into more plottable format
+  # Make a table of all possible parameter values for the network treelikeness test
+  ntlt_params <- expand.grid("gene_name" = unique(emp_df$gene_name), "num_taxa" = unique(emp_df$num_taxa), 
+                             "codon_position" = unique(emp_df$codon_position))
+  # Add DNA type as a column
+  ntlt_params$DNA_type <- NA
+  ntlt_params$DNA_type[ntlt_params$gene_name == "cmos"] <- "nDNA"
+  ntlt_params$DNA_type[ntlt_params$gene_name == "CYTB" | ntlt_params$gene_name == "ND2" | ntlt_params$gene_name == "ND3"] <- "mtDNA"
+  # Calculate proportion of treelike alignments for each set of parameter values
+  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp1, params_df = ntlt_params, results_df = emp_df))
+  # Add columns to match the emp_long_df
+  ntlt_params$row_id <- rep(NA, length(prop_tl_results))
+  ntlt_params$uid <- rep(NA, length(prop_tl_results))
+  ntlt_params$value <- prop_tl_results
+  ntlt_params$variable <- "NetworkTreelikenessTest"
+  # Restructure the dataframe to match the emp_long_df
+  ntlt_params <- ntlt_params[,c(names(emp_long_df))]
+  # Bind to the emp_long_df
+  emp_long_df <- rbind(emp_long_df, ntlt_params)
+  
+  # Add fancy labels for facets
+  emp_long_df$var_label <- factor(emp_long_df$variable, 
+                                   levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                                              "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                              "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
+                                   ordered = TRUE, 
+                                   labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+                                              expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                              expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+}
+
+
+
+#### 8. Plot data from empirical datasets ####
+
+
 
 
 

@@ -154,6 +154,8 @@ all_oaks_alignments <- oaks_df$output_alignment_file
 # Remove the alignments with either a .log or .iqtree file
 oaks_alignments_to_run <- unique(c(all_oaks_alignments[!file.exists(paste0(all_oaks_alignments, ".log"))], 
                                    all_oaks_alignments[!file.exists(paste0(all_oaks_alignments, ".iqtree"))] ))
+# Remove the alignments that are not partitioned by codon position
+oaks_alignments_to_run <- grep("All", oaks_alignments_to_run, value = TRUE, invert = TRUE)
 # Apply treelikeness metrics to all alignments 
 mclapply(oaks_alignments_to_run, treelikeness.metrics.empirical,
          iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,

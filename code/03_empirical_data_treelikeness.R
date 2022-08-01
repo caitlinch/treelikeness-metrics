@@ -151,8 +151,11 @@ if ((FALSE %in% file.exists(oaks_df$output_alignment_file)) == TRUE){
 #### 5. Apply tests for treelikeness to each empirical alignment ####
 # Get list of all the Oaks 2011 alignments to run
 all_oaks_alignments <- oaks_df$output_alignment_file
+# Remove the alignments with either a .log or .iqtree file
+oaks_alignments_to_run <- unique(c(all_oaks_alignments[!file.exists(paste0(all_oaks_alignments, ".log"))], 
+                                   all_oaks_alignments[!file.exists(paste0(all_oaks_alignments, ".iqtree"))] ))
 # Apply treelikeness metrics to all alignments 
-mclapply(all_oaks_alignments[20:length(all_oaks_alignments)], treelikeness.metrics.empirical,
+mclapply(oaks_alignments_to_run, treelikeness.metrics.empirical,
          iqtree2_path, splitstree_path, phylogemetric_path, fast_TIGER_path,
          supply_number_of_taxa = FALSE, number_of_taxa = NA,
          num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100,

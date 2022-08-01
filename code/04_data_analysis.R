@@ -350,47 +350,42 @@ if (plot_empirical == TRUE){
 
 #### 8. Plot data from empirical datasets ####
 if (plot_empirical == TRUE){
-  ## Plot 1: box plots of average value for each test statistic
+  ## Plot 1: box plots of average value for each test statistic against codon position (faceted by number of taxa, coloured by type of DNA alignment) ## 
   # Set dataset for plot
   plot_df <- emp_long_df
   
-  # Create test dataset for plot (with all variables) to make sure formatting will look nice
-  extend_df <- emp_wide_df[10:12,]
-  extend_df$num_taxa <- 23
-  test_df <- rbind(emp_wide_df, extend_df)
-  plot_df <- melt(test_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
-  plot_df$value <- as.numeric(plot_df$value)
-  plot_df$var_label <- factor(plot_df$variable, 
-                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                             "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
-                                  ordered = TRUE, 
-                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
-  
+  # # Create test dataset for plot (with all variables) to make sure formatting will look nice
+  # extend_df <- emp_wide_df[10:12,]
+  # extend_df$num_taxa <- 23
+  # test_df <- rbind(emp_wide_df, extend_df)
+  # plot_df <- melt(test_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
+  # plot_df$value <- as.numeric(plot_df$value)
+  # plot_df$var_label <- factor(plot_df$variable, 
+  #                                 levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+  #                                            "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+  #                                            "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
+  #                                 ordered = TRUE, 
+  #                                 labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+  #                                            expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+  #                                            expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+  #                                            expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+  # Add color blind friendly palette
+  colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # grey, orange, sky blue, bluish green, yellow, blue, vermilion, reddish purple
   # Construct plot
-  ggplot(plot_df, aes(x = codon_position, y = value, fill = num_taxa)) + 
+  p <- ggplot(plot_df, aes(x = codon_position, y = value, fill = DNA_type)) + 
     geom_boxplot() +
-    facet_wrap(~var_label, scales = "fixed", labeller = label_parsed) +
+    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
     scale_x_discrete(name = "Codon position") +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    guides(fill = guide_legend(title = "Number\nof taxa"))
-  
-  
-  
-  facet_grid(var_label~DNA_type, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Codon position") +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1))
-  guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = " ") +
+    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1))+
+    guides(fill = guide_legend(title = "Type of DNA\nalignment")) +
+    labs(title = "Number of taxa") +
+    scale_fill_manual(values = c(colorBlindGrey8[2], colorBlindGrey8[6]), breaks = c("mtDNA", "nDNA"), labels = c("mtDNA", "nDNA")) +
     theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+    theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 14),
+          axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 16, hjust = 0.5), legend.text = element_text(size = 14),
           strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
+          plot.title = element_text(size = 16, hjust = 0.5))
   # Save plot
   plot_path <- paste0(plot_directory, "emp_plot1_main.figure.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")

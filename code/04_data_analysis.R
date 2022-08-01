@@ -314,46 +314,32 @@ if (plot_empirical == TRUE){
   
   # Remove columns you don't want for plotting
   emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type", 
-                              "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                              "LM_proportion_resolved_quartets", "mean_Q_residual", 
-                              "sCF_mean", "mean_TIGER_value")]
+                            "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                            "LM_proportion_resolved_quartets", "NetworkTreelikenessTest", 
+                            "mean_Q_residual", "sCF_mean", "mean_TIGER_value")]
   
   # Convert sCF values to decimal from percentage
   emp_wide_df$sCF_mean <- emp_wide_df$sCF_mean / 100
   
+  # Rename the Network Treelikeness Test results
+  emp_wide_df$NetworkTreelikenessTest_raw <- emp_wide_df$NetworkTreelikenessTest
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Zero_splits_where_confidence_intervals_exclude_0"] <- 0
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Treelike"] <- 1
+  emp_wide_df$NetworkTreelikenessTest[emp_wide_df$NetworkTreelikenessTest_raw == "Non-treelike"] <- 0
+  
   # Melt exp1_wide_df for better plotting
   emp_long_df <- melt(emp_wide_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
   
-  # Transform the Network Treelikeness Test results into more plottable format
-  # Make a table of all possible parameter values for the network treelikeness test
-  ntlt_params <- expand.grid("gene_name" = unique(emp_df$gene_name), "num_taxa" = unique(emp_df$num_taxa), 
-                             "codon_position" = unique(emp_df$codon_position))
-  # Add DNA type as a column
-  ntlt_params$DNA_type <- NA
-  ntlt_params$DNA_type[ntlt_params$gene_name == "cmos"] <- "nDNA"
-  ntlt_params$DNA_type[ntlt_params$gene_name == "CYTB" | ntlt_params$gene_name == "ND2" | ntlt_params$gene_name == "ND3"] <- "mtDNA"
-  # Calculate proportion of treelike alignments for each set of parameter values
-  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp1, params_df = ntlt_params, results_df = emp_df))
-  # Add columns to match the emp_long_df
-  ntlt_params$row_id <- rep(NA, length(prop_tl_results))
-  ntlt_params$uid <- rep(NA, length(prop_tl_results))
-  ntlt_params$value <- prop_tl_results
-  ntlt_params$variable <- "NetworkTreelikenessTest"
-  # Restructure the dataframe to match the emp_long_df
-  ntlt_params <- ntlt_params[,c(names(emp_long_df))]
-  # Bind to the emp_long_df
-  emp_long_df <- rbind(emp_long_df, ntlt_params)
-  
   # Add fancy labels for facets
   emp_long_df$var_label <- factor(emp_long_df$variable, 
-                                   levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                              "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                              "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
-                                   ordered = TRUE, 
-                                   labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                              expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                              expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                                             "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
+                                  ordered = TRUE, 
+                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 }
 
 

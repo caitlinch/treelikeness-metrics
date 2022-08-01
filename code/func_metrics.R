@@ -444,7 +444,8 @@ TIGGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
 
 
 ## Likelihood mapping (Strimmer and von Haeseler 1997)
-likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, substitution_model = "MFP", number_of_taxa){
+likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, substitution_model = "MFP", 
+                               number_of_taxa = NA, sequence_format = "DNA"){
   # Function to call IQ-Tree and create a likelihood map for the alignment
   
   ## Create the likelihood map
@@ -741,7 +742,7 @@ treelikeness.metrics.simulations <- function(alignment_path,
     time_name <- c(time_name, "Start_likelihood_mapping")
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
-                             number_of_taxa = n_tree_tips)
+                             number_of_taxa = n_tree_tips, sequence_format = sequence_format)
     # Set timer
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_likelihood_mapping","Start_scfs")
@@ -885,7 +886,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Estimate the ML tree using IQ-Tree, extract details about the model of sequence evolution, and conduct a likelihood mapping analysis
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
-                             number_of_taxa = n_tree_tips)
+                             number_of_taxa = n_tree_tips, sequence_format = sequence_format)
     
     # Extract parameters for estimating the distance matrix from the .iqtree file 
     if (sequence_format == "DNA"){

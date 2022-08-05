@@ -184,8 +184,18 @@ format.timers <- function(time_csv){
   
   # Open the csv file
   time_df <- read.csv(time_csv, stringsAsFactors = FALSE)
+  # Check whether the unique identifier column is present
+  if (("unique_id" %in% names(time_df)) == TRUE){
+    # Remove row numbers column
+    time_df <- time_df[,c("unique_id", "time_name", "timings")]
+  } else if (("unique_id" %in% names(time_df)) == FALSE){
+    # Extract the unique id from the file name and add it as a column to the dataframe
+    time_df$unique_id <- gsub("\\.csv", "", gsub("_test_times", "", basename(time_csv)))
+    # Remove row numbers column and rearrange column order
+    time_df <- time_df[,c("unique_id", "time_name", "timings")]
+  }
   # Remove row numbers column
-  time_df <- time_df[,2:4]
+  time_df <- time_df[,c("unique_id", "time_name", "timings")]
   # Change timings column to time format
   time_df$timings <- as.POSIXct(time_df$timings)
   

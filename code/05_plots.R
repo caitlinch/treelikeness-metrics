@@ -42,23 +42,26 @@ time_df <- read.csv(time_file)
 # Reshape into long format
 long_df <- melt(time_df, id.vars = c("uid", "time_units"))
 # Convert time to minutes
-long_df$value <- round(long_df$value/60, digits = 2)
-long_df$time_units <- "mins"
+long_df$value <- round((long_df$value*(1/60)*(1/60)), digits = 2)
+long_df$time_units <- "hours"
 # Add fancy labels for facets
 long_df$var_label <- factor(long_df$variable, 
-                                 levels = c("tree_proportion", "Cunningham_test",
-                                            "delta_plot", "likelihood_mapping",
-                                            "ntlt", "q_residuals", 
-                                            "scfs", "fast_tiger", 
-                                            "total_time"), 
+                                 levels = c("likelihood_mapping", "scfs", "ntlt", "delta_plot", "q_residuals", "fast_tiger", "Cunningham_test", "tree_proportion", "total_time"), 
                                  ordered = TRUE, 
-                                 labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                            expression(paste(delta["q"])), expression(atop("Likelihood", "mapping")),
-                                            expression("NTLT"), expression("Q-Residual"), 
-                                            expression("sCF"), expression("Fast TIGER"),
-                                            expression("Total")) )
+                                 labels = c("Likelihood\nmapping", "sCF", "Network\nTreelikeness\nTest", "Delta\nplot", "Q-Residual", "Fast\nTIGER", "Cunningham\nmetric", "Tree\nproportion", "Total\nruntime") )
 # Create a discrete box plot where the tests are the x axis and time in minutes is on the y axis
-
+p <- ggplot(data = long_df, aes(x = var_label, y = value)) +
+  geom_boxplot(outlier.alpha = 0.6) +
+  scale_x_discrete(name = "Test statistic") +
+  scale_y_continuous(name = "Time to run test statistic (hours)", breaks = seq(0, 28, 4), labels = seq(0, 28, 4), minor_breaks = seq(0,28,2), limits = c(0,26)) +
+  labs(title = "Experiment 2: Simulations with introgression (250 gene trees)") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5, size = 17),
+        axis.title.x = element_text(size = 14), axis.text.x = element_text(size = 11),
+        axis.title.y = element_text(size = 14), axis.text.y = element_text(size = 12))
+# Save plot
+p_name <- paste0(plot_directory, "exp2_timing_boxplots_313obs_250genes.pdf")
+ggsave(filename = p_name, plot = p, device = "pdf", height = 8, width = 8, units = "in")
 
 
 

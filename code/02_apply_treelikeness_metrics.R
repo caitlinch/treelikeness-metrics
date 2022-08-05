@@ -61,7 +61,7 @@ if (run_location == "local"){
 
 # Control variables
 run_exp1 <- FALSE
-run_exp2 <- TRUE
+run_exp2 <- FALSE
 rerun_missing_runs <- TRUE
 rerun_experiment_ids <- c("exp2")
 
@@ -253,9 +253,6 @@ for (e in exp_ids){
 #### 5. Collate times ####
 # Collate csvs for identifying how long each test statistic took to run
 
-# Extract all filenames from results folder
-results_files <- list.files(results_directory)
-
 ## For experiments 1 and 2 (simulations)
 exp_ids <- c("exp1", "exp2")
 results_folders <- c("exp1" = "exp_1", "exp2" = "exp_2")
@@ -271,7 +268,7 @@ for (e in exp_ids){
     # Add the results folder to create the full file path for the time files
     time_files <- paste0(e_results_folder, time_files)
     # Format the time files and extract the time differences
-    time_list <- lapply(times_csvs, format.timers)
+    time_list <- lapply(time_files, format.timers)
     # Change times list into a dataframe
     time_df <- do.call(rbind, time_list)
     # Save time difference csv

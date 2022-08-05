@@ -812,26 +812,7 @@ treelikeness.metrics.simulations <- function(alignment_path,
     if (save_timers == TRUE){
       # Save raw timings
       time_df <- data.frame(unique_id, time_name, timings)
-      write.csv(time_df, paste0(replicate_folder, unique_id, "_test_times.csv.csv"))
-      
-      # Find time for each test statistic
-      test <- c("likelihood_mapping", "scfs", "ntlt", "delta_plot", "q_residuals", "fast_tiger", "Cunningham_test", "tree_proportion")
-      difftime <- c(c(time_df[time_df$time_name == "End_likelihood_mapping", 3] - time_df[time_df$time_name == "Start_likelihood_mapping", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_scfs", 3] - time_df[time_df$time_name == "Start_scfs", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_ntlt", 3] - time_df[time_df$time_name == "Start_ntlt", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_delta_plot", 3] - time_df[time_df$time_name == "Start_delta_plot", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_q_residual", 3] - time_df[time_df$time_name == "Start_q_residual", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_fast_tiger", 3] - time_df[time_df$time_name == "Start_fast_tiger", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_Cunningham_test", 3] - time_df[time_df$time_name == "Start_Cunningham_test", 3])[[1]],
-                    c(time_df[time_df$time_name == "End_tree_proportion", 3] - time_df[time_df$time_name == "Start_tree_proportion", 3])[[1]])
-      units <- c(attr(c(time_df[time_df$time_name == "End_likelihood_mapping", 3] - time_df[time_df$time_name == "Start_likelihood_mapping", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_scfs", 3] - time_df[time_df$time_name == "Start_scfs", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_ntlt", 3] - time_df[time_df$time_name == "Start_ntlt", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_delta_plot", 3] - time_df[time_df$time_name == "Start_delta_plot", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_q_residual", 3] - time_df[time_df$time_name == "Start_q_residual", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_fast_tiger", 3] - time_df[time_df$time_name == "Start_fast_tiger", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_Cunningham_test", 3] - time_df[time_df$time_name == "Start_Cunningham_test", 3]), "units"),
-                 attr(c(time_df[time_df$time_name == "End_tree_proportion", 3] - time_df[time_df$time_name == "Start_tree_proportion", 3]), "units") )
+      write.csv(time_df, paste0(replicate_folder, unique_id, "_test_times.csv"))
     } # end save timers
     
   } # end run treelikeness tests
@@ -1484,3 +1465,76 @@ get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_forma
   return(output_list)
   
 } # end function
+
+
+
+format.timers <- function(time_csv){
+  # A small function to read in a timing csv and read out a nice row of how long each step took
+  
+  # Open the csv file
+  time_df <- read.csv(time_csv, stringsAsFactors = FALSE)
+  # Remove row numbers column
+  time_df <- time_df[,2:4]
+  # Change timings column to time format
+  time_df$timings <- as.POSIXct(time_df$timings)
+  
+  # Find time for each test statistic
+  test_cols <- c("uid", "likelihood_mapping", "scfs", "ntlt", "delta_plot", "q_residuals", "fast_tiger", "Cunningham_test", "tree_proportion", "total_time", "time_units")
+  timings <- c(unique(time_df$unique_id)[[1]],
+               format.one.time(time_df, "Start_likelihood_mapping", "End_likelihood_mapping"),
+               format.one.time(time_df, "Start_scfs", "End_scfs"),
+               format.one.time(time_df, "Start_ntlt", "End_ntlt"),
+               format.one.time(time_df, "Start_delta_plot", "End_delta_plot"),
+               format.one.time(time_df, "Start_q_residual", "End_q_residual"),
+               format.one.time(time_df, "Start_fast_tiger", "End_fast_tiger"),
+               format.one.time(time_df, "Start_Cunningham_test", "End_Cunningham_test"),
+               format.one.time(time_df, "Start_tree_proportion", "End_tree_proportion"),
+               format.one.time(time_df, "Start_time", "Results_saved_and_done"),
+               "secs")
+  
+  # Assemble timings into a data frame row
+  time_row <- as.data.frame(matrix(data = timings, nrow = 1, ncol = length(timings), byrow = TRUE))
+  # Name the columns
+  names(time_row) <- test_cols
+  
+  # Return the formatted time differences
+  return(time_row)
+}
+
+
+
+format.one.time <- function(time_df, start_time_label, end_time_label){
+  # Small function to take a start and end label (corresponding to objects within a column) and find the time difference in seconds between them
+  
+  # Find the time difference
+  time_diff <- c(time_df[time_df$time_name == end_time_label, 3] - time_df[time_df$time_name == start_time_label, 3])[[1]]
+  # Find what units the time difference is in
+  time_unit <- attr(c(time_df[time_df$time_name == end_time_label, 3] - time_df[time_df$time_name == start_time_label, 3]), "units")
+  
+  # Convert the time difference to seconds
+  if (time_unit == "secs"){
+    # If already in seconds, do not change
+    time_diff = time_diff
+  } else if (time_unit == "mins"){
+    # Convert minutes to seconds
+    time_diff = time_diff * 60
+  } else if (time_unit == "hours"){
+    # Convert hours to seconds
+    time_diff = time_diff * 60 * 60
+  } else if (time_unit == "days"){
+    # Convert days to seconds
+    time_diff = time_diff * 60 * 60 * 24
+  } else if (time_unit == "weeks"){
+    # Convert days to seconds
+    time_diff = time_diff * 60 * 60 * 24 * 7
+  }
+  
+  # Round to 2dp
+  time_diff <- round(time_diff, digits = 2)
+  
+  # Return the time difference
+  return(time_diff)
+}
+
+
+

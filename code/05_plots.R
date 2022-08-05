@@ -33,7 +33,7 @@ if (dir.exists(plot_directory) == FALSE){dir.create(plot_directory)}
 
 #### 3. Plot timings for experiment 2 ####
 # List all data files
-data_files <- paste0(data_directory, list.files(data_directory))
+data_files <- paste0(data_directory, list.files(data_directory, recursive = TRUE))
 # Identify the experiment 2 timings file
 time_files <- grep("exp2", grep("test_statistic_timing", data_files, value = TRUE), value = TRUE)
 # Open the timings file(s) and collate them into one dataframe
@@ -41,7 +41,7 @@ time_list <- lapply(time_files, read.csv)
 time_df <- as.data.frame(do.call(rbind, time_list))
 # Reshape into long format
 long_df <- melt(time_df, id.vars = c("uid", "time_units", "num_genes"))
-# Convert time to minutes
+# Convert time to hours
 long_df$value <- round((long_df$value*(1/60)*(1/60)), digits = 2)
 long_df$time_units <- "hours"
 # Add fancy labels for facets
@@ -53,7 +53,7 @@ long_df$var_label <- factor(long_df$variable,
 ## 250 genes timing: pretty box plot ##
 # Reduce the dataframe to only rows for runs with 250 genes
 plot_df <- long_df[long_df$num_genes == 250,]
-# Create a discrete box plot where the tests are the x axis and time in minutes is on the y axis
+# Create a discrete box plot where the tests are the x axis and time in hours is on the y axis
 p <- ggplot(data = plot_df, aes(x = var_label, y = value)) +
   geom_boxplot(outlier.alpha = 0.6) +
   scale_x_discrete(name = "Test statistic") +
@@ -69,7 +69,7 @@ ggsave(filename = p_name, plot = p, device = "pdf", height = 8, width = 8, units
 
 ## 250 genes and 1000 timing: pretty box plot ##
 plot_df <- long_df
-# Create a discrete box plot where the tests are the x axis and time in minutes is on the y axis
+# Create a discrete box plot where the tests are the x axis and time in hours is on the y axis
 p <- ggplot(data = long_df, aes(x = var_label, y = value, fill = as.factor(num_genes))) +
   geom_boxplot(outlier.alpha = 0.4) +
   scale_x_discrete(name = "Test statistic") +
@@ -88,8 +88,8 @@ ggsave(filename = p_name, plot = p, device = "pdf", height = 8, width = 8, units
 ## Faceted 250 genes and 1000 timing: pretty box plot ##
 plot_df <- long_df
 # Create a facet labeller
-facet_names <- c(`250` = "250 genes (each 4000 bp long)", `1000` = "1000 genes (each 1000bp long")
-# Create a discrete box plot where the tests are the x axis and time in minutes is on the y axis
+facet_names <- c(`250` = "250 genes (each 1000 bp long)", `1000` = "1000 genes (each 1000bp long)")
+# Create a discrete box plot where the tests are the x axis and time in hours is on the y axis
 p <- ggplot(data = long_df, aes(x = var_label, y = value)) +
   geom_boxplot(outlier.alpha = 0.4) +
   facet_wrap(~num_genes, scale = "free_y", labeller = as_labeller(facet_names)) +

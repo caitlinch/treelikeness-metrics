@@ -271,6 +271,8 @@ for (e in exp_ids){
     time_list <- lapply(time_files, format.timers)
     # Change times list into a dataframe
     time_df <- do.call(rbind, time_list)
+    # Add a column for the number of genes
+    time_df$num_genes <- 250
     # Save time difference csv
     time_file <- paste0(results_directory, e, "_test_statistic_timing.csv")
     write.csv(time_df, time_file, row.names = FALSE)

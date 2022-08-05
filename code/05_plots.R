@@ -39,8 +39,10 @@ if (dir.exists(plot_directory) == FALSE){dir.create(plot_directory)}
 time_file <- grep("exp2", grep("test_statistic_timing", data_files, value = TRUE), value = TRUE)
 # Open the timings file
 time_df <- read.csv(time_file)
+# Add a column with the number of gene trees
+time_df$num_genes <- 250
 # Reshape into long format
-long_df <- melt(time_df, id.vars = c("uid", "time_units"))
+long_df <- melt(time_df, id.vars = c("uid", "time_units", "num_genes"))
 # Convert time to minutes
 long_df$value <- round((long_df$value*(1/60)*(1/60)), digits = 2)
 long_df$time_units <- "hours"

@@ -250,5 +250,32 @@ for (e in exp_ids){
 
 
 
+#### 5. Collate times ####
+# Collate csvs for identifying how long each test statistic took to run
 
+# Extract all filenames from results folder
+results_files <- list.files(results_directory)
 
+## For experiments 1 and 2 (simulations)
+exp_ids <- c("exp1", "exp2")
+results_folders <- c("exp1" = "exp_1", "exp2" = "exp_2")
+for (e in exp_ids){
+  # List all output files for this experiment
+  e_results_folder <- paste0(results_directory, results_folders[[e]], "/")
+  e_output_files <- list.files(e_results_folder, recursive = TRUE)
+  # Identify timing csv files
+  time_files <- grep("test_times", e_output_files, value = TRUE)
+  
+  # If any time files exist, format them and save the time differences as a csv
+  if (length(time_files) > 0){
+    # Add the results folder to create the full file path for the time files
+    time_files <- paste0(e_results_folder, time_files)
+    # Format the time files and extract the time differences
+    time_list <- lapply(times_csvs, format.timers)
+    # Change times list into a dataframe
+    time_df <- do.call(rbind, time_list)
+    # Save time difference csv
+    time_file <- paste0(results_directory, e, "_test_statistic_timing.csv")
+    write.csv(time_df, time_file, row.names = FALSE)
+  }
+}

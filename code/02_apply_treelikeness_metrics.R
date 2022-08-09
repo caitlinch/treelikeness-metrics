@@ -174,27 +174,6 @@ for (e in exp_ids){
   # Extract the list of all alignments
   all_alignments <- e_op_df$output_alignment_file
   
-  # For experiment 1, remove rows with substitution rates that are too low
-  if (e == "exp1"){
-    # For experiment 1, remove rows with substitution rates that are too low
-    e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
-    e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
-    e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
-  } else if (e == "exp2"){
-    # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
-    e_params_df  <- e_params_df[(e_params_df$tree_depth != 0.1 & e_params_df$tree_depth != 10 & e_params_df$tree_depth != 100), ]
-    e_results_df <- e_results_df[(e_results_df$tree_depth != 0.1 & e_results_df$tree_depth != 10 & e_results_df$tree_depth != 100), ]
-    e_op_df      <- e_op_df[(e_op_df$tree_depth != 0.1 & e_op_df$tree_depth != 10 & e_op_df$tree_depth != 100), ]
-    # For experiment 2, remove rows with ancient recombination events
-    e_params_df  <- e_params_df[(e_params_df$recombination_type != "Ancient"), ]
-    e_results_df <- e_results_df[(e_results_df$recombination_type != "Ancient"), ]
-    e_op_df      <- e_op_df[(e_op_df$recombination_type != "Ancient"), ]
-    # For experiment 2, remove rows with 100 taxa
-    e_params_df  <- e_params_df[(e_params_df$num_taxa != 100), ]
-    e_results_df <- e_results_df[(e_results_df$num_taxa != 100), ]
-    e_op_df      <- e_op_df[(e_op_df$num_taxa != 100), ]
-  }
-  
   # Check that all unique ids have a match
   all_uids_present = setequal(e_results_df$uid, e_params_df$uid)
   # If some uids are missing, report and print which
@@ -209,17 +188,39 @@ for (e in exp_ids){
       
       # Get ids of alignments missing from results df (unrun - need to run) and save
       missing_ids <- params_ids[!(params_ids %in% results_ids)]
-      # missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt") 
-      # write(missing_ids, file = missing_ids_file)
+      missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt")
+      write(missing_ids, file = missing_ids_file)
       
       # Make dataframe consisting of only missing alignments that need running and save
       missing_als_df <- e_op_df[e_op_df$uid %in% missing_ids, ]
-      # missing_als_file <- paste0(results_directory, e, "_parameters_rerun_", output_id, ".csv")
-      # write.csv(missing_als_df, file = missing_als_file, row.names = TRUE)
+      missing_als_file <- paste0(results_directory, e, "_parameters_rerun_", output_id, ".csv")
+      write.csv(missing_als_df, file = missing_als_file, row.names = TRUE)
       
       if (rerun_missing_runs == TRUE){
-        # Set which alignments to rerun
+        # Set which alignments to rerun (remove alignments with certain parameters that are too slow or have insufficient information to run)
+        if (e == "exp1"){
+          # For experiment 1, remove rows with substitution rates that are too low
+          e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
+          e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
+          e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
+        } else if (e == "exp2"){
+          # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
+          e_params_df  <- e_params_df[(e_params_df$tree_depth != 0.1 & e_params_df$tree_depth != 10 & e_params_df$tree_depth != 100), ]
+          e_results_df <- e_results_df[(e_results_df$tree_depth != 0.1 & e_results_df$tree_depth != 10 & e_results_df$tree_depth != 100), ]
+          e_op_df      <- e_op_df[(e_op_df$tree_depth != 0.1 & e_op_df$tree_depth != 10 & e_op_df$tree_depth != 100), ]
+          # For experiment 2, remove rows with ancient recombination events
+          e_params_df  <- e_params_df[(e_params_df$recombination_type != "Ancient"), ]
+          e_results_df <- e_results_df[(e_results_df$recombination_type != "Ancient"), ]
+          e_op_df      <- e_op_df[(e_op_df$recombination_type != "Ancient"), ]
+          # For experiment 2, remove rows with 100 taxa
+          e_params_df  <- e_params_df[(e_params_df$num_taxa != 100), ]
+          e_results_df <- e_results_df[(e_results_df$num_taxa != 100), ]
+          e_op_df      <- e_op_df[(e_op_df$num_taxa != 100), ]
+        }
+        
+        # Extract vector of alignments to rerun
         rerun_al_paths <- missing_als_df$output_alignment_file
+        
         # Run missing alignments
         mclapply(rerun_al_paths, treelikeness.metrics.simulations,
                  iqtree2_path, splitstree_path, 

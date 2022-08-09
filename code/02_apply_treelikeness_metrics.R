@@ -200,26 +200,18 @@ for (e in exp_ids){
         # Set which alignments to rerun (remove alignments with certain parameters that are too slow or have insufficient information to run)
         if (e == "exp1"){
           # For experiment 1, remove rows with substitution rates that are too low
-          e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
-          e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
-          e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
+          missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 1e-04 & missing_als_df$tree_depth != 1e-03), ]
         } else if (e == "exp2"){
           # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
-          e_params_df  <- e_params_df[(e_params_df$tree_depth != 0.1 & e_params_df$tree_depth != 10 & e_params_df$tree_depth != 100), ]
-          e_results_df <- e_results_df[(e_results_df$tree_depth != 0.1 & e_results_df$tree_depth != 10 & e_results_df$tree_depth != 100), ]
-          e_op_df      <- e_op_df[(e_op_df$tree_depth != 0.1 & e_op_df$tree_depth != 10 & e_op_df$tree_depth != 100), ]
+          missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 0.1 & missing_als_df$tree_depth != 10 & missing_als_df$tree_depth != 100), ]
           # For experiment 2, remove rows with ancient recombination events
-          e_params_df  <- e_params_df[(e_params_df$recombination_type != "Ancient"), ]
-          e_results_df <- e_results_df[(e_results_df$recombination_type != "Ancient"), ]
-          e_op_df      <- e_op_df[(e_op_df$recombination_type != "Ancient"), ]
+          missing_als_df  <- missing_als_df[(missing_als_df$recombination_type != "Ancient"), ]
           # For experiment 2, remove rows with 100 taxa
-          e_params_df  <- e_params_df[(e_params_df$num_taxa != 100), ]
-          e_results_df <- e_results_df[(e_results_df$num_taxa != 100), ]
-          e_op_df      <- e_op_df[(e_op_df$num_taxa != 100), ]
+          missing_als_df  <- missing_als_df[(missing_als_df$num_taxa != 100), ]
         }
         
         # Extract vector of alignments to rerun
-        rerun_al_paths <- missing_als_df$output_alignment_file
+        rerun_al_paths <- e_op_df$output_alignment_file
         
         # Run missing alignments
         mclapply(rerun_al_paths, treelikeness.metrics.simulations,

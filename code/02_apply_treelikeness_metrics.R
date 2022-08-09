@@ -173,9 +173,19 @@ for (e in exp_ids){
   
   # For experiment 1, remove rows with substitution rates that are too low
   if (e == "exp1"){
+    # For experiment 1, remove rows with substitution rates that are too low
     e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
     e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
     e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
+  } if (e == "exp2"){
+    # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
+    e_params_df  <- e_params_df[(e_params_df$tree_depth != 0.1 & e_params_df$tree_depth != 10 & e_params_df$tree_depth != 100), ]
+    e_results_df <- e_results_df[(e_results_df$tree_depth != 0.1 & e_results_df$tree_depth != 10 & e_results_df$tree_depth != 100), ]
+    e_op_df      <- e_op_df[(e_op_df$tree_depth != 0.1 & e_op_df$tree_depth != 10 & e_op_df$tree_depth != 100), ]
+    # For experiment 2, remove rows with ancient recombination events
+    e_params_df  <- e_params_df[(e_params_df$recombination_type != "Ancient"), ]
+    e_results_df <- e_results_df[(e_results_df$recombination_type != "Ancient"), ]
+    e_op_df      <- e_op_df[(e_op_df$recombination_type != "Ancient"), ]
   }
   
   # Check that all unique ids have a match

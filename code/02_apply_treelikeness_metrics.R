@@ -177,7 +177,7 @@ for (e in exp_ids){
     e_params_df  <- e_params_df[(e_params_df$tree_depth != 1e-04 & e_params_df$tree_depth != 1e-03), ]
     e_results_df <- e_results_df[(e_results_df$tree_depth != 1e-04 & e_results_df$tree_depth != 1e-03), ]
     e_op_df      <- e_op_df[(e_op_df$tree_depth != 1e-04 & e_op_df$tree_depth != 1e-03), ]
-  } if (e == "exp2"){
+  } else if (e == "exp2"){
     # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
     e_params_df  <- e_params_df[(e_params_df$tree_depth != 0.1 & e_params_df$tree_depth != 10 & e_params_df$tree_depth != 100), ]
     e_results_df <- e_results_df[(e_results_df$tree_depth != 0.1 & e_results_df$tree_depth != 10 & e_results_df$tree_depth != 100), ]

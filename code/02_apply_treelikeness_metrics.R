@@ -211,7 +211,7 @@ for (e in exp_ids){
         }
         
         # Extract vector of alignments to rerun
-        rerun_al_paths <- e_op_df$output_alignment_file
+        rerun_al_paths <- missing_als_df$output_alignment_file
         
         # Run missing alignments
         mclapply(rerun_al_paths, treelikeness.metrics.simulations,

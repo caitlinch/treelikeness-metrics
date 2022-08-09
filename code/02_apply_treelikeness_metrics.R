@@ -155,12 +155,12 @@ if (run_exp2 == TRUE){
 #### 4. Print list of alignments that do not have treelikeness results files ####
 # Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
 
-# Extract all filenames from results folder
-results_files <- list.files(results_directory)
-
 ## For experiments 1 and 2 (simulations)
 exp_ids <- rerun_experiment_ids
 for (e in exp_ids){
+  # Extract all filenames from results folder
+  results_files <- list.files(results_directory)
+  
   # Open parameters csv
   e_params_file <- paste0(results_directory, grep("rerun", grep(e, grep("parameters", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
   e_params_df <- read.csv(e_params_file, stringsAsFactors = FALSE)

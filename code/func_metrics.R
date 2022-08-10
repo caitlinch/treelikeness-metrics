@@ -413,7 +413,7 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
   # If one or both haven't run IQ-Tree to create the likelihood map
   iq_file <- paste0(alignment_path, ".iqtree")
   map_file <- paste0(alignment_path, ".lmap.eps")
-  if ((file.exists(iq_file) == FALSE) & (file.exists(map_file) == FALSE)){
+  if ((file.exists(iq_file) == FALSE) | (file.exists(map_file) == FALSE)){
     number_of_quartets <- 25 * as.numeric(number_of_taxa)
     call <- paste0(iqtree2_path, " -s ", alignment_path, " -m ", substitution_model, " -nt ", iqtree2_number_threads, " -lmap ", number_of_quartets, " -redo -safe")
     system(call)

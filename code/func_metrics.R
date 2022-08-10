@@ -413,7 +413,7 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
   # If one or both haven't run IQ-Tree to create the likelihood map
   iq_file <- paste0(alignment_path, ".iqtree")
   map_file <- paste0(alignment_path, ".lmap.eps")
-  if ((file.exists(iq_file) == FALSE) | (file.exists(map_file) == FALSE)){
+  if ((file.exists(iq_file) == FALSE) & (file.exists(map_file) == FALSE)){
     number_of_quartets <- 25 * as.numeric(number_of_taxa)
     call <- paste0(iqtree2_path, " -s ", alignment_path, " -m ", substitution_model, " -nt ", iqtree2_number_threads, " -lmap ", number_of_quartets, " -redo -safe")
     system(call)
@@ -426,27 +426,32 @@ likelihood.mapping <- function(alignment_path, iqtree2_path, iqtree2_number_thre
   
   ## Need four or more taxa to conduct likelihood mapping
   if (num_unique_taxa >= 4){
-    ## Extract results from likelihood map
-    iq_log <- readLines(iq_file)
-    ind <- grep("Number of fully resolved  quartets",iq_log)
-    resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-    ind <- grep("Number of partly resolved quartets",iq_log)
-    partly_resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-    ind <- grep("Number of unresolved",iq_log)
-    unresolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
-    total_q <- (resolved_q+partly_resolved_q+unresolved_q)
-    prop_resolved <- resolved_q/total_q
-    
-    ## Collate results into a vector
-    lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
-    names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
-                           "total_num_quartets", "proportion_resolved_quartets")
+    if (file.exists(iq_file) == TRUE){
+      # Extract results from likelihood map
+      iq_log <- readLines(iq_file)
+      ind <- grep("Number of fully resolved  quartets",iq_log)
+      resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+      ind <- grep("Number of partly resolved quartets",iq_log)
+      partly_resolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+      ind <- grep("Number of unresolved",iq_log)
+      unresolved_q <- as.numeric(strsplit(strsplit(iq_log[ind],":")[[1]][2],"\\(")[[1]][1])
+      total_q <- (resolved_q+partly_resolved_q+unresolved_q)
+      prop_resolved <- resolved_q/total_q
+      # Collate results into a vector
+      lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
+    }
+    else if (file.exists(iq_file) == FALSE){
+      # Create a vector noting that the .iqtree file does not exist
+      lm_results <- rep("no_iqtree_file", 5)
+    }
   } else {
-    ## Collate results into a vector
+    # Create a vector noting that there are insufficient unique taxa to create a likelihood map
     lm_results <- rep(paste0(num_unique_taxa, "_unique_taxa_no_likelihood_map"), 5)
-    names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
-                           "total_num_quartets", "proportion_resolved_quartets")
   }
+  
+  ## Rename vector of results
+  names(lm_results) <- c("num_resolved_quartets", "num_partly_resolved_quartets", "num_unresolved_quartets",
+                         "total_num_quartets", "proportion_resolved_quartets")
   
   ## Return results
   return(lm_results)

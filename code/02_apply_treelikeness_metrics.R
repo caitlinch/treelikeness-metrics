@@ -204,8 +204,6 @@ for (e in exp_ids){
         } else if (e == "exp2"){
           # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
           missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 0.1 & missing_als_df$tree_depth != 10 & missing_als_df$tree_depth != 100), ]
-          # For experiment 2, remove rows with ancient recombination events
-          missing_als_df  <- missing_als_df[(missing_als_df$recombination_type != "Ancient"), ]
           # For experiment 2, remove rows with 100 taxa
           missing_als_df  <- missing_als_df[(missing_als_df$num_taxa != 100), ]
         }

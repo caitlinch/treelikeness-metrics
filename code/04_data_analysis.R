@@ -168,7 +168,7 @@ if (plot_exp2 == TRUE){
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                 "LM_proportion_resolved_quartets", "mean_Q_residual",
                                 "sCF_mean", "mean_TIGER_value")]
-  }
+  }  # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
   
   # Melt exp2_wide_df for better plotting
   exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type"))
@@ -191,27 +191,32 @@ if (plot_exp2 == TRUE){
   # Bind to the exp2_long_df
   exp2_long_df <- rbind(exp2_long_df, ntlt_params)
   
-  # # Add fancy labels for facets
-  # exp2_long_df$var_label <- factor(exp2_long_df$variable, 
-  #                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-  #                                             "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-  #                                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
-  #                                  ordered = TRUE, 
-  #                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-  #                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-  #                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-  #                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
-  # Add fancy labels for facets -  - do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
-  exp2_long_df$var_label <- factor(exp2_long_df$variable, 
-                                   levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                              "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                              "mean_Q_residual", "sCF_mean"), 
-                                   ordered = TRUE, 
-                                   labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                              expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                              expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                              expression(atop("Mean", "sCF value")) ) )
-}
+  # Add fancy labels for facets (based on which test statistics were selected)
+  if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
+    # Add fancy labels for facets
+    exp2_long_df$var_label <- factor(exp2_long_df$variable,
+                                     levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
+                                                "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                                "mean_Q_residual", "sCF_mean", "mean_TIGER_value"),
+                                     ordered = TRUE,
+                                     labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
+                                                expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                                expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
+                                                expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+  } else {
+    # Add fancy labels for facets
+    # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
+    exp2_long_df$var_label <- factor(exp2_long_df$variable, 
+                                     levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                                                "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                                "mean_Q_residual", "sCF_mean"), 
+                                     ordered = TRUE, 
+                                     labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
+                                                expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                                expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
+                                                expression(atop("Mean", "sCF value")) ) )
+  } # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
+} # end if (plot_exp2 == TRUE)
 
 
 

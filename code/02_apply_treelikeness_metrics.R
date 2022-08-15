@@ -201,11 +201,6 @@ for (e in exp_ids){
         if (e == "exp1"){
           # For experiment 1, remove rows with substitution rates that are too low
           missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 1e-04 & missing_als_df$tree_depth != 1e-03), ]
-        } else if (e == "exp2"){
-          # For experiment 2, remove rows with tree depths (in coalescent units) that are too low or high
-          missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 0.1 & missing_als_df$tree_depth != 10 & missing_als_df$tree_depth != 100), ]
-          # For experiment 2, remove rows with 100 taxa
-          missing_als_df  <- missing_als_df[(missing_als_df$num_taxa != 100), ]
         }
         
         # Extract vector of alignments to rerun

@@ -216,6 +216,7 @@ if (plot_exp2 == TRUE){
                                                 expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
                                                 expression(atop("Mean", "sCF value")) ) )
   } # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
+  
 } # end if (plot_exp2 == TRUE)
 
 

@@ -146,8 +146,11 @@ if (plot_exp2 == TRUE){
   exp2_data_file <- grep("exp2", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
   
+  # Manage test statistic columns
   # Convert sCF values to decimal from percentage
   exp2_df$sCF_mean <- exp2_df$sCF_mean / 100
+  # Convert likelihood mapping results to numeric (will be char because possible value is "no_iqtree_file", which means could not finish LM function)
+  exp2_df$LM_proportion_resolved_quartets <- as.numeric(exp2_df$LM_proportion_resolved_quartets)
   
   # Select test statistics for plotting (by subsetting columns)
   if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
@@ -172,7 +175,6 @@ if (plot_exp2 == TRUE){
   
   # Melt exp2_wide_df for better plotting
   exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type"))
-  
   
   # Transform the Network Treelikeness Test results into more plottable format
   # Make a table of all possible parameter values for the network treelikeness test

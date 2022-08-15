@@ -145,23 +145,30 @@ if (plot_exp2 == TRUE){
   # Open data file from Experiment 2 as a dataframe
   exp2_data_file <- grep("exp2", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
-  exp2_df$mean_TIGER_value <- as.numeric(exp2_df$mean_TIGER_value)
   
   # Convert sCF values to decimal from percentage
   exp2_df$sCF_mean <- exp2_df$sCF_mean / 100
   
-  # # Remove columns you don't want for plotting
-  # exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
-  #                             "recombination_value", "recombination_type",
-  #                             "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-  #                             "LM_proportion_resolved_quartets", "mean_Q_residual", 
-  #                             "sCF_mean", "mean_TIGER_value")]
-  # Remove columns you don't want for plotting - do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
-  exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
-                              "recombination_value", "recombination_type",
-                              "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                              "LM_proportion_resolved_quartets", "mean_Q_residual", 
-                              "sCF_mean")]
+  # Select test statistics for plotting (by subsetting columns)
+  if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
+    # Remove columns you don't want for plotting
+    # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
+    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
+                                "recombination_value", "recombination_type",
+                                "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
+                                "LM_proportion_resolved_quartets", "mean_Q_residual", 
+                                "sCF_mean")]
+  } else {
+    # TIGER was run, so plot TIGER results with other test statistic results
+    # Convert TIGER results to numeric
+    exp2_df$mean_TIGER_value <- as.numeric(exp2_df$mean_TIGER_value)
+    # Remove columns you don't want for plotting
+    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth",
+                                "recombination_value", "recombination_type",
+                                "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
+                                "LM_proportion_resolved_quartets", "mean_Q_residual",
+                                "sCF_mean", "mean_TIGER_value")]
+  }
   
   # Melt exp2_wide_df for better plotting
   exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type"))
@@ -360,7 +367,7 @@ if (plot_empirical == TRUE){
   ## Plot 1: box plots of average value for each test statistic against codon position (faceted by number of taxa, coloured by type of DNA alignment) ## 
   # Set dataset for plot
   plot_df <- emp_long_df
-
+  
   # Add color blind friendly palette
   colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # grey, orange, sky blue, bluish green, yellow, blue, vermilion, reddish purple
   

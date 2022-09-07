@@ -19,7 +19,7 @@ output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_d
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 plot_exp1 = FALSE
-plot_exp2 = FALSE
+plot_exp2 = TRUE
 plot_empirical = TRUE
 
 
@@ -247,6 +247,24 @@ if (plot_exp2 == TRUE){
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  # Construct plot with free y axis
+  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+    geom_smooth() + 
+    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
+    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+    scale_y_continuous(name = "Test statistic value") +
+    scale_color_viridis_d(direction = -1) +
+    guides(color = guide_legend(title = "Number of\ntaxa")) +
+    labs(title = "Tree depth (coalescent units)") +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(size = 18, hjust = 0.5))
+  # Save plot
+  plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient_freey.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   
   ## Plot 2: Recent events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
   # Set dataset for plot
@@ -269,6 +287,24 @@ if (plot_exp2 == TRUE){
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  # Construct plot with free y axis
+  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+    geom_smooth() + 
+    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
+    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+    scale_y_continuous(name = "Test statistic value") +
+    scale_color_viridis_d(direction = -1) +
+    guides(color = guide_legend(title = "Number of\ntaxa")) +
+    labs(title = "Tree depth (coalescent units)") +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(size = 18, hjust = 0.5))
+  # Save plot
+  plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent_freey.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   
   ## Plot 3: Ancient events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##

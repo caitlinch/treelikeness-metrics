@@ -78,7 +78,20 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 
-#### 3. Construct parameters dataframe for empirical alignments ####
+#### 3. Prepare Richards2018 alignments for analysis ####
+# Extract basic details about the alignments
+all_alignments <- list.files(richards2011_directory, recursive = T)
+# Extend to full file path
+if (length(all_alignments) > 0){
+  all_alignments <- paste0(richards2011_directory, all_alignments)
+}
+# Remove any misaligned files
+all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
+# Extract the number of characters and taxa in each alignment
+alignment_dim_list <- lapply(all_alignments, alignment.dimensions)
+
+
+#### 4. Construct parameters dataframe for empirical alignments ####
 # Create filename for Oaks 2011 parameters csv
 oaks_csv_file <- paste0(results_directory, "Oaks2011_parameters.csv")
 
@@ -132,7 +145,7 @@ if (file.exists(oaks_csv_file)){
 
 
 
-#### 4. Copy alignments and save the parameters for each alignment ####
+#### 5. Copy alignments and save the parameters for each alignment ####
 # Make a new folder for the Oaks 2011 analyses
 copy_directory <-  paste0(results_directory, "Oaks2011/")
 if (dir.exists(copy_directory) == FALSE){dir.create(copy_directory)}
@@ -152,7 +165,7 @@ if ((FALSE %in% file.exists(oaks_df$output_alignment_file)) == TRUE){
 
 
 
-#### 5. Apply tests for treelikeness to each empirical alignment ####
+#### 6. Apply tests for treelikeness to each empirical alignment ####
 # Get list of all the Oaks 2011 alignments to run
 all_oaks_alignments <- oaks_df$output_alignment_file
 # Remove the alignments with either a .log or .iqtree file

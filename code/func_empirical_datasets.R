@@ -48,7 +48,12 @@ process.alignment.dimensions.row <- function(row){
   new_row$shuffled_taxa <- "TRUE"
   
   # Copy the alignment and shuffle the taxa of the new alignment randomly
-  new_alignment_path <- shuffle.taxa(new_row$alignment_path)
+  shuffle_output <- shuffle.taxa(new_row$alignment_path)
+  
+  # Update row details with the output from the shuffle.taxa function
+  new_row$alignment_path <- shuffle_output[["shuffled_alignment_path"]]
+  new_row$number_unchanged_taxa <- shuffle_output[["number_unchanged_taxa"]]
+  new_row$percent_unchanged_taxa <- shuffle_output[["percent_unchanged_taxa"]]
   
   # Return output
   return(new_row)

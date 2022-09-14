@@ -88,7 +88,7 @@ if (length(all_alignments) > 0){
 # Remove any misaligned files
 all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
 # Extract the number of characters and taxa in each alignment
-alignment_dim_list <- lapply(all_alignments, alignment.dimensions)
+alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
 
 
 #### 4. Construct parameters dataframe for empirical alignments ####

@@ -79,18 +79,38 @@ source(paste0(repo_directory, "code/func_empirical_datasets.R"))
 
 
 #### 3. Prepare Richards2018 alignments for analysis ####
-# Extract basic details about the alignments
-all_alignments <- list.files(richards2011_directory, recursive = T)
-# Extend to full file path
-if (length(all_alignments) > 0){
-  all_alignments <- paste0(richards2011_directory, all_alignments)
+## Extract basic details about the alignments
+# Specify the csv file containing basic information about the richards2018 nexus alignments
+alignment_dim_file <- paste0(results_directory, "exp3_richards2018_alignment_dimensions.csv")
+# If the file containing basic information about the alignments exists, open it. If not, create it.
+if (file.exists(alignment_dim_file) == TRUE){
+  alignment_dims <- read.csv(alignment_dim_file)
+} else {
+  all_alignments <- list.files(richards2011_directory, recursive = T)
+  # Extend to full file path
+  if (length(all_alignments) > 0){
+    all_alignments <- paste0(richards2011_directory, all_alignments)
+  }
+  # Remove any misaligned files
+  all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
+  # Extract the number of characters and taxa in each alignment
+  alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
+  alignment_dims <- as.data.frame(do.call(rbind, alignment_dim_list))
+  names(alignment_dims) <- c("alignment_path", "num_taxa", "num_sites")
+  # Create new column with a unique identifier for each alignment
+  alignment_dims$uid <- paste0(gsub("\\.nex", "", basename(alignment_dims$alignment_path)), "_copy")
+  # Add dataset id as column
+  alignment_dims$dataset <- "Richards2018"
+  # Add column for the clade and gene
+  alignment_dims$clade <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 1))
+  alignment_dims$gene <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 2))
+  # Reorder columns
+  alignment_dims <- alignment_dims[, c("uid", "dataset", "clade", "gene", "num_taxa", "num_sites", "alignment_path")]
+  # Sort so that the genes are in order of increasing number of taxa
+  alignment_dims <- alignment_dims[order(as.numeric(alignment_dims$num_taxa), alignment_dims$gene), ]
+  # Save the nice data frame of information
+  write.csv(alignment_dims, alignment_dim_file, row.names = F)
 }
-# Remove any misaligned files
-all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
-# Extract the number of characters and taxa in each alignment
-alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
-alignment_dims <- as.data.frame(do.call(rbind, alignment_dim_list))
-names(alignment_dims) <- c("Alignment_path", "num_taxa", "num_sites")
 
 
 #### 4. Construct parameters dataframe for empirical alignments ####

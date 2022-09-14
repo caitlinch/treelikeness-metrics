@@ -74,7 +74,7 @@ library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "code/func_metrics.R"))
-source(paste0(repo_directory, "code/func_data_analysis.R"))
+source(paste0(repo_directory, "code/func_empirical_datasets.R"))
 
 
 
@@ -89,6 +89,8 @@ if (length(all_alignments) > 0){
 all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
 # Extract the number of characters and taxa in each alignment
 alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
+alignment_dims <- as.data.frame(do.call(rbind, alignment_dim_list))
+names(alignment_dims) <- c("Alignment_path", "num_taxa", "num_sites")
 
 
 #### 4. Construct parameters dataframe for empirical alignments ####

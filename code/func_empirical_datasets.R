@@ -29,7 +29,7 @@ alignment.dimensions.nex <- function(alignment_path){
   n_taxa <- length(n)
   n_chars <- unique(lapply(n, length))[[1]]
   # Create output vector
-  op_vector <- c(basename(alignment_path), n_taxa, n_chars)
+  op_vector <- c(alignment_path, n_taxa, n_chars)
   # Return output
   return(op_vector)
 }

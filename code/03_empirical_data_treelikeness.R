@@ -104,13 +104,23 @@ if (file.exists(alignment_dim_file) == TRUE){
   # Add column for the clade and gene
   alignment_dims$clade <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 1))
   alignment_dims$gene <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 2))
+  # Add a column for whether the species have been shuffled
+  alignment_dims$shuffled_taxa <- "FALSE"
+  # Add columns noting the number and percent of changed taxa labels
+  alignment_dims$number_unchanged_taxa <- alignment_dims$num_taxa
+  alignment_dims$percent_unchanged_taxa <- 100
   # Reorder columns
-  alignment_dims <- alignment_dims[, c("uid", "dataset", "clade", "gene", "num_taxa", "num_sites", "alignment_path")]
+  alignment_dims <- alignment_dims[, c("uid", "dataset", "clade", "gene", "num_taxa", "num_sites", "shuffled_taxa", "number_unchanged_taxa", "percent_unchanged_taxa",  "alignment_path")]
   # Sort so that the genes are in order of increasing number of taxa
   alignment_dims <- alignment_dims[order(as.numeric(alignment_dims$num_taxa), alignment_dims$gene), ]
   # Save the nice data frame of information
   write.csv(alignment_dims, alignment_dim_file, row.names = F)
 }
+
+## Shuffle the names in the alignments
+# For each alignment, take a row from the alignment_dims csv file. Take that alignment, copy it, and shuffle the sites.
+# Return a summary row about the new alignment
+
 
 
 #### 4. Construct parameters dataframe for empirical alignments ####

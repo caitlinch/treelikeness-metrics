@@ -79,47 +79,60 @@ source(paste0(repo_directory, "code/func_empirical_datasets.R"))
 
 
 #### 3. Prepare Richards2018 alignments for analysis ####
-## Extract basic details about the alignments
-# Specify the csv file containing basic information about the richards2018 nexus alignments
-alignment_dim_file <- paste0(results_directory, "exp3_richards2018_alignment_dimensions.csv")
-# If the file containing basic information about the alignments exists, open it. If not, create it.
-if (file.exists(alignment_dim_file) == TRUE){
-  alignment_dims <- read.csv(alignment_dim_file)
+# Specify the file name for the csv containing both the copied alignments and the shuffled taxa alignments
+shuffled_alignment_dim_file <- paste0(results_directory, "exp3_richards2018_shuffled_alignment_dimensions.csv")
+# If the file exists, open it. If not, create it.
+if (file.exists(shuffled_alignment_dim_file) == TRUE){
+  richards2018_dims <- read.csv(shuffled_alignment_dim_file)
 } else {
-  all_alignments <- list.files(richards2011_directory, recursive = T)
-  # Extend to full file path
-  if (length(all_alignments) > 0){
-    all_alignments <- paste0(richards2011_directory, all_alignments)
+  ## Extract basic details about the alignments
+  # Specify the csv file containing basic information about the richards2018 nexus alignments
+  alignment_dim_file <- paste0(results_directory, "exp3_richards2018_copy_alignment_dimensions.csv")
+  # If the file containing basic information about the alignments exists, open it. If not, create it.
+  if (file.exists(alignment_dim_file) == TRUE){
+    alignment_dims <- read.csv(alignment_dim_file)
+  } else {
+    all_alignments <- list.files(richards2011_directory, recursive = T)
+    # Extend to full file path
+    if (length(all_alignments) > 0){
+      all_alignments <- paste0(richards2011_directory, all_alignments)
+    }
+    # Remove any misaligned files
+    all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
+    # Extract the number of characters and taxa in each alignment
+    alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
+    alignment_dims <- as.data.frame(do.call(rbind, alignment_dim_list))
+    names(alignment_dims) <- c("alignment_path", "num_taxa", "num_sites")
+    # Create new column with a unique identifier for each alignment
+    alignment_dims$uid <- paste0(gsub("\\.nex", "", basename(alignment_dims$alignment_path)), "_copy")
+    # Add dataset id as column
+    alignment_dims$dataset <- "Richards2018"
+    # Add column for the clade and gene
+    alignment_dims$clade <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 1))
+    alignment_dims$gene <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 2))
+    # Add a column for whether the species have been shuffled
+    alignment_dims$shuffled_taxa <- "FALSE"
+    # Add columns noting the number and percent of changed taxa labels
+    alignment_dims$number_unchanged_taxa <- alignment_dims$num_taxa
+    alignment_dims$percent_unchanged_taxa <- 100
+    # Reorder columns
+    alignment_dims <- alignment_dims[, c("uid", "dataset", "clade", "gene", "num_taxa", "num_sites", "shuffled_taxa", "number_unchanged_taxa", "percent_unchanged_taxa",  "alignment_path")]
+    # Sort so that the genes are in order of increasing number of taxa
+    alignment_dims <- alignment_dims[order(as.numeric(alignment_dims$num_taxa), alignment_dims$gene), ]
+    # Save the nice data frame of information
+    write.csv(alignment_dims, alignment_dim_file, row.names = F)
   }
-  # Remove any misaligned files
-  all_alignments <- grep("misalignment", all_alignments, value = T, invert = T)
-  # Extract the number of characters and taxa in each alignment
-  alignment_dim_list <- lapply(all_alignments, alignment.dimensions.nex)
-  alignment_dims <- as.data.frame(do.call(rbind, alignment_dim_list))
-  names(alignment_dims) <- c("alignment_path", "num_taxa", "num_sites")
-  # Create new column with a unique identifier for each alignment
-  alignment_dims$uid <- paste0(gsub("\\.nex", "", basename(alignment_dims$alignment_path)), "_copy")
-  # Add dataset id as column
-  alignment_dims$dataset <- "Richards2018"
-  # Add column for the clade and gene
-  alignment_dims$clade <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 1))
-  alignment_dims$gene <- unlist(lapply(strsplit(alignment_dims$uid, "_"), `[[`, 2))
-  # Add a column for whether the species have been shuffled
-  alignment_dims$shuffled_taxa <- "FALSE"
-  # Add columns noting the number and percent of changed taxa labels
-  alignment_dims$number_unchanged_taxa <- alignment_dims$num_taxa
-  alignment_dims$percent_unchanged_taxa <- 100
-  # Reorder columns
-  alignment_dims <- alignment_dims[, c("uid", "dataset", "clade", "gene", "num_taxa", "num_sites", "shuffled_taxa", "number_unchanged_taxa", "percent_unchanged_taxa",  "alignment_path")]
-  # Sort so that the genes are in order of increasing number of taxa
-  alignment_dims <- alignment_dims[order(as.numeric(alignment_dims$num_taxa), alignment_dims$gene), ]
-  # Save the nice data frame of information
-  write.csv(alignment_dims, alignment_dim_file, row.names = F)
+  
+  ## Shuffle the names in the alignments
+  # For each alignment, take a row from the alignment_dims csv file. Take that alignment, copy it, and shuffle the sites.
+  # Return a summary row about the new alignment
+  shuffled_alignment_dims_list <- lapply(1:nrow(alignment_dims), function(x){process.alignment.dimensions.row(alignment_dims[x, ])})
+  shuffled_alignment_dims <- do.call(rbind, shuffled_alignment_dims_list)
+  # Bind the shuffled and unshuffled data frames together
+  richards2018_dims <- rbind(alignment_dims, shuffled_alignment_dims)
+  # Output the bound data frames
+  write.csv(richards2018_dims, file = shuffled_alignment_dim_file, row.names = FALSE)
 }
-
-## Shuffle the names in the alignments
-# For each alignment, take a row from the alignment_dims csv file. Take that alignment, copy it, and shuffle the sites.
-# Return a summary row about the new alignment
 
 
 

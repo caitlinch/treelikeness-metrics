@@ -1,7 +1,7 @@
-# /caitlinch/treelikeness-metrics/code/05_plotting.R
+# /caitlinch/treelikeness-metrics/code/04_timing_plots.R
 # Caitlin Cherryh 2022
 
-# This program makes various additional or supplementary plots (main results are plotted in 04_data_analysis.R)
+# This program makes various additional or supplementary plots (main results are plotted in 03_data_analysis.R)
 
 
 

@@ -1,4 +1,4 @@
-# /caitlinch/treelikeness-metrics/code/04_data_analysis.R
+# /caitlinch/treelikeness-metrics/code/03_data_analysis.R
 # Caitlin Cherryh 2022
 
 # This program takes results from applying various treelikeness tests and performs data analysis
@@ -12,7 +12,6 @@
 
 # plot_exp1 <- either TRUE to plot experiment 1 results, or FALSE to skip
 # plot_exp2 <- either TRUE to plot experiment 2 results, or FALSE to skip
-# plot_empirical <- either TRUE to plot empirical dataset results, or FALSE to skip
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
@@ -20,7 +19,6 @@ repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-met
 
 plot_exp1 = FALSE
 plot_exp2 = TRUE
-plot_empirical = TRUE
 
 
 #### 2. Prepare analyses ####
@@ -353,109 +351,5 @@ if (plot_exp2 == TRUE){
   plot_path <- paste0(plot_directory, "exp2_plot4_main.figure_num_taxa_Recent.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 }
-
-
-
-#### 7. Prepare data from empirical datasets ####
-if (plot_empirical == TRUE){
-  # Open data file from Experiment 1 as a dataframe
-  emp_data_file <- grep("Oaks2011", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
-  emp_df <- read.csv(file = emp_data_file, stringsAsFactors = FALSE)
-  # Convert TIGER values to numeric
-  emp_df$mean_TIGER_value <- as.numeric(emp_df$mean_TIGER_value)
-  # Convert sCF values to decimal from percentage
-  emp_df$sCF_mean <- emp_df$sCF_mean / 100
-  
-  # Remove rows with ALL codon positions
-  emp_df <- emp_df[emp_df$codon_position != "All",]
-  
-  # Create wide df with only necessary columns
-  emp_wide_df <- emp_df[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type",
-                            "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                            "LM_proportion_resolved_quartets", "mean_Q_residual", "sCF_mean",
-                            "mean_TIGER_value")]
-  
-  # Melt exp1_wide_df for better plotting
-  emp_long_df <- melt(emp_wide_df, id.vars = c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type"))
-  emp_long_df$value <- as.numeric(emp_long_df$value)
-  
-  # Rename the Network Treelikeness Test results
-  ntlt_params <- expand.grid("num_taxa" = sort(unique(emp_wide_df$num_taxa)), "codon_position" = sort(unique(emp_wide_df$codon_position)), 
-                             "DNA_type" = sort(unique(emp_wide_df$DNA_type)))
-  ntlt_params$value <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.empirical, params_df = ntlt_params, results_df = emp_df))
-  ntlt_params$variable <- "NetworkTreelikenessTest"
-  ntlt_params$row_id <- NA
-  ntlt_params$uid <- NA
-  ntlt_params$gene_name <- NA
-  ntlt_params <- ntlt_params[, c("row_id", "uid", "gene_name", "num_taxa", "codon_position", "DNA_type", "variable", "value")] 
-  
-  # Combine the two dataframes
-  emp_long_df <- rbind(emp_long_df, ntlt_params)
-  
-  # Add fancy labels for facets
-  emp_long_df$var_label <- factor(emp_long_df$variable, 
-                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                             "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                             "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
-                                  ordered = TRUE, 
-                                  labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                             expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                             expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                             expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
-}
-
-
-
-#### 8. Plot data from empirical datasets ####
-if (plot_empirical == TRUE){
-  ## Plot 1: box plots of average value for each test statistic against codon position (faceted by number of taxa, coloured by type of DNA alignment) ## 
-  # Set dataset for plot
-  plot_df <- emp_long_df
-  
-  # Add color blind friendly palette
-  colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # grey, orange, sky blue, bluish green, yellow, blue, vermilion, reddish purple
-  
-  # Construct plot
-  p <- ggplot(plot_df, aes(x = as.factor(codon_position), y = value, fill = DNA_type)) + 
-    geom_boxplot() +
-    geom_jitter(color="black", size=1, alpha=0.5) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_discrete(name = "Codon position") +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    guides(fill = guide_legend(title = "Type of DNA\nalignment")) +
-    labs(title = "Number of taxa") +
-    scale_fill_manual(values = c(colorBlindGrey8[2], colorBlindGrey8[6]), breaks = c("mtDNA", "nDNA"), labels = c("mtDNA", "nDNA")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 14),
-          axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 16, hjust = 0.5), legend.text = element_text(size = 14),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 16, hjust = 0.5))
-  # Save plot
-  plot_path <- paste0(plot_directory, "emp_plot1_main.figure_by.taxa.pdf")
-  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
-  
-  # Construct plot
-  p <- ggplot(plot_df, aes(x = as.factor(codon_position), y = value, fill = DNA_type)) + 
-    geom_boxplot() +
-    geom_jitter(color="black", size=1, alpha=0.5) +
-    facet_wrap(~var_label, scales = "fixed", labeller = label_parsed) +
-    scale_x_discrete(name = "Codon position") +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    guides(fill = guide_legend(title = "Type of DNA\nalignment")) +
-    scale_fill_manual(values = c(colorBlindGrey8[2], colorBlindGrey8[6]), breaks = c("mtDNA", "nDNA"), labels = c("mtDNA", "nDNA")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 16), axis.text.x = element_text(size = 14),
-          axis.title.y = element_text(size = 16), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 16, hjust = 0.5), legend.text = element_text(size = 14),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 16, hjust = 0.5))
-  # Save plot
-  plot_path <- paste0(plot_directory, "emp_plot1_main.figure_all.taxa.pdf")
-  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
-}
-
-
-
 
 

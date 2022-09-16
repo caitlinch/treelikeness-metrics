@@ -184,8 +184,3 @@ exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
 write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
 
 
-## Ideas for extension:
-#   -  Repeat above experiments but add random noise
-#   -  Repeat above experiments but add alignment error
-
-

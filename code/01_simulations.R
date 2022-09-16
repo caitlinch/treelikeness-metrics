@@ -4,10 +4,6 @@
 # This program will simulate alignments with varying levels of treelikeness
 # This program requires IQ-Tree2 (2.2-beta or above) and ms.
 
-# If running on soma, remember to activate the empirical_treelikeness conda environment first:
-#     source /home/rob/anaconda3/etc/profile.d/conda.sh
-#     conda activate empirical_treelikeness
-
 
 
 #### 1. Set parameters ####

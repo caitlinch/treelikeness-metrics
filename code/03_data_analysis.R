@@ -17,7 +17,7 @@ data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_res
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
-plot_exp1 = FALSE
+plot_exp1 = TRUE
 plot_exp2 = TRUE
 
 
@@ -44,6 +44,10 @@ if (plot_exp1 == TRUE){
   # Open data file from Experiment 1 as a dataframe
   exp1_data_file <- grep("exp1", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
+  
+  # Convert mean tiger value to numeric
+  # Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
+  #       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
   exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
   
   # Remove columns you don't want for plotting
@@ -147,7 +151,8 @@ if (plot_exp2 == TRUE){
   # Manage test statistic columns
   # Convert sCF values to decimal from percentage
   exp2_df$sCF_mean <- exp2_df$sCF_mean / 100
-  # Convert likelihood mapping results to numeric (will be char because possible value is "no_iqtree_file", which means could not finish LM function)
+  # Convert likelihood mapping results to numeric
+  # Values will be characters because 386 alignments or 9.7% have value of "no_iqtree_file" (which means could not perform LM)
   exp2_df$LM_proportion_resolved_quartets <- as.numeric(exp2_df$LM_proportion_resolved_quartets)
   
   # Select test statistics for plotting (by subsetting columns)

@@ -71,6 +71,7 @@ e_op_df <- read.csv(e_op_file, stringsAsFactors = FALSE)
 
 # Extract the list of all alignments
 all_alignments <- e_op_df$output_alignment_file
+test_als <- all_alignments[1:10]
 
 # Apply the TIGER function
 # tiger.empirical(alignment_path, fast_TIGER_path, sequence_format = "DNA")

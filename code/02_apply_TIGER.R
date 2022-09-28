@@ -83,6 +83,6 @@ keep_indexes <- which(!sapply(tiger_list, is.null))
 tiger_list_filtered <- tiger_list[keep_indexes]
 # Save output dataframe
 tiger_df <- as.data.frame(do.call("rbind", tiger_list_filtered))
-tiger_df_name <- paste0(results_directory, e, "_treelikeness_metrics_collated_results.csv")
+tiger_df_name <- paste0(results_directory, e, "_TIGER_collated_results.csv")
 write.csv(tiger_df, tiger_df_name, row.names = FALSE)
 

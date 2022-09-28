@@ -394,11 +394,11 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
 
 
 
-TIGGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
+TIGGER <- function(alignment_path, TIGGER_path, sequence_format = "DNA"){
   # Tree Independent Genertion of Evolutionary Rates
   # Function to calculate TIGER values from a multiple sequence alignment using the 
   #   brettc/tigger software (available here: https://github.com/brettc/tigger)
-  
+  # Unimplemented - could not get TIGGER working
 }
 
 

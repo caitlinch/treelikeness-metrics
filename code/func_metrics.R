@@ -898,6 +898,42 @@ treelikeness.metrics.empirical <- function(alignment_path,
 
 
 
+tiger.empirical <- function(alignment_path, fast_TIGER_path,
+                            sequence_format = "DNA"){
+  ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
+  
+  # Print alignment path
+  print(alignment_path)
+  
+  ## Prepare variables and output file names for run
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Get unique id for the alignment
+  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
+  
+  # Create name for output dataframe
+  df_name <- paste0(replicate_folder, unique_id, "_tiger_results.csv")
+  
+  if (file.exists(df_name) == TRUE){
+    results_df <- read.csv(df_name)
+  } else if (file.exists(df_name) == FALSE){
+    # Apply TIGER (Cummins and McInerney 2011)
+    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
+    
+    # Assemble results into a dataframe and save
+    results_vec <- c(unique_id, mean_tiger_value)
+    results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+    names_vec <- c("uid", "mean_TIGER_value")
+    names(results_df) <- names_vec
+    write.csv(results_df, file = df_name, row.names = FALSE) 
+  }
+  
+  # Return the tiger dataframe
+  return(results_df)
+} # end function
+
+
+
 
 #### Utility functions ####
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){

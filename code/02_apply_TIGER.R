@@ -42,7 +42,7 @@ if (run_location == "local"){
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
   
   # Run parameters
-  num_cores <- 30
+  num_cores <- 20
 }
 
 
@@ -74,7 +74,8 @@ all_alignments <- e_op_df$output_alignment_file
 
 # Apply the TIGER function
 # tiger.empirical(alignment_path, fast_TIGER_path, sequence_format = "DNA")
-tiger_list <- lapply(all_alignments, tiger.empirical, fast_TIGER_path, sequence_format = "DNA")
+# tiger_list <- lapply(test_als, tiger.empirical, fast_TIGER_path, sequence_format = "DNA")
+tiger_list <- mclapply(all_alignments, tiger.empirical, fast_TIGER_path, sequence_format = "DNA", mc.cores = num_cores)
 
 # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
 keep_indexes <- which(!sapply(tiger_list, is.null))

@@ -26,6 +26,7 @@ plot_exp2 = TRUE
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 # Open packages
+library(scales)
 library(reshape2)
 library(ggplot2)
 library(patchwork)
@@ -45,6 +46,9 @@ if (plot_exp1 == TRUE){
   exp1_data_file <- grep("exp1", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
   
+  # Convert sCF values to decimal from percentage
+  exp1_df$sCF_mean <- exp1_df$sCF_mean / 100
+  
   # Convert mean tiger value to numeric
   # Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
   #       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
@@ -58,9 +62,6 @@ if (plot_exp1 == TRUE){
   
   # Melt exp1_wide_df for better plotting
   exp1_long_df <- melt(exp1_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
-  
-  # Convert sCF values to decimal from percentage
-  exp1_wide_df$sCF_mean <- exp1_wide_df$sCF_mean / 100
   
   # Transform the Network Treelikeness Test results into more plottable format
   # Make a table of all possible parameter values for the network treelikeness test
@@ -98,7 +99,7 @@ if (plot_exp1 == TRUE){
   plot_df <- exp1_long_df
   # Set log10 minor breaks for x axis
   x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  # Construct plot
+  # Construct plot with fixed y axis from 0-1
   p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
     facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
@@ -106,14 +107,40 @@ if (plot_exp1 == TRUE){
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
     scale_color_viridis_d(direction = -1) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(x = expression("Number of trees ("*log[10]*" scale)")) +
+    labs(title = "Tree depth (substitutions per site)", 
+         x = expression("Number of trees ("*log[10]*" scale)")) +
     theme_bw() +
     theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
           axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
           legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11))
+          strip.text = element_text(size = 11),
+          plot.title = element_text(hjust = 0.5, size = 18))
   # Save plot
   plot_path <- paste0(plot_directory, "exp1_plot1_main.figure_tree_depth.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp1_plot1_main.figure_tree_depth.png")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  
+  # Construct plot with free y axis
+  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
+    geom_smooth() + 
+    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
+    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
+    scale_y_continuous(name = "Test statistic value") +
+    scale_color_viridis_d(direction = -1) +
+    guides(color = guide_legend(title = "Number of\ntaxa")) +
+    labs(title = "Tree depth (substitutions per site)", 
+         x = expression("Number of trees ("*log[10]*" scale)")) +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(hjust = 0.5, size = 18))
+  # Save plot
+  plot_path <- paste0(plot_directory, "exp1_plot1_freey_main.figure_tree_depth_forMS.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp1_plot1_freey_main.figure_tree_depth_forMS.png")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   
   ## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
@@ -121,7 +148,7 @@ if (plot_exp1 == TRUE){
   plot_df <- exp1_long_df
   # Set log10 minor breaks for x axis
   x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  # Construct plot
+  # Construct plot  with fixed y axis from 0-1
   p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) + 
     geom_smooth() + 
     facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
@@ -129,14 +156,40 @@ if (plot_exp1 == TRUE){
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
     scale_color_viridis_d(direction = -1, option = "C") +
     guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
-    labs(x = expression("Number of trees ("*log[10]*" scale)")) +
+    labs(title = "Number of taxa",
+         x = expression("Number of trees ("*log[10]*" scale)")) +
     theme_bw() +
     theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
           axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
           legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11))
+          strip.text = element_text(size = 11),
+          plot.title = element_text(hjust = 0.5, size = 18))
   # Save plot
   plot_path <- paste0(plot_directory, "exp1_plot2_main.figure_num_taxa.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  plot_path <- paste0(plot_directory, "exp1_plot2_main.figure_num_taxa.png")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  
+  # Construct plot  with free y axis
+  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) + 
+    geom_smooth() + 
+    facet_grid(var_label~num_taxa, scales = "free_y", labeller = label_parsed) +
+    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
+    scale_y_continuous(name = "Test statistic value") +
+    scale_color_viridis_d(direction = -1, option = "C") +
+    guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
+    labs(title = "Number of taxa",
+         x = expression("Number of trees ("*log[10]*" scale)")) +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
+          strip.text = element_text(size = 11),
+          plot.title = element_text(hjust = 0.5, size = 18))
+  # Save plot
+  plot_path <- paste0(plot_directory, "exp1_plot2_freey_main.figure_num_taxa.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  plot_path <- paste0(plot_directory, "exp1_plot2_freey_main.figure_num_taxa.png")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 }
 
@@ -145,7 +198,7 @@ if (plot_exp1 == TRUE){
 #### 5. Prepare data from Experiment 2 for plotting ####
 if (plot_exp2 == TRUE){
   # Open data file from Experiment 2 as a dataframe
-  exp2_data_file <- grep("exp2", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
+  exp2_data_file <- grep("00_", grep("exp2", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE)
   exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
   
   # Manage test statistic columns
@@ -228,17 +281,20 @@ if (plot_exp2 == TRUE){
 
 #### 6. Plot data from Experiment 2 ####
 if (plot_exp2 == TRUE){
+  # Set color palette for plots 1 and 2
+  viridis_picks = scales::viridis_pal(direction = -1)(5)
+  
   ## Plot 1: Ancient events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
   # Set dataset for plot
   plot_df <- exp2_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
-  # Construct plot
+  # Construct plot with fixed y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
     facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    scale_color_viridis_d(direction = -1) +
+    scale_color_manual(values = viridis_picks[2:5]) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
     labs(title = "Tree depth (coalescent units)") +
     theme_bw() +
@@ -250,13 +306,15 @@ if (plot_exp2 == TRUE){
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient.png")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   # Construct plot with free y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
     facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value") +
-    scale_color_viridis_d(direction = -1) +
+    scale_color_manual(values = viridis_picks[2:5]) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
     labs(title = "Tree depth (coalescent units)") +
     theme_bw() +
@@ -266,7 +324,9 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient_freey.pdf")
+  plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient_freey_forMS.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot1_main.figure_tree_depth_Ancient_freey_forMS.png")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   
   ## Plot 2: Recent events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
@@ -279,7 +339,7 @@ if (plot_exp2 == TRUE){
     facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    scale_color_viridis_d(direction = -1) +
+    scale_color_manual(values = viridis_picks[1:5]) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
     labs(title = "Tree depth (coalescent units)") +
     theme_bw() +
@@ -291,13 +351,15 @@ if (plot_exp2 == TRUE){
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent.png")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   # Construct plot with free y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
     facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value") +
-    scale_color_viridis_d(direction = -1) +
+    scale_color_manual(values = viridis_picks[1:5]) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
     labs(title = "Tree depth (coalescent units)") +
     theme_bw() +
@@ -307,7 +369,9 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent_freey.pdf")
+  plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent_freey_forMS.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot2_main.figure_tree_depth_Recent_freey_forMS.png")
   ggsave(p, filename = plot_path, width = 10, height = 12.5, units = "in")
   
   ## Plot 3: Ancient events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
@@ -332,6 +396,8 @@ if (plot_exp2 == TRUE){
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot3_main.figure_num_taxa_Ancient.pdf")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot3_main.figure_num_taxa_Ancient.png")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
   
   ## Plot 4: Recent events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
   # Set dataset for plot
@@ -354,6 +420,8 @@ if (plot_exp2 == TRUE){
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
   plot_path <- paste0(plot_directory, "exp2_plot4_main.figure_num_taxa_Recent.pdf")
+  ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
+  plot_path <- paste0(plot_directory, "exp2_plot4_main.figure_num_taxa_Recent.png")
   ggsave(p, filename = plot_path, width = 10, height = 12, units = "in")
 }
 

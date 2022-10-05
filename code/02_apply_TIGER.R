@@ -86,3 +86,17 @@ tiger_df <- as.data.frame(do.call("rbind", tiger_list_filtered))
 tiger_df_name <- paste0(results_directory, e, "_TIGER_collated_results.csv")
 write.csv(tiger_df, tiger_df_name, row.names = FALSE)
 
+
+
+
+#### 4. Collate TIGER results
+# Get list of all files
+all_uids <- e_op_df$uid
+all_dirs <- dirname(head(e_op_df$output_alignment_file))
+tiger_output_files <- paste0(all_dirs, "/", all_uids, "_tiger_results.csv")
+complete_tiger_files <- tiger_output_files[which(file.exists(tiger_output_files)==TRUE)]
+tiger_op_list <- lapply(complete_tiger_files, read.csv)
+tiger_op_df <- do.call(rbind, tiger_op_list)
+tiger_op_df_name <- paste0(results_directory, "exp2_TIGER_completeRuns_collated_results.csv")
+write.csv(tiger_op_df, tiger_op_df_name, row.names = FALSE)
+

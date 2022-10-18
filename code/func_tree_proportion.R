@@ -120,21 +120,21 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
     }
     ## Calculate tree proportion
     ## Check class: can only calculate tree proportion if both t_splits and nw_splits are class "splits"
-    if (class(t_splits) != "splits" & class(nw_splits) != "splits") {
-      # If both tree and network are NA, that means there were no non-trivial splits in the alignment
-      # Return that value
-      tree_proportion <- "Only_trivial_splits_in_network_and_tree"
-    } else if (class(t_splits) == "splits" & class(nw_splits) == "splits") {
-      # If neither tree or network are NA, that means there were non-trivial splits in both
+    if (class(t_splits) == "splits" & class(nw_splits) == "splits") {
+      # If both tree and network are class "splits", that means there were non-trivial splits in both
       ## Calculate tree proportion
       t_split_weight_sum <- sum(attr(t_splits, "weight"))
       nw_split_weight_sum <- sum(attr(nw_splits, "weight"))
       tree_proportion <- t_split_weight_sum/nw_split_weight_sum
+    } else if (class(t_splits) != "splits" & class(nw_splits) != "splits") {
+      # If both tree and network are NA, that means there were no non-trivial splits in the alignment
+      # Return that value
+      tree_proportion <- "Only_trivial_splits_in_network_and_tree"
     } else if (class(t_splits) != "splits" & class(nw_splits) == "splits") {
       # If only trivial splits in tree and other splits in network, means no splits from network are included in tree
       # Therefore tree proportion must be 0 (no trees in network also in tree: tree proportion = 0/x = 0)
       tree_proportion <- "0_no_splits_in_tree"
-    } else if (class(t_splits) != "splits" & class(nw_splits) != "splits") {
+    } else if (class(t_splits) == "splits" & class(nw_splits) != "splits") {
       # If only trivial splits in network and not in tree, something must have gone wrong
       # Report that
       tree_proportion <- "0_no_splits_in_network"

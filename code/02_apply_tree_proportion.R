@@ -38,13 +38,14 @@ if (run_location == "local"){
 }
 
 
+
 #### 2. Prepare analyses ####
 # Open packages
 library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "code/func_tree_proportion.R"))
-source(paste0(repo_directory, "code/func_data_analysis.R"))
+
 
 
 #### 3. Apply tree proportion
@@ -67,7 +68,6 @@ for (e in exp_ids){
   test_als <- all_alignments[1:10]
   
   # Apply the tree proportion function
-  # tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, network.method = "SplitsTree4" , splitstree_path = NA, dist.ml.model = NA)
   tp_list <- mclapply(all_alignments, tree.proportion.output.csv, sequence_format = "DNA", remove_trivial_splits = TRUE, 
                       network.method = "SplitsTree4", splitstree_path = splitstree_path, dist.ml.model = NA, 
                       mc.cores = num_cores)

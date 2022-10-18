@@ -93,6 +93,6 @@ for (e in exp_ids){
   complete_tp_files <- tp_output_files[which(file.exists(tp_output_files)==TRUE)]
   tp_op_list <- lapply(complete_tp_files, read.csv)
   tp_op_df <- do.call(rbind, tp_op_list)
-  tp_op_df_name <- paste0(results_directory, "_treeProportion_completeRuns_collated_results.csv")
+  tp_op_df_name <- paste0(results_directory, e, "_treeProportion_completeRuns_collated_results.csv")
   write.csv(tp_op_df, tp_op_df_name, row.names = FALSE)
 }

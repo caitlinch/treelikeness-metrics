@@ -155,6 +155,43 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
 
 
 
+tree.proportion.output.csv <- function(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
+                                       network.method = "SplitsTree4" , splitstree_path = NA, dist.ml.model = NA){
+  ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
+  
+  # Print alignment path
+  print(alignment_path)
+  
+  ## Prepare variables and output file names for run
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Get unique id for the alignment
+  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
+  
+  # Create name for output dataframe
+  df_name <- paste0(replicate_folder, unique_id, "_TreeProportion_results.csv")
+  
+  if (file.exists(df_name) == TRUE){
+    results_df <- read.csv(df_name)
+  } else if (file.exists(df_name) == FALSE){
+    # Apply TIGER (Cummins and McInerney 2011)
+    tp_value <- tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
+                                        network.method = "SplitsTree4" , splitstree_path = splitstree_path, dist.ml.model = NA)
+    
+    # Assemble results into a dataframe and save
+    results_vec <- c(unique_id, tp_value)
+    results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+    names_vec <- c("uid", "tree_proportion")
+    names(results_df) <- names_vec
+    write.csv(results_df, file = df_name, row.names = FALSE) 
+  }
+  
+  # Return the tiger dataframe
+  return(results_df)
+} # end function
+
+
+
 #### Distance matrix and network estimation functions ####
 calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Calculate a distance matrix of pairwise distances from DNA sequences using a model of DNA substitution

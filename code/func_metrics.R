@@ -934,7 +934,6 @@ tiger.empirical <- function(alignment_path, fast_TIGER_path,
 
 
 
-
 #### Utility functions ####
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree

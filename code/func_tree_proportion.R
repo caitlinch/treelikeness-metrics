@@ -71,11 +71,13 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
     # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
     # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
     for (i in 2:length(nw_splits)) {
+      # print(i)
       # i is the current split being tested for compatibility
       # Test whether the current split is compatible with all other splits that have been added
-      # test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, i)])) # Old test for compatibility (using inbuilt ape function is.compatible)
-      test_compatibility <- pairwise.compatibility(i, nw_splits[c(compatible_splits)])
-      print(test_compatibility)
+      compatibility_matrix <- as.matrix(compatible(nw_splits))[c(compatible_splits, i), c(compatible_splits, i)]
+      # print(compatibility_matrix)
+      # Sum up all the values in the commpatibility matrix
+      check_sum = sum(compatibility_matrix)
       # Check compatibility (by checking the sum of the matrix values)
       if (check_sum == 0){
         # If the matrix values sum to 0, then the set of splits are compatible
@@ -83,6 +85,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
       } else if (check_sum > 0){
          check_compatibility = FALSE
       }
+      # print(check_compatibility)
       # If the split is compatible, add it to the list of compatible splits
       if (check_compatibility == TRUE){
         # If there are any incompatible splits in the matrix, they are represented by a 1

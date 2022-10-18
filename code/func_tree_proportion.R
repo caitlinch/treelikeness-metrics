@@ -13,8 +13,11 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
   # If using "SplitsTree4" as the network method, need to supply a file path to the SplitsTree4 java executeable
   # If using "R" as the network method, need to supply a model for estimating the distance matrix using ape::dist.ml. All models from ape::dist.ml are allowed.
   
+  ### Convert the network method to all uppercase
+  network.method <- toupper(network.method)
+  
   ### Run the tree proportion metric
-  if (network.method == "R"){
+  if (network.method == "R" | network.method == "PHANGORN"){
     # Calculate NeighborNet network in R
     # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
     # Compute pairwise distances for the taxa using the specified model of sequence evolution
@@ -23,8 +26,10 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
     nnet <- neighborNet(mldist)
     # Extract the splits from the NeighborNet network
     unordered_nw_splits <- as.splits(nnet)
-  } else if (network.method == "SplitsTree"){
+  } else if (network.method == "SPLITSTREE" | network.method == "SPLITTREE" | network.method == "SPLITSTREE4" | network.method == "S"){
     unordered_nw_splits <- make.splitstree.neighbornet(alignment_path, splitstree_path, return.splits = TRUE)
+  } else {
+    stop('Valid options for network.method are "SplitsTree4" (to calculate the Neighbor-Net in SplitsTree4) and "R" (to calculate the Neighbor-Net in R using phangorn).' )
   }
   
   ## Identify splits in greedy tree

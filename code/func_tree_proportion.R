@@ -71,13 +71,23 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
     # Iterate through each split. If the split is compatible with all other splits, add it to the set of edges comprising the maximum weight spanning tree
     # If the split is not compatible, it will add reticulation and the tree will become a network. Discard any non-compatible splits.
     for (i in 2:length(nw_splits)) {
-      # Assign the number of i to be the current split being tested for compatibility
-      current_split <- i
+      # i is the current split being tested for compatibility
       # Test whether the current split is compatible with all other splits that have been added
-      test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, current_split)]))
+      # test_compatibility <- is.compatible.bitsplits(as.bitsplits(nw_splits[c(compatible_splits, i)])) # Old test for compatibility (using inbuilt ape function is.compatible)
+      test_compatibility <- pairwise.compatibility(i, nw_splits[c(compatible_splits)])
+      print(test_compatibility)
+      # Check compatibility (by checking the sum of the matrix values)
+      if (check_sum == 0){
+        # If the matrix values sum to 0, then the set of splits are compatible
+        check_compatibility = TRUE
+      } else if (check_sum > 0){
+         check_compatibility = FALSE
+      }
       # If the split is compatible, add it to the list of compatible splits
-      if (test_compatibility == TRUE){
-        compatible_splits <- c(compatible_splits, current_split)
+      if (check_compatibility == TRUE){
+        # If there are any incompatible splits in the matrix, they are represented by a 1
+        # Therefore is the sum of matrix values is larger than 0, the added split is incompatible with the existing set of splits
+        compatible_splits <- c(compatible_splits, i)
       }
     }
     # Take the tree as the set of compatible splits
@@ -323,5 +333,60 @@ trivial.splits.present <- function(s){
   op <- list("TrivialSplitsPresent" = trivial_splits_present, "Num_splits" = nSplits, 
              "Num_trivial_splits" = num_trivial_splits, "Num_non_trivial_splits" = num_non_trivial_splits)
   return(op)
+}
+
+
+
+are.splits.compatible <- function(split1_index, split2_index, set_of_splits){
+  ## Function to compare a pair of splits and determine whether they are compatible
+  
+  ## Open splits
+  # A split "A|B" is a bipartition of a taxon set "X" into two non-empty sets
+  split1 <- set_of_splits[split1_index]
+  split2 <- set_of_splits[split2_index]
+  # Get indices of all taxa in splits
+  si1 <- split1[[1]]
+  si2 <- split2[[1]]
+  
+  ## Determine whether splits are compatible
+  #Get list of taxa for each side of each split
+  taxa <- attr(set_of_splits, "labels")
+  A1 <- taxa[si1]
+  B1 <- setdiff(taxa, A1)
+  A2 <- taxa[si2]
+  B2 <- setdiff(taxa, A2)
+  # Two splits S1 = A1|B1 and S2 = A2|B2 on X are compatible if one of the four possible intersections 
+  #   of their split parts is empty: A1 ∩ A2, A1 ∩ B2, B1 ∩ A2, B1 ∩ B2
+  #   Otherwise, the splits are incompatible
+  #   A set of splits is compatible if all pairs of splits in S are compatible
+  i1 <- intersect(A1, A2)
+  i2 <- intersect(A1, B2)
+  i3 <- intersect(B1, A2)
+  i4 <- intersect(B1, B2)
+  if ((length(i1) == 0) | (length(i2) == 0) | (length(i3) == 0) | (length(i4) == 0)){
+    result = "Compatible"
+  } else {
+    result = "Incompatible"
+  }
+  
+  ## Return output
+  output = c(split1_index, split2_index, result)
+  names(output) <- c("split1", "split2", "compatibility")
+  return(output)
+}
+
+
+
+pairwise.compatibility <- function(index, set_of_splits){
+  ## Function to take one split and compare pairwise to all other splits within a set to determine
+  #     whether they are compatible
+  
+  # Get indices to compare split to all splits except itself
+  comparison_indices <- setdiff(1:length(set_of_splits), index)
+  # Compare split to all splits except itself
+  pc_df <- do.call(rbind.data.frame, lapply(comparison_indices, are.splits.compatible, index, set_of_splits))
+  names(pc_df) <- c("split1", "split2", "compatibility")
+  # Return pairwise compatibility data frame
+  return(pc_df)
 }
 

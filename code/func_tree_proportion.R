@@ -236,3 +236,92 @@ make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.
     return(splits_output_path)
   }
 }
+
+
+
+convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_taxablock = FALSE){
+  ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
+  
+  ## Prepare parameters for file conversion
+  # Name nexus file by simply appending "_converted.nex" to end of existing file name
+  nexus_alignment_path <- paste0(alignment_path,"_converted.nex")
+  # Extract file type from alignment path
+  suffix <- tail(strsplit(alignment_path,"\\.")[[1]],1)
+  # Set format for output nexus file
+  if ((sequence_format == "DNA") | (sequence_format == "dna")){
+    nexus_format = "dna"
+  } else if ((sequence_format == "Protein") | (sequence_format == "protein") | 
+             (sequence_format == "AA") | (sequence_format == "aa")){
+    nexus_format = "protein"
+  }
+  
+  # Create a variable to specify whether to include a single DATA block (datablock = TRUE) or separate TAXA and CHARACTER boxes (datablock = FALSE)
+  if (include_taxablock == TRUE){
+    datablock_bool = FALSE
+  } else if (include_taxablock == FALSE){
+    datablock_bool = TRUE
+  }
+  
+  ## Convert to nexus using functions based on suffix
+  if (suffix == "fasta" |suffix == "fa" | suffix == "fna" | suffix == "ffn" | suffix == "faa" | suffix == "frn" | suffix == "fas"){
+    ## If the file is a fasta file, convert it to nexus file format (unless a nexus version already exists)
+    if (file.exists(nexus_alignment_path) == FALSE){
+      # Read in the fasta data
+      data <- read.FASTA(alignment_path, type = sequence_format)
+      # Write out the nexus data
+      if (include_taxablock == TRUE){
+        # write the output as a nexus file with a taxa block (single data block = FALSE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = FALSE, interleaved = FALSE)
+      } else if (include_taxablock == FALSE){
+        # write the output as a nexus file without a taxa block - only a single datablock (single data block = TRUE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = TRUE, interleaved = FALSE)
+      }
+    }
+  } else if (suffix == "phy" | suffix == "phylip"){
+    ## If the file is a phy file, convert it to nexus file format (unless a nexus version already exists)
+    if (file.exists(nexus_alignment_path) == FALSE){
+      data <- read.phy(alignment_path)
+      # Write out the nexus data
+      if (include_taxablock == TRUE){
+        # write the output as a nexus file with a taxa block (single data block = FALSE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = FALSE, interleaved = FALSE)
+      } else if (include_taxablock == FALSE){
+        # write the output as a nexus file without a taxa block - only a single datablock (single data block = TRUE)
+        write.nexus.data(data, file = nexus_alignment_path,format = nexus_format, datablock = TRUE, interleaved = FALSE)
+      }
+    }
+  }
+  
+  ## Open the nexus file and delete the interleave = YES or INTERLEAVE = NO part so IQ-TREE can read it
+  nexus <- readLines(nexus_alignment_path)
+  ind <- grep("BEGIN CHARACTERS",nexus)+2
+  if ((sequence_format == "DNA") | (sequence_format == "dna")){
+    nexus[ind] <- "  FORMAT MISSING=? GAP=- DATATYPE=DNA;"
+  } else if ((sequence_format == "Protein") | (sequence_format == "protein") | 
+             (sequence_format == "AA") | (sequence_format == "aa")){
+    nexus[ind] <- "  FORMAT MISSING=? GAP=- DATATYPE=PROTEIN;"
+  }
+  # Write the edited nexus file out 
+  writeLines(nexus,nexus_alignment_path)
+  
+  ## Output file name and path for nexus file
+  return(nexus_alignment_path)
+}
+
+
+
+trivial.splits.present <- function(s){
+  ## Small  function to check whether trivial splits are present and return the number of trivial splits and the number of non-trivial splits
+  nSplits <- length(s)
+  nTips <- length(attr(s, "labels"))
+  l <- lengths(s)
+  split_number_trivial <- as.logical((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L)))
+  trivial_splits_present <- TRUE %in% split_number_trivial
+  num_trivial_splits <- length(which((l == 0L) | (l == 1L) | (l == nTips) | (l == (nTips - 1L))))
+  num_non_trivial_splits <- nSplits - num_trivial_splits
+  # Return output
+  op <- list("TrivialSplitsPresent" = trivial_splits_present, "Num_splits" = nSplits, 
+             "Num_trivial_splits" = num_trivial_splits, "Num_non_trivial_splits" = num_non_trivial_splits)
+  return(op)
+}
+

@@ -86,6 +86,13 @@ for (e in exp_ids){
 
 #### 4. Collate tree proportion results
 for (e in exp_ids){
+  # Get csv files
+  e_params_file <- paste0(results_directory, grep("rerun", grep(e, grep("parameters", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  e_results_file <- paste0(results_directory, grep("rerun", grep(e, grep("treelikeness_metrics_collated_results", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  e_op_file <- paste0(results_directory, grep("rerun", grep(e, grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  # Open output paths csv
+  e_op_df <- read.csv(e_op_file, stringsAsFactors = FALSE)
+  
   # Get list of all files
   all_uids <- e_op_df$uid
   all_dirs <- dirname(e_op_df$output_alignment_file)

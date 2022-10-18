@@ -4,6 +4,7 @@
 # This file contains functions to calculate the tree proportion for any alignment
 # Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
 
+library(phangorn)
 library(ape)
 
 #### Tree proportion function ####
@@ -13,21 +14,44 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
   # If using "SplitsTree4" as the network method, need to supply a file path to the SplitsTree4 java executeable
   # If using "R" as the network method, need to supply a model for estimating the distance matrix using ape::dist.ml. All models from ape::dist.ml are allowed.
   
+  ### Check whether the alignment file exists
+  # If the alignment file does not exist, raise an error and stop the function
+  if (is.na(alignment_path)){
+    stop('Must supply valid file path to a sequence alignment.' )
+  } else if (file.exists(alignment_path) == FALSE){
+    stop('Must supply valid file path to a sequence alignment.' )
+  }
+  
+  ### Check whether the sequence format is valid
+  if (sequence_format != "DNA" & sequence_format != "AA"){
+    stop('Allowable sequence formats are "DNA" and "AA".' )
+  }
+  
   ### Convert the network method to all uppercase
   network.method <- toupper(network.method)
   
   ### Run the tree proportion metric
   if (network.method == "R" | network.method == "PHANGORN"){
-    # Calculate NeighborNet network in R
-    # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
-    # Compute pairwise distances for the taxa using the specified model of sequence evolution
-    mldist <- calculate.dna.pairwise.distance.matrix(alignment_path, sequence_format = sequence_format, substitution_model = dist.ml.model)
-    # Create a NeighbourNet network from the alignment
-    nnet <- neighborNet(mldist)
-    # Extract the splits from the NeighborNet network
-    unordered_nw_splits <- as.splits(nnet)
+    if (is.na(dist.ml.model) == TRUE){
+      stop('Must supply model for calculating pairwise distance matrix. Look at help file for phangorn::dist.ml function (type "?dist.ml" into the command line) to see available substitution models.' )
+    } else if (is.na(dist.ml.model) == FALSE){
+      # Calculate NeighborNet network in R
+      # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
+      # Compute pairwise distances for the taxa using the specified model of sequence evolution
+      mldist <- calculate.dna.pairwise.distance.matrix(alignment_path, sequence_format = sequence_format, substitution_model = dist.ml.model)
+      # Create a NeighbourNet network from the alignment
+      nnet <- neighborNet(mldist)
+      # Extract the splits from the NeighborNet network
+      unordered_nw_splits <- as.splits(nnet)
+    }
   } else if (network.method == "SPLITSTREE" | network.method == "SPLITTREE" | network.method == "SPLITSTREE4" | network.method == "S"){
-    unordered_nw_splits <- make.splitstree.neighbornet(alignment_path, splitstree_path, return.splits = TRUE)
+    if (is.na(splitstree_path) == TRUE){
+      stop('Must supply file path to SplitsTree4 executable.' )
+    } else if (file.exists(splitstree_path) == FALSE){
+      stop('Must supply valid file path to SplitsTree4 executable.' )
+    } else if (is.na(splitstree_path) == FALSE & file.exists(splitstree_path) == TRUE){
+      unordered_nw_splits <- make.splitstree.neighbornet(alignment_path, splitstree_path, return.splits = TRUE)
+    }
   } else {
     stop('Valid options for network.method are "SplitsTree4" (to calculate the Neighbor-Net in SplitsTree4) and "R" (to calculate the Neighbor-Net in R using phangorn).' )
   }

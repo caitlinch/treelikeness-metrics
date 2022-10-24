@@ -14,9 +14,9 @@ library(phangorn) # for splits and networks, for midpoint rooting trees
 
 
 #### Treelikeness metric functions ####
-tree.proportion <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
-                            check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, splitstree_path = NA, 
-                            base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
+tree.proportion.long <- function(alignment_path, sequence_format = "DNA", model = "JC69", remove_trivial_splits = TRUE, 
+                                 check_iqtree_log_for_identical_sequences = FALSE, run_splitstree = FALSE, splitstree_path = NA, 
+                                 base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
   ## Function to calculate the tree proportion: the proportion of split weights in the phylogenetic network captured by the minimum evolution tree
   
   ## Check whether multiple sequences in the alignment are identical
@@ -752,10 +752,10 @@ treelikeness.metrics.simulations <- function(alignment_path,
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_Cunningham_test","Start_tree_proportion")
     # Apply tree proportion (new test)
-    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
-                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
-                                       base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
+    tree_proportion <- tree.proportion.long(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
+                                            remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
+                                            run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
+                                            base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
     # Set timer
     timings <- c(timings,Sys.time(), Sys.time())
     time_name <- c(time_name, "End_tree_proportion", "Assemble_results")
@@ -875,10 +875,10 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                          distance_matrix_substitution_model = distance_matrix_substitution_method,
                                          base_frequencies = state_frequencies, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     # Apply tree proportion (new test)
-    tree_proportion <- tree.proportion(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
-                                       remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                       run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
-                                       base_frequencies = state_frequencies, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
+    tree_proportion <- tree.proportion.long(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
+                                            remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
+                                            run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
+                                            base_frequencies = state_frequencies, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,

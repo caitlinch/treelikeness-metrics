@@ -32,7 +32,7 @@ which(as.numeric(results_df$tree_proportion) != as.numeric(keep_df$tree_proporti
 results_df$tree_proportion <- keep_df$tree_proportion
 # Write out the results file
 write.csv(results_df, file = results_file, row.names = FALSE)
-
+# Result: NO CHANGE IN TREE PROPORTION VALUES FOR EXPERIMENT 1
 
 
 

@@ -93,6 +93,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
         compatible_splits <- c(compatible_splits, i)
       }
     }
+    print(compatible_splits)
     # Take the tree as the set of compatible splits
     t_splits <- nw_splits[compatible_splits]
   }

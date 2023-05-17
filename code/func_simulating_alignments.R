@@ -240,7 +240,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 }
 
 
-ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df, select.sister = FALSE, scale.gene.trees = TRUE){
+ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df, select.sister = FALSE, scale.random.tree = FALSE, scale.gene.trees = TRUE){
   ## Function to generate a single alignment given a row from the experiment 2 params dataframe
   ## Generate alignments with ILS and without introgression
   ## Uses ms to generate gene trees
@@ -286,7 +286,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth = row$tree_depth, 
                                          recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
                                          select.sister = FALSE, output_directory = row_folder, ms_path = ms_path, replicate_number = NA, 
-                                         unique_id = row$uid)
+                                         unique_id = row$uid, scale.random.tree)
     start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
     # Scale the gene trees by the row$tree_depth 
@@ -331,7 +331,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
 
 #### Functions for ms ####
 ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0, recombination_type = NA, select.sister = FALSE, output_directory, ms_path = "ms", 
-                              replicate_number = NA, unique_id = NA){
+                              replicate_number = NA, unique_id = NA, scale.random.tree = FALSE){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
@@ -358,8 +358,11 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth, recombination_value = 0
   ## Create a base tree for the simulations
   # Generate a random tree under the coalescent using ape::rcoal
   t <- rcoal(ntaxa)
-  # Scale the tree depth (so the total depth is set according to the tree_depth parameter)
-  t$edge.length <- t$edge.length * (tree_depth / max(branching.times(t)))
+  # Scale the random tree only if the flag is set to TRUE 
+  if (scale.random.tree == TRUE){
+    # Scale the tree depth (so the total depth is set according to the tree_depth parameter)
+    t$edge.length <- t$edge.length * (tree_depth / max(branching.times(t)))
+  }
   # Save the random tree
   write.tree(t, file = t_path)
   

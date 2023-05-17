@@ -59,6 +59,20 @@ generate.NNI.trees <- function(num_trees, num_taxa,tree_depth, NNI_moves, output
 }
 
 
+scale.gene.tree.depths <- function(gene_trees, new_tree_depth){
+  # Small function to take in a list of gene trees and scale them 
+  
+  # Scale the depth of each tree (so the total depth is set according to the provided tree_depth parameter)
+  for (i in 1:length(gene_trees)){
+    gt <- gene_trees[[i]]
+    gt$edge.length <- gt$edge.length * (new_tree_depth / max(branching.times(gt)))
+    gene_trees[[i]] <- gt
+  }
+  # Return the scaled gene trees
+  return(gene_trees)
+}
+
+
 #### Functions to generate partition files ####
 partition.random.trees <- function(num_trees, al_length, sequence_type, models = NA, rescaled_tree_lengths = NA, output_filepath){
   # This function generates a charpartition file for n genes (where n is num_trees) of length al_length/n 
@@ -137,7 +151,7 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
     row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
                          "_", row$tree_depth, "/")
     row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
-                         "_", row$tree_depth, "_parameters.csv")
+                           "_", row$tree_depth, "_parameters.csv")
   }
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
@@ -226,7 +240,7 @@ NNI.moves.generate.alignment <- function(row_id, output_directory, iqtree2_path,
 }
 
 
-ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df, select.sister = FALSE){
+ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_path, experiment_params_df, select.sister = FALSE, scale.gene.trees = TRUE){
   ## Function to generate a single alignment given a row from the experiment 2 params dataframe
   ## Generate alignments with ILS and without introgression
   ## Uses ms to generate gene trees
@@ -259,7 +273,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
                                     "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_ms_gene_trees.txt")
   }
-
+  
   # Create the folder to store information for this row, if it doesn't already exist
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
   
@@ -275,6 +289,15 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
                                          unique_id = row$uid)
     start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
+    # Scale the gene trees by the row$tree_depth 
+    if (scale.gene.trees == TRUE){
+      # Open the gene tree file
+      gene_trees <- read.tree(gene_trees_file)
+      # Scale the gene trees
+      scaled_gene_trees <- scale.gene.tree.depths(gene_trees = gene_trees, new_tree_depth = row$tree_depth)
+      # Save the scaled gene trees
+      write.tree(scaled_gene_trees, file = gene_trees_file)
+    }
     # Generate the partition file
     gene_partition_file <- paste0(row_folder, row$partition_file)
     partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type, 
@@ -662,6 +685,5 @@ divisors <- function(x){
   d = y[x%%y == 0]
   return(d)
 }
-
 
 

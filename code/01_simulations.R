@@ -117,7 +117,7 @@ if (number_parallel_threads == 1){
   exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
 } else {
   exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
-           mc.cores = number_parallel_threads)
+                           mc.cores = number_parallel_threads)
 }
 
 # Change output file names from list to dataframe
@@ -172,10 +172,12 @@ write.csv(exp2_params, file = exp2_df_path, row.names = TRUE)
 # Run single rep:
 #   lapply(1, ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params, select.sister = FALSE)
 if (number_parallel_threads == 1){
-  exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params)
+  exp2_op_list<- lapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+                        experiment_params_df = exp2_params, select.sister = FALSE, scale.random.tree = FALSE, scale.gene.trees = TRUE)
 } else {
-  exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp2_params,
-           mc.cores = number_parallel_threads)
+  exp2_op_list <- mclapply(1:nrow(exp2_params), ms.generate.alignment, output_directory = exp2_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+                           experiment_params_df = exp2_params, select.sister = FALSE, scale.random.tree = FALSE, scale.gene.trees = TRUE, 
+                           mc.cores = number_parallel_threads)
 }
 
 # Change output file names from list to dataframe

@@ -139,7 +139,7 @@ exp2_dir <- paste0(local_directory, "exp_2/")
 if (dir.exists(exp2_dir) == FALSE){dir.create(exp2_dir)}
 
 exp2_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_gene_trees, 
-                           "tree_depth" = tree_depth_coalescent, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"))
+                           "tree_depth_coalescent" = tree_depth_coalescent, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"))
 # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`_`recombination proportion`_`introgression event type`
 exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", sprintf("%04d", exp2_params$num_taxa), "_",
                           sprintf("%03d", exp2_params$num_reps), "_", exp2_params$tree_depth, "_", exp2_params$recombination_value,
@@ -148,6 +148,7 @@ exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", s
 exp2_params$alisim_gene_models <- alisim_gene_models
 exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
 # Add other parameters
+exp2_params$tree_depth_subs_per_sites <- 0.5
 exp2_params$total_alignment_length <- number_gene_trees * gene_length
 exp2_params$sequence_type <- sequence_type
 # Add name for the partition file and output alignment file for each simulated alignment

@@ -256,27 +256,27 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     gene_trees_file       <- paste0(row_folder, row$uid, "_ms_gene_trees.txt")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
     row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_parameters.csv")
     start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_starting_tree.txt")
     gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_ms_gene_trees.txt")
   } else {
     row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
     row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_parameters.csv")
     start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_starting_tree.txt")
     gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
                                     "_ms_gene_trees.txt")
   }
   

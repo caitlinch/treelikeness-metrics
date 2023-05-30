@@ -256,22 +256,28 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     gene_trees_file       <- paste0(row_folder, row$uid, "_ms_gene_trees.txt")
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
     row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
     row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_parameters.csv")
     start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_starting_tree.txt")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_starting_tree.txt")
     gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_ms_gene_trees.txt")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_ms_gene_trees.txt")
   } else {
     row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "/")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
     row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_parameters.csv")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_parameters.csv")
     start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_starting_tree.txt")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_starting_tree.txt")
     gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth, "_", row$recombination_value, "_", row$recombination_type, "_ms_gene_trees.txt")
+                                    "_", row$tree_depth_coalescent, "_", tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
+                                    "_ms_gene_trees.txt")
   }
   
   # Create the folder to store information for this row, if it doesn't already exist
@@ -283,18 +289,18 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # If the output alignment file doesn't exist, generate it
   if (file.exists(output_alignment_file) == FALSE){
     # Call ms
-    ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth = row$tree_depth, 
+    ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth_coalescent = row$tree_depth_coalescent, 
                                          recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
                                          select.sister = FALSE, output_directory = row_folder, ms_path = ms_path, replicate_number = NA, 
                                          unique_id = row$uid, scale.random.tree)
     start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
-    # Scale the gene trees by the row$tree_depth 
+    # Scale the gene trees by the row$tree_depth_subs_per_sites
     if (scale.gene.trees == TRUE){
       # Open the gene tree file
       gene_trees <- read.tree(gene_trees_file)
       # Scale the gene trees
-      scaled_gene_trees <- scale.gene.tree.depths(gene_trees = gene_trees, new_tree_depth = row$tree_depth)
+      scaled_gene_trees <- scale.gene.tree.depths(gene_trees = gene_trees, new_tree_depth = row$tree_depth_subs_per_sites)
       # Save the scaled gene trees
       write.tree(scaled_gene_trees, file = gene_trees_file)
     }
@@ -315,9 +321,10 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     row$gene_tree_file <- gene_trees_file
     row$partition_file <- paste0(row_folder, row$partition_file)
     row$output_alignment_file <- output_alignment_file
-    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth", "recombination_value", 
-                           "recombination_type", "uid", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length",
-                           "sequence_type", "starting_tree_file", "gene_tree_file", "partition_file", "output_alignment_file")]
+    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth_coalescent", "tree_depth_subs_per_sites",
+                           "recombination_value", "recombination_type", "uid", "alisim_gene_models", "alisim_gene_tree_length", 
+                           "total_alignment_length", "sequence_type", "starting_tree_file", "gene_tree_file", "partition_file", 
+                           "output_alignment_file")]
     write.csv(output_row, file = row_csv_path, row.names = FALSE)
   } else if (file.exists(row_csv_path) == TRUE) {
     # If output parameter csv exists, read it in

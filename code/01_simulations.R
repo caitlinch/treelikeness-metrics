@@ -36,7 +36,7 @@ if (run_location == "local"){
   local_directory         <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   repo_directory          <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   ms_path                 <- "ms"
-  iqtree2_path            <- "iqtree2.2-beta"
+  iqtree2_path            <- "iqtree2"
   number_parallel_threads <- 1
 } else if (run_location == "soma"){
   local_directory         <- "/data/caitlin/treelikeness_metrics/"

@@ -61,7 +61,7 @@ if (run_location == "local"){
 
 # Control variables
 run_exp1 <- FALSE
-run_exp2 <- FALSE
+run_exp2 <- TRUE
 rerun_missing_runs <- TRUE
 rerun_experiment_ids <- c("exp2")
 

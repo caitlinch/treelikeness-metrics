@@ -20,8 +20,8 @@
 # sequence_type                   <- Sequence type for simulation (we chose "DNA").
 # taxa_vec                        <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
 # num_reps                        <- Number of replicates to run for each set of simulation conditions (we chose 10). Must be >= 1.
-# tree_depth_random               <- One or more values for the tree length of randomly generated trees (in substitutions per site).
-# tree_depth_coalescent           <- One or more values for the tree length of coalescent trees (in coalescent units).
+# tree_depth_random_sims          <- One or more values for the tree length of randomly generated trees (in substitutions per site).
+# tree_depth_coalescent_sims      <- One or more values for the tree length of coalescent trees (in coalescent units).
 # number_gene_trees               <- Number of gene trees to generate for coalescent simulations
 # r_vec                           <- Values of introgression (we chose from 0 to 1 in intervals of 0.05)
 # alisim_gene_models              <- Model of sequence evolution for Alisim 
@@ -51,8 +51,8 @@ gene_length                     <- 1000
 sequence_type                   <- "DNA"
 taxa_vec                        <- c(5,10,20,50,100)
 num_reps                        <- 10
-tree_depth_random               <- c(0.01, 0.1, 1)
-tree_depth_coalescent           <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
+tree_depth_random_sims          <- c(0.01, 0.1, 1)
+tree_depth_coalescent_sims      <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
 number_gene_trees               <- 250
 r_vec                           <- seq(0, 0.5, 0.05)
 alisim_gene_models              <- "JC"
@@ -96,7 +96,7 @@ if (run.experiment.1 == TRUE){
   if(!file.exists(exp1_dir)){dir.create(exp1_dir)}
   
   # Create matrix with parameters for generating each simulated alignment
-  exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_of_trees, "tree_depth" = tree_depth_random)
+  exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_of_trees, "tree_depth" = tree_depth_random_sims)
   # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`
   exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
                             sprintf("%03d", exp1_params$num_reps), "_", exp1_params$tree_depth)
@@ -148,7 +148,7 @@ if (run.experiment.2 == TRUE){
   if (dir.exists(exp2_dir) == FALSE){dir.create(exp2_dir)}
   
   exp2_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_gene_trees, 
-                             "tree_depth_coalescent" = tree_depth_coalescent, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"))
+                             "tree_depth_coalescent" = tree_depth_coalescent_sims, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"))
   # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`_`recombination proportion`_`introgression event type`
   exp2_params$uid <- paste0("exp2_",sprintf("%05d", exp2_params$num_trees), "_", sprintf("%04d", exp2_params$num_taxa), "_",
                             sprintf("%03d", exp2_params$num_reps), "_", exp2_params$tree_depth, "_", exp2_params$recombination_value,

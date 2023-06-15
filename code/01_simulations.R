@@ -10,8 +10,10 @@
 # local_directory                 <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory                  <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
 # ms_path                         <- Path to ms executable 
+
 # iqtree2_path                    <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included). 
 # number_parallel_threads         <- Number of threads to run simultaneously in mclapply when generating alignments
+
 # total_alignment_length          <- Total length of concatenated alignments in base pairs (we chose 10000) for the random tree analyses.
 # gene_length                     <- Length of each gene generated in ms. Total alignment length will be length of each gene multiplied by number of gene trees. 
 #                                     For Total Alignment Length = 10000, use 100 gene trees of 100 bp each.
@@ -24,35 +26,38 @@
 # r_vec                           <- Values of introgression (we chose from 0 to 1 in intervals of 0.05)
 # alisim_gene_models              <- Model of sequence evolution for Alisim 
 # alisim_gene_tree_length         <- Gene-specific tree length for Alisim
+# conversion_depth_subs_per_site     <- Tree depth for ML tree - used to convert depth of ms gene trees from coalescent units to substitutions per site
+
 # run.experiment.1                <- Control flag for experiment 1 (TRUE to run code to generate simulations for Experiment 1)
 # run.experiment.2                <- Control flag for experiment 2 (TRUE to run code to generate simulations for Experiment 2)
 
 run_location = "soma"
 if (run_location == "local"){
-  local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
-  ms_path <- "ms"
-  iqtree2_path <- "iqtree2.2-beta"
+  local_directory         <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  repo_directory          <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+  ms_path                 <- "ms"
+  iqtree2_path            <- "iqtree2.2-beta"
   number_parallel_threads <- 1
 } else if (run_location == "soma"){
-  local_directory <- "/data/caitlin/treelikeness_metrics/"
-  repo_directory <- "/data/caitlin/treelikeness_metrics/"
-  ms_path <- "/data/caitlin/executables/msdir/ms"
-  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
+  local_directory         <- "/data/caitlin/treelikeness_metrics/"
+  repo_directory          <- "/data/caitlin/treelikeness_metrics/"
+  ms_path                 <- "/data/caitlin/executables/msdir/ms"
+  iqtree2_path            <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
   number_parallel_threads <- 20
 }
 
-total_alignment_length <- 10000
-gene_length <- 1000
-sequence_type <- "DNA"
-taxa_vec <- c(5,10,20,50,100)
-num_reps <- 10
-tree_depth_random <- c(0.01, 0.1, 1)
-tree_depth_coalescent <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
-number_gene_trees <- 250
-r_vec <- seq(0, 0.5, 0.05)
-alisim_gene_models <- "JC"
-alisim_gene_tree_length <- 0.1
+total_alignment_length          <- 10000
+gene_length                     <- 1000
+sequence_type                   <- "DNA"
+taxa_vec                        <- c(5,10,20,50,100)
+num_reps                        <- 10
+tree_depth_random               <- c(0.01, 0.1, 1)
+tree_depth_coalescent           <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
+number_gene_trees               <- 250
+r_vec                           <- seq(0, 0.5, 0.05)
+alisim_gene_models              <- "JC"
+alisim_gene_tree_length         <- NA
+conversion_depth_subs_per_site  <- 0.1
 
 run.experiment.1 <- FALSE
 run.experiment.2 <- TRUE
@@ -152,7 +157,7 @@ if (run.experiment.2 == TRUE){
   exp2_params$alisim_gene_models <- alisim_gene_models
   exp2_params$alisim_gene_tree_length <- alisim_gene_tree_length
   # Add other parameters
-  exp2_params$tree_depth_subs_per_sites <- 0.5
+  exp2_params$tree_depth_subs_per_sites <- conversion_depth_subs_per_site
   exp2_params$total_alignment_length <- number_gene_trees * gene_length
   exp2_params$sequence_type <- sequence_type
   # Add name for the partition file and output alignment file for each simulated alignment

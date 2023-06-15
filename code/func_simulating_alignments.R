@@ -33,6 +33,7 @@ generate.random.trees <- function(num_trees, num_taxa, tree_depth, output_filepa
   }
 }
 
+
 generate.NNI.trees <- function(num_trees, num_taxa,tree_depth, NNI_moves, output_filepath = NA){
   # This function generates a random tree with m taxa, and then (n-1) related trees by performing a single NNI move on the starting tree
   # (where n is num_trees and m is num_taxa)

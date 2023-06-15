@@ -1,5 +1,5 @@
-# /caitlinch/treelikeness-metrics/01_simulations.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness-metrics/code/01_simulations.R
+# Caitlin Cherryh 2023
 
 # This program will simulate alignments with varying levels of treelikeness
 # This program requires IQ-Tree2 (2.2-beta or above) and ms.
@@ -61,6 +61,8 @@ conversion_depth_subs_per_site  <- 0.1
 
 run.experiment.1 <- FALSE
 run.experiment.2 <- TRUE
+
+
 
 #### 2. Open packages ####
 library(ape)
@@ -195,7 +197,5 @@ if (run.experiment.2 == TRUE){
   exp2_op_df_path <- paste0(local_directory, "exp2_file_output_paths.csv")
   write.csv(exp2_op_df, file = exp2_op_df_path, row.names = TRUE)
 }
-
-
 
 

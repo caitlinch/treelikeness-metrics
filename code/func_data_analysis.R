@@ -1,8 +1,7 @@
-# /caitlinch/treelikeness_metrics/code/func_metrics.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness_metrics/code/func_metrics.R
+# Caitlin Cherryh 2023
 
 # This file contains functions for data manipulation and data analysis
-
 
 
 collate.treelikeness.results <- function(alignment_path, experiment_number){
@@ -48,7 +47,6 @@ collate.treelikeness.results <- function(alignment_path, experiment_number){
 }
 
 
-
 collate.empirical.treelikeness.results <- function(alignment_path){
   # Function to take one alignment, get the parameters csv and treelikeness results csv, glue them together and return the new csv as a data.frame
   
@@ -82,7 +80,6 @@ collate.empirical.treelikeness.results <- function(alignment_path){
 }
 
 
-
 reformat.network.treelikeness.test.results.exp1 <- function(id, params_df, results_df){
   # For processing experiment 1 results
   # Function to collect the proportion of treelike alignments for each set of parameters
@@ -105,7 +102,6 @@ reformat.network.treelikeness.test.results.exp1 <- function(id, params_df, resul
   # Return the proportion of treelike alignments for this set of parameter values
   return(prop_tl_als)
 }
-
 
 
 reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, results_df){
@@ -133,7 +129,6 @@ reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, resul
 }
 
 
-
 reformat.network.treelikeness.test.results.empirical <- function(id, params_df, results_df){
   # For processing experiment 2 results
   # Function to collect the proportion of treelike alignments for each set of parameters
@@ -159,7 +154,6 @@ reformat.network.treelikeness.test.results.empirical <- function(id, params_df, 
 }
 
 
-
 copy.empirical.alignment <- function(row_id, data_df){
   # Small function to take a row from a dataframe, save a copy of the alignment, and save the row containing the alignment parameters as a csv
   
@@ -176,7 +170,6 @@ copy.empirical.alignment <- function(row_id, data_df){
   # Save the row as the parameters.csv file
   write.csv(row, file = row$parameters_path, row.names = FALSE)
 }
-
 
 
 format.timers <- function(time_csv){
@@ -223,7 +216,6 @@ format.timers <- function(time_csv){
 }
 
 
-
 format.one.time <- function(time_df, start_time_label, end_time_label){
   # Small function to take a start and end label (corresponding to objects within a column) and find the time difference in seconds between them
   
@@ -256,5 +248,4 @@ format.one.time <- function(time_df, start_time_label, end_time_label){
   # Return the time difference
   return(time_diff)
 }
-
 

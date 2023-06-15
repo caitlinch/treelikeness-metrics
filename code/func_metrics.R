@@ -1,5 +1,5 @@
-# /caitlinch/treelikeness_metrics/func_metrics.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness_metrics/code/func_metrics.R
+# Caitlin Cherryh 2023
 
 # This file contains functions to apply tests for treelikeness to a single alignment
 # Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
@@ -406,7 +406,6 @@ TIGER <- function(alignment_path, fast_TIGER_path, sequence_format = "DNA"){
 }
 
 
-
 TIGGER <- function(alignment_path, TIGGER_path, sequence_format = "DNA"){
   # Tree Independent Genertion of Evolutionary Rates
   # Function to calculate TIGER values from a multiple sequence alignment using the 
@@ -558,7 +557,6 @@ estimate.iqtree2.gene.trees <- function(gene_folder, iqtree2_path, iqtree2_numbe
 }
 
 
-
 call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = "MFP"){
   ## Small function to call IQ-Tree2 for one alignment
   # Use _flag commands from function call to assemble IQ-Tree2 call
@@ -585,14 +583,12 @@ call.iqtree2<- function(gene_path, iqtree2_path, iqtree2_number_threads = "AUTO"
 }
 
 
-
 estimate.ASTRAL.species.tree <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path){
   ## Function to estimate a species tree using ASTRAL
   # Assemble ASTRAL command from input file names
   astral_command <- paste0("java -jar ", ASTRAL_path, " -i ", gene_tree_file, " -o ", species_tree_file, " 2> ", log_file)
   system(astral_command)
 }
-
 
 
 estimate.ASTRAL.multilocus.bootstrapping <- function(gene_tree_file, species_tree_file, log_file, ASTRAL_path, bootstraps_file){
@@ -681,7 +677,6 @@ treelikeness.metrics.simulations <- function(alignment_path,
   # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
   collated_df_name <- paste0(replicate_folder, unique_id, "_collated_alignment_results.csv")
-  
   
   ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
@@ -798,7 +793,6 @@ treelikeness.metrics.simulations <- function(alignment_path,
 } # end function
 
 
-
 treelikeness.metrics.empirical <- function(alignment_path, 
                                            iqtree2_path, splitstree_path, 
                                            phylogemetric_path, fast_TIGER_path, 
@@ -824,7 +818,6 @@ treelikeness.metrics.empirical <- function(alignment_path,
   # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
   collated_df_name <- paste0(replicate_folder, unique_id, "_collated_alignment_results.csv")
-  
   
   ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
@@ -910,7 +903,6 @@ treelikeness.metrics.empirical <- function(alignment_path,
 } # end function
 
 
-
 tiger.empirical <- function(alignment_path, fast_TIGER_path,
                             sequence_format = "DNA"){
   ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
@@ -982,7 +974,6 @@ make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.
 }
 
 
-
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_taxablock = FALSE){
   ### Convert fasta file to nexus file (if there is no existing nexus file with the same name)
   
@@ -1051,7 +1042,6 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
   ## Output file name and path for nexus file
   return(nexus_alignment_path)
 }
-
 
 
 check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_format = "DNA"){
@@ -1134,7 +1124,6 @@ check.iqtree.log.for.identical.sequences <- function(alignment_path, sequence_fo
 }
 
 
-
 genes.from.alignment <- function(alignment_path, partition_path, gene_folder, sequence_format = "DNA", save.gene.info = FALSE){
   ## Function to take an alignment and a partition file, and save separate alignments for each gene (and a data frame with info about the genes)
   
@@ -1161,7 +1150,6 @@ genes.from.alignment <- function(alignment_path, partition_path, gene_folder, se
     write.csv(gene_info_df, file = paste0(dirname(alignment_path), "/genes_from_alignment_info.csv"))
   }
 }
-
 
 
 save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder, sequence_format = "DNA"){
@@ -1195,7 +1183,6 @@ save.one.gene <- function(index, charpartitions, alignment_matrix, output_folder
 }
 
 
-
 is.split.trivial <- function(split){
   ## Small function to determine whether a split is trivial or non-trivial (trivial = terminal branch)
   # Extract the bipartition subsets from the tree
@@ -1213,14 +1200,12 @@ is.split.trivial <- function(split){
 }
 
 
-
 trivial.splits.wrapper <- function(index, set_of_splits){
   ## Function that wraps around is.split.trivial for better application of lapply
   split <- set_of_splits[index]
   is.trivial <- is.split.trivial(split)
   return(is.trivial)
 }
-
 
 
 are.splits.compatible <- function(split1_index, split2_index, set_of_splits){
@@ -1262,7 +1247,6 @@ are.splits.compatible <- function(split1_index, split2_index, set_of_splits){
 }
 
 
-
 pairwise.compatibility <- function(index, set_of_splits){
   ## Function to take one split and compare pairwise to all other splits within a set to determine
   #     whether they are compatible
@@ -1277,7 +1261,6 @@ pairwise.compatibility <- function(index, set_of_splits){
 }
 
 
-
 remove.duplicate.splits <- function(df){
   ## Small function to remove duplicate splits from the compatibility dataframe
   
@@ -1288,7 +1271,6 @@ remove.duplicate.splits <- function(df){
   # Return dataframe with each comparison of two splits included only once
   return(df)
 }
-
 
 
 trivial.splits.present <- function(s){
@@ -1307,7 +1289,6 @@ trivial.splits.present <- function(s){
 }
 
 
-
 process.one.compatibility.matrix.row <- function(row_id, df){
   ## Small function to process one row of the compatibility dataframe and return a nice ordered string of the splits that are involved
   
@@ -1319,7 +1300,6 @@ process.one.compatibility.matrix.row <- function(row_id, df){
   # Return the newly formatted string
   return(output_string)
 }
-
 
 
 calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA){
@@ -1380,7 +1360,6 @@ calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_form
   # Return the pairwise distance matrix
   return(pdm)
 }
-
 
 
 get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_format = "DNA"){
@@ -1478,5 +1457,4 @@ get.model.parameters.from.iqtree.file <- function(alignment_path, sequence_forma
   return(output_list)
   
 } # end function
-
 

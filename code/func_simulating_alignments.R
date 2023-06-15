@@ -1,5 +1,5 @@
-# /caitlinch/treelikeness_metrics/func_simulating_alignment.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness_metrics/code/func_simulating_alignment.R
+# Caitlin Cherryh 2023
 
 #This file contains functions to simulate DNA multiple sequence alignments with varying levels of treelikeness
 # Some functions require IQ-Tree2 (2.2-beta or above), or ms
@@ -71,6 +71,7 @@ scale.gene.tree.depths <- function(gene_trees, new_tree_depth){
   # Return the scaled gene trees
   return(gene_trees)
 }
+
 
 
 #### Functions to generate partition files ####
@@ -336,6 +337,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
 }
 
 
+
 #### Functions for ms ####
 ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, recombination_value = 0, recombination_type = NA, 
                               select.sister = FALSE, output_directory, ms_path = "ms", replicate_number = NA,
@@ -423,7 +425,6 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, recombinatio
   names(output_files) <- c("starting_tree_file", "ms_output_file", "ms_gene_tree_file")
   return(output_files)
 }
-
 
 
 extract.clade.from.node <- function(node, tree, coalescent_times){
@@ -591,7 +592,6 @@ add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, sel
   # Return dataframe with recombination event added
   return(r_df)
 }
-
 
 
 add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){

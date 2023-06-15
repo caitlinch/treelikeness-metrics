@@ -1,5 +1,5 @@
-# /caitlinch/treelikeness-metrics/code/02_apply_treelikeness_metrics.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness-metrics/code/02_apply_treelikeness_metrics.R
+# Caitlin Cherryh 2023
 
 # This program will apply various tests for treelikeness to simulated alignments
 # This program requires IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, and SplitsTree (4.17.2 or above).
@@ -66,6 +66,7 @@ rerun_missing_runs <- TRUE
 rerun_experiment_ids <- c("exp2")
 
 
+
 #### 2. Prepare analyses ####
 # Open packages
 library(parallel)
@@ -81,7 +82,6 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
 
 #### 3. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
-
 if (run_exp1 == FALSE){
   ## For experiment 1:
   # Extract all file names from results folder
@@ -154,7 +154,6 @@ if (run_exp2 == TRUE){
 
 #### 4. Print list of alignments that do not have treelikeness results files ####
 # Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
-
 ## For experiments 1 and 2 (simulations)
 exp_ids <- rerun_experiment_ids
 for (e in exp_ids){
@@ -255,7 +254,6 @@ for (e in exp_ids){
 
 #### 5. Collate times ####
 # Collate csvs for identifying how long each test statistic took to run
-
 ## For experiments 1 and 2 (simulations)
 exp_ids <- c("exp1", "exp2")
 results_folders <- c("exp1" = "exp_1", "exp2" = "exp_2")
@@ -281,3 +279,5 @@ for (e in exp_ids){
     write.csv(time_df, time_file, row.names = FALSE)
   }
 }
+
+

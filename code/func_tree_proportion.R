@@ -1,11 +1,13 @@
-# /caitlinch/treelikeness_metrics/func_tree_proportion.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness_metrics/func_tree_proportion.R
+# Caitlin Cherryh 2023
 
 # This file contains functions to calculate the tree proportion for any alignment
 # Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
 
 library(phangorn)
 library(ape)
+
+
 
 #### Tree proportion function ####
 tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, network.method = "SplitsTree4" , splitstree_path = NA, dist.ml.model = NA){
@@ -155,7 +157,6 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
 }
 
 
-
 tree.proportion.output.csv <- function(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
                                        network.method = "SplitsTree4" , splitstree_path = NA, dist.ml.model = NA){
   ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
@@ -254,7 +255,6 @@ calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_form
 }
 
 
-
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree
   # Convert fasta to nexus (if the conversion has not already occured)
@@ -287,7 +287,6 @@ make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.
     return(splits_output_path)
   }
 }
-
 
 
 convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_taxablock = FALSE){
@@ -360,7 +359,6 @@ convert.to.nexus <- function(alignment_path, sequence_format = "DNA", include_ta
 }
 
 
-
 trivial.splits.present <- function(s){
   ## Small  function to check whether trivial splits are present and return the number of trivial splits and the number of non-trivial splits
   nSplits <- length(s)
@@ -375,6 +373,4 @@ trivial.splits.present <- function(s){
              "Num_trivial_splits" = num_trivial_splits, "Num_non_trivial_splits" = num_non_trivial_splits)
   return(op)
 }
-
-
 

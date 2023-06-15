@@ -1,5 +1,5 @@
-# /caitlinch/treelikeness-metrics/code/03_data_analysis.R
-# Caitlin Cherryh 2022
+# caitlinch/treelikeness-metrics/code/03_data_analysis.R
+# Caitlin Cherryh 2023
 
 # This program takes results from applying various treelikeness tests and performs data analysis
 
@@ -19,6 +19,7 @@ repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-met
 
 plot_exp1 = TRUE
 plot_exp2 = TRUE
+
 
 
 #### 2. Prepare analyses ####

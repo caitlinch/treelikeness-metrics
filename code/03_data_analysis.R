@@ -17,7 +17,7 @@ data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_res
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
-plot_exp1 = TRUE
+plot_exp1 = FALSE
 plot_exp2 = TRUE
 
 
@@ -213,7 +213,7 @@ if (plot_exp2 == TRUE){
   if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
     # Remove columns you don't want for plotting
     # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
-    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
+    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", 
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                 "LM_proportion_resolved_quartets", "mean_Q_residual", 
@@ -223,7 +223,7 @@ if (plot_exp2 == TRUE){
     # Convert TIGER results to numeric
     exp2_df$mean_TIGER_value <- as.numeric(exp2_df$mean_TIGER_value)
     # Remove columns you don't want for plotting
-    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth",
+    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent",
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                 "LM_proportion_resolved_quartets", "mean_Q_residual",
@@ -231,11 +231,11 @@ if (plot_exp2 == TRUE){
   }  # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
   
   # Melt exp2_wide_df for better plotting
-  exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", "recombination_value", "recombination_type"))
+  exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", "recombination_value", "recombination_type"))
   
   # Transform the Network Treelikeness Test results into more plottable format
   # Make a table of all possible parameter values for the network treelikeness test
-  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp2_df$num_taxa)), "tree_depth" = sort(unique(exp2_df$tree_depth)), 
+  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp2_df$num_taxa)), "tree_depth_coalescent" = sort(unique(exp2_df$tree_depth_coalescent)), 
                              "recombination_value" = sort(unique(exp2_df$recombination_value)), "recombination_type" = unique(exp2_df$recombination_type))
   # Calculate proportion of treelike alignments for each set of parameter values
   prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp2, params_df = ntlt_params, results_df = exp2_df))
@@ -292,7 +292,7 @@ if (plot_exp2 == TRUE){
   # Construct plot with fixed y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
-    facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
+    facet_grid(var_label~tree_depth_coalescent, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
     scale_color_manual(values = viridis_picks[2:5]) +
@@ -312,7 +312,7 @@ if (plot_exp2 == TRUE){
   # Construct plot with free y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
-    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
+    facet_grid(var_label~tree_depth_coalescent, scales = "free_y", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value") +
     scale_color_manual(values = viridis_picks[2:5]) +
@@ -337,7 +337,7 @@ if (plot_exp2 == TRUE){
   # Construct plot
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
-    facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
+    facet_grid(var_label~tree_depth_coalescent, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1)) +
     scale_color_manual(values = viridis_picks[1:5]) +
@@ -357,7 +357,7 @@ if (plot_exp2 == TRUE){
   # Construct plot with free y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth() + 
-    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
+    facet_grid(var_label~tree_depth_coalescent, scales = "free_y", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value") +
     scale_color_manual(values = viridis_picks[1:5]) +
@@ -380,7 +380,7 @@ if (plot_exp2 == TRUE){
   plot_df <- exp2_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
   # Construct plot
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth))) + 
+  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth_coalescent))) + 
     geom_smooth() + 
     facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
@@ -405,7 +405,7 @@ if (plot_exp2 == TRUE){
   plot_df <- exp2_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
   # Construct plot
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth))) + 
+  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth_coalescent))) + 
     geom_smooth() + 
     facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +

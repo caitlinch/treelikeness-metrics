@@ -21,7 +21,7 @@ This github repository contains scripts used to:
 2. Benchmark existing metrics for treelikeness against these simulations
 3. Introduce a new metric for treelikeness in phylogenetic datasets, called the tree proportion
 
-If you replicate any part of these analyses or use functions from these scripts, please cite this repository. Thank you!  
+If you replicate any part of these analyses or use functions from these scripts, please cite this repository.
 
 
 #### Contents
@@ -29,8 +29,8 @@ If you replicate any part of these analyses or use functions from these scripts,
     + All scripts necessary to completely replicate this analysis are included in the `code/` folder
     + Each script includes an overview, a list of necessary parameters or file paths,  and a list of software necessary to run that script
 + Output
-        + All `.csv` files containing output from each stage of the analysis can be found in the `output/` folder
-        + The `.csv` files are grouped by the simulation approach -  `exp1` for the random tree simulations and `exp2` for the introgression simulations
+    + All `.csv` files containing output from each stage of the analysis can be found in the `output/` folder
+    + The `.csv` files are grouped by the simulation approach -  `exp1` for the random tree simulations and `exp2` for the introgression simulations
 + Conda enviroment
     + The `environment.yml` file is included to replicate the conda environment used for this project
 + Instructions for replication
@@ -48,17 +48,8 @@ To fully replicate the analyses, follow these steps:
 2. Create the conda environment `gene_filtering` using the `environment.yaml` file
 3. Prepare simulated alignments
     + The script `code/01_simulations.R` will generate both sets of simulated alignments (random tree simulations and introgression simulations)
-    + To simulate each alignment:
-    + For the random tree simulations:
-          1. One or more trees with the correct number of taxa are randomly generated
-          2. DNA is simulated along each tree (such that each tree has an equal proportion of sites within the alignment)
-          3. The alignments are concatenated, resulting in a single sequence alignment with multiple underlying evolutionary histories
-    + For the introgression simulations:
-          1. A single tree with the correct number of taxa is randomly generated
-          2. An introgression event is added to the tree
-          3. The reticulate evolutionary history is entered into ms to generate gene trees
-          4. DNA is simulated along each gene tree
-          5. The alignments for each gene tree are concatenated
+    + The random tree simulations mimic decreased treelikeness by increasing the number of evolutionary histories present within an alignment
+    + The introgression simulations mimic decreased treelikeness by increasing the proportion of sites within the alignment impacted by a single introgression event
 4. Apply treelikeness metrics
     + The script `code/02_apply_treelikeness_metrics.R` will fully replicate our analysis by applying each treelikeness metric to each simulated alignment
     + To apply specific treelikeness metrics to a single alignment, use the functions in the script `code/func_metrics.R`
@@ -129,40 +120,40 @@ We included the "PHANGORN" method of phylogenetic network estimation for users w
 ### Treelikeness metrics
 - **Proportion of explained variance**
     - Note: Referred to as "Cunningham metric" in our manuscript
-    - **Paper**: Cunningham, J.P., 1978. "Free trees and bidirectional trees as representations of psychological distance". *Journal of Mathematical Psychology*, 17:165–188. https://doi.org/10.1016/0022-2496(78)90029-9
-    - **Implementation**: Available in this repository, via the script `code/func_metrics.R` by calling the function `cunningham.test()`
-    - **Implementation citation**: Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)
+    - Cunningham, J.P., 1978. "Free trees and bidirectional trees as representations of psychological distance". *Journal of Mathematical Psychology*, 17:165–188. https://doi.org/10.1016/0022-2496(78)90029-9
+    - Available in this repository, via the script `code/func_metrics.R` by calling the function `cunningham.test()`
+        - Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)
 - **Delta plots**
-    - **Paper**: Holland, B.R., Huber, K.T., Dress, A., Moulton, V., 2002. "δ plots: a tool for analyzing phylogenetic distance data". *Molecular Biology and Evolution*, 19:2051–2059. https://doi.org/10.1093/oxfordjournals.molbev.a004030
-    - **Implementation**: `delta.plot()` function included in the R package ape
-    - **Implementation citation**: Paradis E., Schliep, K., 2019. “ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R.” *Bioinformatics*, 35:526-528. https://doi.org/10.1093/bioinformatics/bty633
+    - Holland, B.R., Huber, K.T., Dress, A., Moulton, V., 2002. "δ plots: a tool for analyzing phylogenetic distance data". *Molecular Biology and Evolution*, 19:2051–2059. https://doi.org/10.1093/oxfordjournals.molbev.a004030
+    - Function `delta.plot()` included in the R package ape
+        - Paradis E., Schliep, K., 2019. “ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R.” *Bioinformatics*, 35:526-528. https://doi.org/10.1093/bioinformatics/bty633
 - **Likelihood mapping**
-    - **Paper**: Strimmer, K., von Haeseler, A., 1997. "Likelihood-mapping: a simple method to visualize phylogenetic content of a sequence alignment". *Proceedings of the National Academy of Science U.S.A*., 94:6815–6819. https://doi.org/10.1073/pnas.94.13.6815
-    - **Implementation**: Available in IQ-Tree
-    - **Implementation citation**: Minh, B.Q., Schmidt, H.A., Chernomor, O., Schrempf, D., Woodhams,  M.D., von Haeseler, A., Lanfear, A., 2020. "IQ-TREE 2: New models and efficient methods for phylogenetic inference in the genomic era". *Molecular Biology and Evolution*, 37:1530-1534.
+    - Strimmer, K., von Haeseler, A., 1997. "Likelihood-mapping: a simple method to visualize phylogenetic content of a sequence alignment". *Proceedings of the National Academy of Science U.S.A*., 94:6815–6819. https://doi.org/10.1073/pnas.94.13.6815
+    - Available in IQ-Tree
+        - Minh, B.Q., Schmidt, H.A., Chernomor, O., Schrempf, D., Woodhams,  M.D., von Haeseler, A., Lanfear, A., 2020. "IQ-TREE 2: New models and efficient methods for phylogenetic inference in the genomic era". *Molecular Biology and Evolution*, 37:1530-1534.
 - **Network treelikeness test**
-    - **Paper**: Huson, D.H., Bryant, D., 2006. "Application of phylogenetic networks in evolutionary studies". *Molecular Biology and Evolution*, 23:254-267. https://doi.org/10.1093/molbev/msj030
-    - **Implementation**: Available in this repository, via the script `code/func_metrics.R` by calling the function `network.treelikeness.test()`. Requires SplitsTree4 (v4.17.1 or above) to run.
-    - **Implementation citation**: Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)
-    - **Software citation**: Huson, D.H., Bryant, D., 2006. "Application of phylogenetic networks in evolutionary studies". *Molecular Biology and Evolution*, 23:254-267. https://doi.org/10.1093/molbev/msj030
+    - Huson, D.H., Bryant, D., 2006. "Application of phylogenetic networks in evolutionary studies". *Molecular Biology and Evolution*, 23:254-267. https://doi.org/10.1093/molbev/msj030
+    - Available in this repository, via the script `code/func_metrics.R` by calling the function `network.treelikeness.test()`. Requires SplitsTree4 (v4.17.1 or above) to run.
+        - Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)
     - SplitsTree4 available from https://uni-tuebingen.de/en/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/splitstree/
+        - Huson, D.H., Bryant, D., 2006. "Application of phylogenetic networks in evolutionary studies". *Molecular Biology and Evolution*, 23:254-267. https://doi.org/10.1093/molbev/msj030
 - **Q-residual**
-    - **Paper**: Gray, R.D., Bryant, D., Greenhill, S.J., 2010. "On the shape and fabric of human history". *Philosophical Transactions of the Royal Society B: Biological Sciences*, 365:3923–3933. https://doi.org/10.1098/rstb.2010.0162
-    - **Implementation**: Available in the Python program Phylogemetric
-    - **Implementation citation**: Greenhill, S. J., 2016. "Phylogemetric: A Python library for calculating phylogenetic network metrics". *Journal of Open Source Software*, 1:28. https://doi.org/10.21105/joss.00028
-    - **Implementation citation**: Greenhill, S. J., 2016. "phylogemetric", GitHub repository, https://github.com/SimonGreenhill/phylogemetric (Accessed 6/7/2023)
+    - Gray, R.D., Bryant, D., Greenhill, S.J., 2010. "On the shape and fabric of human history". *Philosophical Transactions of the Royal Society B: Biological Sciences*, 365:3923–3933. https://doi.org/10.1098/rstb.2010.0162
+    - Available in the Python program Phylogemetric
+        - Greenhill, S. J., 2016. "Phylogemetric: A Python library for calculating phylogenetic network metrics". *Journal of Open Source Software*, 1:28. https://doi.org/10.21105/joss.00028
+        - Greenhill, S. J., 2016. "phylogemetric", GitHub repository, https://github.com/SimonGreenhill/phylogemetric (Accessed 6/7/2023)
 - **Site concordance factors**
-    - **Paper**: Minh, B.Q., Hahn, M.W., Lanfear, R., 2020. "New methods to calculate concordance factors for phylogenomic datasets". *Molecular Biology and Evolution*, 9:2727-2733. https://doi.org/10.1093/molbev/msaa106
-    - **Paper**: Mo, Y.K., Lanfear, R., Hahn, M.W., Minh, B.Q., 2022. "Updated site concordance factors minimize effects of homoplasy and taxon sampling". *Bioinformatics*, 39:btac741. https://doi.org/10.1093/bioinformatics/btac741
-    - **Implementation**: Available in IQ-Tree
-    - **Implementation citation**: Minh, B.Q., Schmidt, H.A., Chernomor, O., Schrempf, D., Woodhams,  M.D., von Haeseler, A., Lanfear, A., 2020. "IQ-TREE 2: New models and efficient methods for phylogenetic inference in the genomic era". *Molecular Biology and Evolution*, 37:1530-1534. https://doi.org/10.1093/molbev/msaa015 
+    - Minh, B.Q., Hahn, M.W., Lanfear, R., 2020. "New methods to calculate concordance factors for phylogenomic datasets". *Molecular Biology and Evolution*, 9:2727-2733. https://doi.org/10.1093/molbev/msaa106
+    - Mo, Y.K., Lanfear, R., Hahn, M.W., Minh, B.Q., 2022. "Updated site concordance factors minimize effects of homoplasy and taxon sampling". *Bioinformatics*, 39:btac741. https://doi.org/10.1093/bioinformatics/btac741
+    - Available in IQ-Tree
+        - Minh, B.Q., Schmidt, H.A., Chernomor, O., Schrempf, D., Woodhams,  M.D., von Haeseler, A., Lanfear, A., 2020. "IQ-TREE 2: New models and efficient methods for phylogenetic inference in the genomic era". *Molecular Biology and Evolution*, 37:1530-1534. https://doi.org/10.1093/molbev/msaa015 
 - **TIGER**
-    - **Paper**: Cummins, C.A., McInerney, J.O., 2011. "A Method for Inferring the Rate of Evolution of Homologous Characters that Can Potentially Improve Phylogenetic Inference, Resolve Deep Divergence and Correct Systematic Biases". *Systematic Biology*, 60:833–844. https://doi.org/10.1093/sysbio/syr064
-    - **Implementation**: Available in the software program fast_TIGER
-    - **Implementation citation**: Frandsen, P.B., 2014. "fast-TIGER", Github repository, https://github.com/pbfrandsen/fast_TIGER (Accessed 6/7/2023)
+    - Cummins, C.A., McInerney, J.O., 2011. "A Method for Inferring the Rate of Evolution of Homologous Characters that Can Potentially Improve Phylogenetic Inference, Resolve Deep Divergence and Correct Systematic Biases". *Systematic Biology*, 60:833–844. https://doi.org/10.1093/sysbio/syr064
+    - Available in the software program fast_TIGER
+        - Frandsen, P.B., 2014. "fast-TIGER", Github repository, https://github.com/pbfrandsen/fast_TIGER (Accessed 6/7/2023)
 
 ***
 ### Citation information
-If you use these scripts or the tree proportion function, please cite this github repository:
+If you replicate any part of these analyses or use functions from these scripts, please cite this repository. Thank you! 
 
 Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)

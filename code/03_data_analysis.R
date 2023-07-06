@@ -102,13 +102,11 @@ if (plot_exp1 == TRUE){
   plot_df <- exp1_long_df
   # Set log10 minor breaks for x and y axis
   x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  y_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  y_axis_labels <- c("0", "0.0001", "0.001", "0.01", "0.1", "1")
-  y_axis_breaks <- as.numeric(y_axis_labels)
   # Construct plot with fixed y axis from 0-1
   p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
+                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+    stat_smooth(method = "loess", geom = "line", linewidth = 1.2, alpha = 0.7, span = 0.75) +
     facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
     scale_x_log10(minor_breaks = x_axis_minor_breaks) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
@@ -128,6 +126,9 @@ if (plot_exp1 == TRUE){
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
   
   # Construct plot with fixed y axis from 0-1, log axis
+  y_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
+  y_axis_labels <- c("0", "0.0001", "0.001", "0.01", "0.1", "1")
+  y_axis_breaks <- as.numeric(y_axis_labels)
   p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) + 
     geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
     stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
@@ -145,7 +146,7 @@ if (plot_exp1 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(hjust = 0.5, size = 18))
   # Save plot
-  plot_prefix <- "mainFig_exp1_plot1_tree_depth_logY."
+  plot_prefix <- "exp1_plot1_tree_depth_logY."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
   
@@ -365,8 +366,9 @@ if (plot_exp2 == TRUE){
   plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
   # Construct plot with fixed y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75, 
+                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
     facet_grid(var_label~tree_depth_coalescent, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
@@ -432,8 +434,9 @@ if (plot_exp2 == TRUE){
   plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
   # Construct plot
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
+                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
     facet_grid(var_label~tree_depth_coalescent, scales = "fixed", labeller = label_parsed) +
     scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +

@@ -26,47 +26,47 @@ If you replicate any part of these analyses or use functions from these scripts,
 
 #### Contents
 + Scripts
-+ All scripts necessary to completely replicate this analysis are included in the `code/` folder
-+ Each script includes an overview, a list of necessary parameters or file paths,  and a list of software necessary to run that script
+    + All scripts necessary to completely replicate this analysis are included in the `code/` folder
+        + Each script includes an overview, a list of necessary parameters or file paths,  and a list of software necessary to run that script
 + Output
-+ `.csv` files containing output from each stage of the analysis can be found in the `output/` folder
-+ The `.csv` files are grouped by the simulation approach
-+ `exp1` indicates parameters and treelikeness metrics results for the random tree simulations
-+ `exp2` indicates parameters and treelikeness metrics results for the introgression simulations
+        + `.csv` files containing output from each stage of the analysis can be found in the `output/` folder
+        + The `.csv` files are grouped by the simulation approach
+            + `exp1` indicates parameters and treelikeness metrics results for the random tree simulations
+            + `exp2` indicates parameters and treelikeness metrics results for the introgression simulations
 + Conda enviroment
-+ The `environment.yml` file is included to replicate the conda environment used for this project
+    + The `environment.yml` file is included to replicate the conda environment used for this project
 + Instructions for replication
-+ Instructions for replicating these analyses, along with details about the datasets and software used, are in this `README.md` file.
+    + Instructions for replicating these analyses, along with details about the datasets and software used, are in this `README.md` file.
 
 ***
 ### Instructions to reproduce the analyses:
 To fully replicate the analyses, follow these steps:
 
 1. Download and install the software programs and R packages required to run each of the treelikeness metrics
-+ IQ-Tree2
-+ SplitsTree4 (v4.17.1 or higher)
-+ Phylogemetric
-+ fast_TIGER
+    + IQ-Tree2
+    + SplitsTree4 (v4.17.1 or higher)
+    + Phylogemetric
+    + fast_TIGER
 2. Create the conda environment `gene_filtering` using the `environment.yaml` file
 3. Prepare simulated alignments
-+ The script `code/01_simulations.R` will generate both sets of simulated alignments (random tree simulations and introgression simulations)
-+ To simulate each alignment:
-+ For the random tree simulations:
-1. One or more trees with the correct number of taxa are randomly generated
-2. DNA is simulated along each tree (such that each tree has an equal proportion of sites within the alignment)
-3. The alignments are concatenated, resulting in a single sequence alignment with multiple underlying evolutionary histories
-+ For the introgression simulations:
-1. A single tree with the correct number of taxa is randomly generated
-2. An introgression event is added to the tree
-3. The reticulate evolutionary history is entered into ms to generate gene trees
-4. DNA is simulated along each gene tree
-5. The alignments for each gene tree are concatenated
+    + The script `code/01_simulations.R` will generate both sets of simulated alignments (random tree simulations and introgression simulations)
+    + To simulate each alignment:
+    + For the random tree simulations:
+          1. One or more trees with the correct number of taxa are randomly generated
+          2. DNA is simulated along each tree (such that each tree has an equal proportion of sites within the alignment)
+          3. The alignments are concatenated, resulting in a single sequence alignment with multiple underlying evolutionary histories
+    + For the introgression simulations:
+          1. A single tree with the correct number of taxa is randomly generated
+          2. An introgression event is added to the tree
+          3. The reticulate evolutionary history is entered into ms to generate gene trees
+          4. DNA is simulated along each gene tree
+          5. The alignments for each gene tree are concatenated
 4. Apply treelikeness metrics
-+ The script `code/02_apply_treelikeness_metrics.R` will fully replicate our analysis by applying each treelikeness metric to each simulated alignment
-+ To apply specific treelikeness metrics to a single alignment, use the functions in the script `code/func_metrics.R`
-+ To apply the tree proportion test to a single alignment, use the functions in the script `code/func_tree_proportion.R`
+    + The script `code/02_apply_treelikeness_metrics.R` will fully replicate our analysis by applying each treelikeness metric to each simulated alignment
+    + To apply specific treelikeness metrics to a single alignment, use the functions in the script `code/func_metrics.R`
+    + To apply the tree proportion test to a single alignment, use the functions in the script `code/func_tree_proportion.R`
 5. Process and analyse results
-+ The script `code/03_data_analysis.R` will plot results from the treelikeness metrics for both sets of simulations
+    + The script `code/03_data_analysis.R` will plot results from the treelikeness metrics for both sets of simulations
 
 ***
 ### Tree proportion

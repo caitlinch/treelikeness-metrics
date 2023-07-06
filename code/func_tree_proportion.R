@@ -1,8 +1,8 @@
-# caitlinch/treelikeness_metrics/func_tree_proportion.R
+# caitlinch/treelikeness_metrics/code/func_tree_proportion.R
 # Caitlin Cherryh 2023
 
 # This file contains functions to calculate the tree proportion for any alignment
-# Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
+
 
 library(phangorn)
 library(ape)
@@ -30,12 +30,12 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
   }
   
   ### Convert the network method to all uppercase
-  network.method <- toupper(network.method)
+  network.method <- gsub(" ", "", toupper(network.method))
   
   ### Run the tree proportion metric
-  if (network.method == "R" | network.method == "PHANGORN"){
+  if (network.method == "R" | network.method == "PHANGORN" | network.method == "P"){
     if (is.na(dist.ml.model) == TRUE){
-      stop('Must supply model for calculating pairwise distance matrix. Look at help file for phangorn::dist.ml function (type "?dist.ml" into the command line) to see available substitution models.' )
+      stop('Must supply model for calculating pairwise distance matrix. Look at help file for phangorn::dist.ml function to see available substitution models.' )
     } else if (is.na(dist.ml.model) == FALSE){
       # Calculate NeighborNet network in R
       # Estimate a NeighborNet network from the distance matrix and order splits from strongest to weakest
@@ -159,7 +159,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
 
 tree.proportion.output.csv <- function(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
                                        network.method = "SplitsTree4" , splitstree_path = NA, dist.ml.model = NA){
-  ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
+  ## Function to take one empirical alignment, apply the tree proportion test statistic and return results in a dataframe
   
   # Print alignment path
   print(alignment_path)
@@ -176,7 +176,7 @@ tree.proportion.output.csv <- function(alignment_path, sequence_format = "DNA", 
   if (file.exists(df_name) == TRUE){
     results_df <- read.csv(df_name)
   } else if (file.exists(df_name) == FALSE){
-    # Apply TIGER (Cummins and McInerney 2011)
+    # Apply tree proportion functuion
     tp_value <- tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
                                         network.method = "SplitsTree4" , splitstree_path = splitstree_path, dist.ml.model = NA)
     

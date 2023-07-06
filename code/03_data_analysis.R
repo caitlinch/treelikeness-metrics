@@ -1,8 +1,7 @@
 # caitlinch/treelikeness-metrics/code/03_data_analysis.R
 # Caitlin Cherryh 2023
 
-# This program takes results from applying various treelikeness tests and performs data analysis
-
+# This program takes results from applying various treelikeness tests and performs data analysis/plotting
 
 
 #### 1. Set parameters ####

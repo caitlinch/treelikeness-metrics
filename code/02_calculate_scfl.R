@@ -51,7 +51,7 @@ if (run_location == "local"){
   iqtree2.2.2_path <- "/data/caitlin/executables/iqtree-2.2.2-Linux/bin/iqtree2"
   
   # Run parameters
-  num_cores <- 30
+  num_cores <- 20
 }
 
 

@@ -524,16 +524,19 @@ scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", 
   
   # Call IQ-Tree2.2.2 and calculate the scfl (site concordance factors with likelihood)
   # for sCFl: iqtree -t concat.treefile -s ALN_FILE --scfl 100 --prefix concord -nt 10
-  treefile <- paste0(alignment_path,".treefile")
-  call <- paste0(iqtree2_path," -t ",treefile," -s ",alignment_path," --scfl ",number_scf_quartets," -nt 1 -redo -safe")
+  treefile <- paste0(alignment_path, ".treefile")
+  call <- paste0(iqtree2_path," -t ",treefile," -s ",alignment_path," --scfl ", number_scf_quartets," -nt 1 -redo -safe -pre scfl")
   system(call)
   
   ## Retrieve the site concordance factors from the output table
-  scfl_table <- read.table(paste0(alignment_path,".treefile.cf.stat"), header = TRUE, sep = "\t")
-  scfl_results <- list(mean_scf = round(mean(scfl_table$sCF), digits = 2), 
-                       median_scf = round(median(scfl_table$sCF), digits = 2), 
-                       all_scfs = scfl_table$sCF, 
-                       branch_ids = scfl_table$ID)
+  treefile <- paste0(dirname(alignment_path), "/scfl.cf.tree.nex")
+  t <- read.tree(treefile)
+  scfl_vec <- t$node.label[which(t$node.label != "")]
+  scfl_branch_ids <- c(t$edge[,2])[which(t$edge[,2]>Ntip(t))] 
+  scfl_results <- list(mean_scf = round(mean(scfl_vec), digits = 2), 
+                       median_scf = round(median(scfl_vec), digits = 2), 
+                       all_scfs = scfl_vec, 
+                       branch_ids = scfl_branch_ids )
   ## Return the site concordance factor results
   return(scfl_results)
 }
@@ -682,6 +685,9 @@ recalculate.scf <- function(alignment_path, iqtree2_path,  num_iqtree2_threads =
   unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
   # Create output folder for sclf
   df_name <- paste0(replicate_folder, unique_id, "_iqtree2.2.2_scfl.csv")
+  
+  ## Move to replicate folder
+  setwd(replicate_folder)
   
   ## Apply Site concordance factors (Minh et. al. 2020)
   # Apply scfl- site concordance factors with likelihood (iqtree2 v2.2.2)

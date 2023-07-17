@@ -512,6 +512,33 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 }
 
 
+scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100, substitution_model = "MFP"){
+  # Function to calculate the site concordance factors with maximum likelihood, given a maximum likelihood tree estimated in IQ-Tree
+  
+  ## Check that the treefile already exists: if it doesn't, run IQ-Tree and create it
+  if (file.exists(paste0(alignment_path,".treefile")) == FALSE){
+    # Given an alignment, estimate the maximum likelihood tree with IQ-Tree2
+    call <- paste0(iqtree2_path," -s ",alignment_path," -m ",substitution_model," -nt ", iqtree2_number_threads, " -redo -safe")
+    system(call)
+  }
+  
+  # Call IQ-Tree2.2.2 and calculate the scfl (site concordance factors with likelihood)
+  # for sCFl: iqtree -t concat.treefile -s ALN_FILE --scfl 100 --prefix concord -nt 10
+  treefile <- paste0(alignment_path,".treefile")
+  call <- paste0(iqtree2_path," -t ",treefile," -s ",alignment_path," --scfl ",number_scf_quartets," -nt 1 -redo -safe")
+  system(call)
+  
+  ## Retrieve the site concordance factors from the output table
+  scfl_table <- read.table(paste0(alignment_path,".treefile.cf.stat"), header = TRUE, sep = "\t")
+  scfl_results <- list(mean_scf = round(mean(scfl_table$sCF), digits = 2), 
+                       median_scf = round(median(scfl_table$sCF), digits = 2), 
+                       all_scfs = scfl_table$sCF, 
+                       branch_ids = scfl_table$ID)
+  ## Return the site concordance factor results
+  return(scfl_results)
+}
+
+
 
 ## Delta plots (Holland et. al. 2002)
 mean.delta.plot.value <- function(alignment_path, sequence_format = "DNA", substitution_model = "JC69", 
@@ -644,6 +671,36 @@ SPECTRE.estimate.network <- function(alignment_path, netmake_path, netme_path, s
 
 
 #### Functions to apply multiple test statistics ####
+recalculate.scf <- function(alignment_path, iqtree2_path,  num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                            iqtree_substitution_model = "MFP"){
+  ## Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
+  
+  ## Prepare variables and output file names for run
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Get unique id for the alignment
+  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
+  # Create output folder for sclf
+  df_name <- paste0(replicate_folder, unique_id, "_iqtree2.2.2_scfl.csv")
+  
+  ## Apply Site concordance factors (Minh et. al. 2020)
+  # Apply scfl- site concordance factors with likelihood (iqtree2 v2.2.2)
+  scfl <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+              substitution_model = iqtree_substitution_model)
+  
+  # Assemble results into a dataframe and save
+  results_vec <- c(unique_id, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), alignment_path)
+  results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+  names_vec <- c("unique_id", "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "input_alignment_path")
+  names(results_df) <- names_vec
+  write.csv(results_df, file = df_name, row.names = FALSE)
+  
+  # Return the scfl results
+  return(results_df)
+}
+
+
+
 treelikeness.metrics.simulations <- function(alignment_path, 
                                              iqtree2_path, splitstree_path, 
                                              phylogemetric_path, fast_TIGER_path, 

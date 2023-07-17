@@ -685,7 +685,7 @@ recalculate.scf <- function(alignment_path, iqtree2_path,  num_iqtree2_threads =
   
   ## Apply Site concordance factors (Minh et. al. 2020)
   # Apply scfl- site concordance factors with likelihood (iqtree2 v2.2.2)
-  scfl <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+  scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
               substitution_model = iqtree_substitution_model)
   
   # Assemble results into a dataframe and save
@@ -776,9 +776,9 @@ treelikeness.metrics.simulations <- function(alignment_path,
     # Set timer
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_likelihood_mapping","Start_scfs")
-    # Apply Site concordance factors (Minh et. al. 2020)
-    scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
-                substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
+    # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
+    scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+                 substitution_model = iqtree_substitution_model)
     # Set timer
     timings <- c(timings,Sys.time(),Sys.time())
     time_name <- c(time_name, "End_scfs","Start_ntlt")
@@ -826,7 +826,7 @@ treelikeness.metrics.simulations <- function(alignment_path,
     time_name <- c(time_name, "End_tree_proportion", "Assemble_results")
     
     # Assemble results into a dataframe and save
-    results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
+    results_vec <- c(lm, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
                      cunningham_metric, tree_proportion, alignment_path)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
     names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
@@ -916,9 +916,9 @@ treelikeness.metrics.empirical <- function(alignment_path,
       
     } # end if sequence alignment == "DNA"
     
-    # Apply Site concordance factors (Minh et. al. 2020)
-    scfs <- scf(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
-                substitution_model = iqtree_substitution_model, add.likelihood.map = FALSE, number_of_taxa = n_tree_tips)
+    # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
+    scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+                 substitution_model = iqtree_substitution_model)
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
     # Apply Delta plots (Holland et. al. 2002)
@@ -944,7 +944,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                             base_frequencies = state_frequencies, Q_matrix = Q_vector, number_of_rate_categories = num_rate_categories)
     
     # Assemble results into a dataframe and save
-    results_vec <- c(lm, scfs$mean_scf, scfs$median_scf, min(scfs$all_scfs), max(scfs$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
+    results_vec <- c(lm, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
                      cunningham_metric, tree_proportion, alignment_path, iqtree_substitution_model, best_iqtree_model, 
                      paste(state_frequencies, collapse = ","), paste(Q_vector, collapse = ","), num_rate_categories, distance_matrix_substitution_method)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))

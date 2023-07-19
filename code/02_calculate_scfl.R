@@ -84,8 +84,9 @@ exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth
 exp1_als <- exp1_op_df$output_alignment_file
 # Apply new scfl to all alignments 
 exp1_scfl_list <- mclapply(exp1_als, recalculate.scf,
-                           iqtree2_path = iqtree2.2.2_path,  num_iqtree2_threads = "AUTO", 
-                           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "MFP",
+                           iqtree2_path = iqtree2.2.2_path,  num_iqtree2_threads = "1", 
+                           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC",
+                           force.redo = TRUE,
                            mc.cores = num_cores)
 # Save output dataframe
 exp1_df <- as.data.frame(do.call("rbind", exp1_scfl_list))
@@ -102,12 +103,41 @@ exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)
 exp2_als <- exp2_op_df$output_alignment_file
 # Apply new scfl to all alignments 
 exp2_scfl_list <- mclapply(exp2_als, recalculate.scf,
-                           iqtree2_path = iqtree2.2.2_path,  num_iqtree2_threads = "AUTO", 
-                           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "MFP",
+                           iqtree2_path = iqtree2.2.2_path,  num_iqtree2_threads = "1", 
+                           num_iqtree2_scf_quartets = 100, iqtree_substitution_model = "JC",
+                           force.redo = FALSE,
                            mc.cores = num_cores)
 # Save output dataframe
 exp2_df <- as.data.frame(do.call("rbind", exp2_scfl_list))
 exp2_df_name <- paste0(results_directory, "exp2_iqtree2.2.2_scfl_results.csv")
 write.csv(exp2_df, exp2_df_name, row.names = FALSE)
+
+
+
+#### 4. To check progress ####
+# List all files in results directory
+results_files <- list.files(results_directory)
+# Get list of alignments for experiment 1
+exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
+exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
+exp1_als <- exp1_op_df$output_alignment_file
+# Get list of alignments for experiment 2
+exp2_op_file <- paste0(results_directory, grep("rerun", grep("exp2", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)
+exp2_als <- exp2_op_df$output_alignment_file
+# Construct file paths for completed files
+exp1_completed_scf <- paste0(dirname(exp1_als), "/", basename(dirname(exp1_als)), "_iqtree2.2.2_scfl.csv")
+exp2_completed_scf <- paste0(dirname(exp2_als), "/", basename(dirname(exp1_als)), "_iqtree2.2.2_scfl.csv")
+# Calculate percentage of completed files
+exp1_percent_done <- length(which(file.exists(exp1_completed_scf) == TRUE))/length(exp1_completed_scf)*100
+exp2_percent_done <- length(which(file.exists(exp2_completed_scf) == TRUE))/length(exp2_completed_scf)*100
+# Output percentage of completed files
+print(paste0("Percentage completed for experiment 1: ", exp1_percent_done))
+print(paste0("Percentage completed for experiment 2: ", exp2_percent_done))
+
+
+
+
 
 

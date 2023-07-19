@@ -128,7 +128,7 @@ exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)
 exp2_als <- exp2_op_df$output_alignment_file
 # Construct file paths for completed files
 exp1_completed_scf <- paste0(dirname(exp1_als), "/", basename(dirname(exp1_als)), "_iqtree2.2.2_scfl.csv")
-exp2_completed_scf <- paste0(dirname(exp2_als), "/", basename(dirname(exp1_als)), "_iqtree2.2.2_scfl.csv")
+exp2_completed_scf <- paste0(dirname(exp2_als), "/", basename(dirname(exp2_als)), "_iqtree2.2.2_scfl.csv")
 # Calculate percentage of completed files
 exp1_percent_done <- length(which(file.exists(exp1_completed_scf) == TRUE))/length(exp1_completed_scf)*100
 exp2_percent_done <- length(which(file.exists(exp2_completed_scf) == TRUE))/length(exp2_completed_scf)*100

@@ -49,8 +49,8 @@ if (plot_exp1 == TRUE){
   exp1_data_file <- grep("exp1", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
   exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
   
-  # Convert sCF values to decimal from percentage
-  exp1_df$sCF_mean <- exp1_df$sCF_mean / 100
+  # Convert sCFL values to decimal from percentage
+  exp1_df$sCFL_mean <- exp1_df$sCFL_mean / 100
   
   # Convert mean tiger value to numeric
   # Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
@@ -61,7 +61,7 @@ if (plot_exp1 == TRUE){
   exp1_wide_df <- exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth", 
                               "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                               "LM_proportion_resolved_quartets", "mean_Q_residual", 
-                              "sCF_mean", "mean_TIGER_value")]
+                              "sCFL_mean", "mean_TIGER_value")]
   
   # Melt exp1_wide_df for better plotting
   exp1_long_df <- melt(exp1_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
@@ -85,12 +85,12 @@ if (plot_exp1 == TRUE){
   exp1_long_df$var_label <- factor(exp1_long_df$variable, 
                                    levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                               "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                              "mean_Q_residual", "sCF_mean", "mean_TIGER_value"), 
+                                              "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"), 
                                    ordered = TRUE, 
                                    labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
                                               expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                               expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+                                              expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
 }
 
 
@@ -274,8 +274,8 @@ if (plot_exp2 == TRUE){
   exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
   
   # Manage test statistic columns
-  # Convert sCF values to decimal from percentage
-  exp2_df$sCF_mean <- exp2_df$sCF_mean / 100
+  # Convert sCFL values to decimal from percentage
+  exp2_df$sCFL_mean <- exp2_df$sCFL_mean / 100
   # Convert likelihood mapping results to numeric
   # Values will be characters because 386 alignments or 9.7% have value of "no_iqtree_file" (which means could not perform LM)
   exp2_df$LM_proportion_resolved_quartets <- as.numeric(exp2_df$LM_proportion_resolved_quartets)
@@ -288,7 +288,7 @@ if (plot_exp2 == TRUE){
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                 "LM_proportion_resolved_quartets", "mean_Q_residual", 
-                                "sCF_mean")]
+                                "sCFL_mean")]
   } else {
     # TIGER was run, so plot TIGER results with other test statistic results
     # Convert TIGER results to numeric
@@ -298,7 +298,7 @@ if (plot_exp2 == TRUE){
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                 "LM_proportion_resolved_quartets", "mean_Q_residual",
-                                "sCF_mean", "mean_TIGER_value")]
+                                "sCFL_mean", "mean_TIGER_value")]
   }  # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
   
   # Melt exp2_wide_df for better plotting
@@ -331,24 +331,24 @@ if (plot_exp2 == TRUE){
     exp2_long_df$var_label <- factor(exp2_long_df$variable,
                                      levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                                 "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                                "mean_Q_residual", "sCF_mean", "mean_TIGER_value"),
+                                                "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
                                      ordered = TRUE,
                                      labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
                                                 expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                                 expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
-                                                expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
+                                                expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
   } else {
     # Add fancy labels for facets
     # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
     exp2_long_df$var_label <- factor(exp2_long_df$variable, 
                                      levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                                 "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                                "mean_Q_residual", "sCF_mean"), 
+                                                "mean_Q_residual", "sCFL_mean"), 
                                      ordered = TRUE, 
                                      labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
                                                 expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                                 expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                                expression(atop("Mean", "sCF value")) ) )
+                                                expression(atop("Mean", "sCFL value")) ) )
   } # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
   
 } # end if (plot_exp2 == TRUE)

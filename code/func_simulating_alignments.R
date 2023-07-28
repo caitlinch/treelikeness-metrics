@@ -362,7 +362,8 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t))
   names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "clade_depth", "removed_taxa", "ms_input")
   # Sort rows by clade depth
-  node_df <- node_df[order(as.numeric(node_df$clade_depth), decreasing = TRUE), ]
+  node_df$clade_depth <- as.numeric(node_df$clade_depth)
+  node_df <- node_df[order(node_df$clade_depth, decreasing = TRUE), ]
   # Add new column for the coalescence time
   node_df$coalescence_time <- ms_coal_ints
   # Format coalescences for ms input
@@ -609,7 +610,7 @@ add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, sel
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
   new_row_df <- data.frame(node = NA, tip_names = paste(paste0("t", taxa), collapse = ","), tip_numbers = paste(paste0(taxa), collapse = ","), 
                            ms_tip_order = paste(sort(taxa, decreasing = TRUE), collapse = ","), ntips = 2, ndepth = NA,
-                           coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+                           clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
   # Attach the new row onto the r_df
   r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
@@ -698,10 +699,10 @@ add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, se
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
   if (select.sister == TRUE){
     new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
-                             coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
   } else if (select.sister == FALSE){
     new_row_df <- data.frame(node = NA, tip_names = NA, tip_numbers = NA, ms_tip_order = NA, ntips = NA, ndepth = NA,
-                             coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
   }
   ## Attach the new row onto the r_df
   r_df <- rbind(r_df, new_row_df)

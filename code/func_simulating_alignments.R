@@ -382,7 +382,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
     node_df <- add.recent.introgression.event(node_df, ntaxa, recombination_value, select.sister)
   } else if (recombination_value != 0 & recombination_type == "Ancient"){
     ## If recombination_value != 0 and recombination_type = "Ancient", add one recombination event between the two oldest lineages before they coalesce
-    node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value, select.sister)
+    node_df <- add.ancient.introgression.event(node_df, ntaxa, recombination_value)
   }
   
   ## Generate gene trees in ms
@@ -610,7 +610,7 @@ add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, sel
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
   new_row_df <- data.frame(node = NA, tip_names = paste(paste0("t", taxa), collapse = ","), tip_numbers = paste(paste0(taxa), collapse = ","), 
                            ms_tip_order = paste(sort(taxa, decreasing = TRUE), collapse = ","), ntips = 2, ndepth = NA,
-                           clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
+                           clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0("R:", donor, " ", receptor), ej = recombination_command)
   # Attach the new row onto the r_df
   r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)

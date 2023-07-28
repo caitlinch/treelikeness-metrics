@@ -349,7 +349,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   
   ## Create a base tree for the simulations
   # Generate a tree using the TreeSim R package
-  t <- sim.bd.taxa.age(n = ntaxa, numbsim = 1, lambda = speciation_rate, mu = 0, frac = 1, age = tree_depth_coalescent, mrca = TRUE)
+  t <- sim.bd.taxa.age(n = ntaxa, numbsim = 1, lambda = speciation_rate, mu = 0, frac = 1, age = tree_depth_coalescent, mrca = TRUE)[[1]]
   # Save the random tree
   write.tree(t, file = t_path)
   

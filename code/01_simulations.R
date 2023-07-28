@@ -98,26 +98,31 @@ if (run.experiment.1 == TRUE){
   # Create folder to store results of this experiment, if it doesn't already exist
   exp1_dir <- paste0(simulation_directory, "exp_1/")
   if(!file.exists(exp1_dir)){dir.create(exp1_dir)}
-  
-  # Create matrix with parameters for generating each simulated alignment
-  exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_of_trees, "tree_depth" = tree_depth_random_sims)
-  # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`
-  exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
-                            sprintf("%03d", exp1_params$num_reps), "_", exp1_params$tree_depth)
-  # Add parameters for Alisim
-  exp1_params$alisim_gene_models <- alisim_gene_models
-  exp1_params$alisim_gene_tree_length <- alisim_gene_tree_length
-  # Add other parameters
-  exp1_params$total_alignment_length <- total_alignment_length
-  exp1_params$sequence_type <- sequence_type
-  # Add names for the tree file, partition file and output alignment file for each simulated alignment
-  exp1_params$tree_file <- paste0(exp1_params$uid, "_random_trees.phy")
-  exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
-  exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
-  
-  # Write exp1_params dataframe to file as a csv
+  # Create file path for parameters csv
   exp1_df_path <- paste0(simulation_directory, "exp1_parameters.csv")
-  write.csv(exp1_params, file = exp1_df_path, row.names = TRUE)
+  
+  if (file.exists(exp1_df_path) == TRUE){
+    exp1_params <- read.csv(exp1_df_path)
+  } else {
+    # Create matrix with parameters for generating each simulated alignment
+    exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_of_trees, "tree_depth" = tree_depth_random_sims)
+    # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`
+    exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
+                              sprintf("%03d", exp1_params$num_reps), "_", exp1_params$tree_depth)
+    # Add parameters for Alisim
+    exp1_params$alisim_gene_models <- alisim_gene_models
+    exp1_params$alisim_gene_tree_length <- alisim_gene_tree_length
+    # Add other parameters
+    exp1_params$total_alignment_length <- total_alignment_length
+    exp1_params$sequence_type <- sequence_type
+    # Add names for the tree file, partition file and output alignment file for each simulated alignment
+    exp1_params$tree_file <- paste0(exp1_params$uid, "_random_trees.phy")
+    exp1_params$partition_file <- paste0(exp1_params$uid, "_partitions.nex")
+    exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
+    
+    # Write exp1_params dataframe to file as a csv
+    write.csv(exp1_params, file = exp1_df_path, row.names = TRUE)
+  }
   
   # Iterate through each row in the parameters dataframe
   # Run all reps:

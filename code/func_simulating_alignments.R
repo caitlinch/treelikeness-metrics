@@ -311,7 +311,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     row$partition_file <- paste0(row_folder, row$partition_file)
     row$output_alignment_file <- output_alignment_file
     output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth_coalescent", "tree_depth_subs_per_sites",
-                           "recombination_value", "recombination_type", "uid", "alisim_gene_models", "alisim_gene_tree_length", 
+                           "recombination_value", "recombination_type", "speciation_rate", "uid", "alisim_gene_models", "alisim_gene_tree_length", 
                            "total_alignment_length", "sequence_type", "starting_tree_file", "gene_tree_file", "partition_file", 
                            "output_alignment_file")]
     write.csv(output_row, file = row_csv_path, row.names = FALSE)

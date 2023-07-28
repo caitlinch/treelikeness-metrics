@@ -355,7 +355,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   
   ##
   # Calculate times for ms -ej commands by finding coalescence times (coalescent intervals found using ape::coalescent.intervals)
-  ms_coal_ints <- calculate.ms.coalescent.times(t)
+  ms_coal_ints <- calculate.ms.coalescent.times(t, simulation.function = "TreeSim")
   # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }
   nodes <- (ntaxa+1):(ntaxa+t$Nnode)
   # Extract information about all clades from tree
@@ -364,7 +364,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   # Sort rows by clade depth
   node_df <- node_df[order(node_df$clade_depth, decreasing = TRUE), ]
   # Add new column for the coalescence time
-  node_df$coalescence_time <- coalescent_times
+  node_df$coalescence_time <- ms_coal_ints
   # Format coalescences for ms input
   node_df <- determine.coalescence.taxa(node_df)
   # Create a new column containing -ej event for each row

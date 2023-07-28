@@ -7,7 +7,7 @@
 
 
 #### 1. Set parameters ####
-# output_directory                 <- Directory where alignments will be saved/treelikeness metrics will be run.
+# simulation_directory            <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory                  <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
 # ms_path                         <- Path to ms executable 
 
@@ -34,13 +34,13 @@
 
 run_location = "soma"
 if (run_location == "local"){
-  output_directory        <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  simulation_directory    <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   repo_directory          <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   ms_path                 <- "ms"
   iqtree2_path            <- "iqtree2"
   number_parallel_threads <- 1
 } else if (run_location == "soma"){
-  output_directory         <- "/data/caitlin/treelikeness_metrics/"
+  simulation_directory    <- "/data/caitlin/treelikeness_metrics/"
   repo_directory          <- "/data/caitlin/treelikeness_metrics/"
   ms_path                 <- "/data/caitlin/executables/msdir/ms"
   iqtree2_path            <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
@@ -96,7 +96,7 @@ number_of_replicates <- 1:num_reps
 # Simulate DNA along each tree with Alisim, using the topology-unlinked partition model
 if (run.experiment.1 == TRUE){
   # Create folder to store results of this experiment, if it doesn't already exist
-  exp1_dir <- paste0(output_directory, "exp_1/")
+  exp1_dir <- paste0(simulation_directory, "exp_1/")
   if(!file.exists(exp1_dir)){dir.create(exp1_dir)}
   
   # Create matrix with parameters for generating each simulated alignment
@@ -116,25 +116,25 @@ if (run.experiment.1 == TRUE){
   exp1_params$output_alignment_file <- paste0(exp1_params$uid, "_output_alignment")
   
   # Write exp1_params dataframe to file as a csv
-  exp1_df_path <- paste0(output_directory, "exp1_parameters.csv")
+  exp1_df_path <- paste0(simulation_directory, "exp1_parameters.csv")
   write.csv(exp1_params, file = exp1_df_path, row.names = TRUE)
   
   # Iterate through each row in the parameters dataframe
   # Run all reps:
-  #   lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+  #   lapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   # Run single rep:
-  #   lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+  #   lapply(1, random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   
   if (number_parallel_threads == 1){
-    exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+    exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   } else {
-    exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
+    exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
                              mc.cores = number_parallel_threads)
   }
   
   # Change output file names from list to dataframe
   exp1_op_df <- as.data.frame(do.call(rbind, exp1_op_list))
-  exp1_op_df_path <- paste0(output_directory, "exp1_file_output_paths.csv")
+  exp1_op_df_path <- paste0(simulation_directory, "exp1_file_output_paths.csv")
   write.csv(exp1_op_df, file = exp1_op_df_path, row.names = TRUE)
 }
 
@@ -148,56 +148,62 @@ if (run.experiment.1 == TRUE){
 #   - Concatenate alignments
 if (run.experiment.3 == TRUE){
   # Create folder to store results of this experiment, if it doesn't already exist
-  exp3_dir <- paste0(output_directory, "exp_3/")
+  exp3_dir <- paste0(simulation_directory, "exp_3/")
   if (dir.exists(exp3_dir) == FALSE){dir.create(exp3_dir)}
   
-  exp3_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_gene_trees, 
-                             "tree_depth_coalescent" = tree_depth_coalescent_sims, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"),
-                             "speciation_rate" = speciation_rates)
-  # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`_`recombination proportion`_`introgression event type`
-  exp3_params$uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
-                            sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
-                            "_", exp3_params$recombination_type, "_", exp3_params$speciation_rate)
-  # Add parameters for Alisim
-  exp3_params$alisim_gene_models <- alisim_gene_models
-  exp3_params$alisim_gene_tree_length <- alisim_gene_tree_length
-  # Add other parameters
-  exp3_params$tree_depth_subs_per_sites <- conversion_depth_subs_per_site
-  exp3_params$total_alignment_length <- number_gene_trees * gene_length
-  exp3_params$sequence_type <- sequence_type
-  # Add name for the partition file and output alignment file for each simulated alignment
-  exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
-  exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
+  # Create file path for parameters csv
+  exp3_df_path <- paste0(simulation_directory, "exp3_parameters.csv")
   
-  # Remove any rows that have 5 taxa and an ancient introgression event
-  # Due to the way ancient introgression events are structured (take place at time where four taxa exist, between two non-sister taxa), a recent and an ancient
-  #     introgression event will be identical for a tree with 5 taxa
-  remove_rows <- which(exp3_params$num_taxa == 5 & exp3_params$recombination_type == "Ancient")
-  keep_rows <- setdiff(1:nrow(exp3_params), remove_rows)
-  exp3_params <- exp3_params[keep_rows, ]
-  
-  
-  # Write exp3_params dataframe to file as a csv
-  exp3_df_path <- paste0(output_directory, "exp3_parameters.csv")
-  write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)
+  if (file.exists(exp3_df_path) == TRUE){
+    exp3_params <- read.csv(exp3_df_path)
+  } else {
+    exp3_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_gene_trees, 
+                               "tree_depth_coalescent" = tree_depth_coalescent_sims, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"),
+                               "speciation_rate" = speciation_rates)
+    # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`_`recombination proportion`_`introgression event type`
+    exp3_params$uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
+                              sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
+                              "_", exp3_params$recombination_type, "_", exp3_params$speciation_rate)
+    # Add parameters for Alisim
+    exp3_params$alisim_gene_models <- alisim_gene_models
+    exp3_params$alisim_gene_tree_length <- alisim_gene_tree_length
+    # Add other parameters
+    exp3_params$tree_depth_subs_per_sites <- conversion_depth_subs_per_site
+    exp3_params$total_alignment_length <- number_gene_trees * gene_length
+    exp3_params$sequence_type <- sequence_type
+    # Add name for the partition file and output alignment file for each simulated alignment
+    exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")
+    exp3_params$output_alignment_file <- paste0(exp3_params$uid, "_output_alignment")
+    
+    # Remove any rows that have 5 taxa and an ancient introgression event
+    # Due to the way ancient introgression events are structured (take place at time where four taxa exist, between two non-sister taxa), a recent and an ancient
+    #     introgression event will be identical for a tree with 5 taxa
+    remove_rows <- which(exp3_params$num_taxa == 5 & exp3_params$recombination_type == "Ancient")
+    keep_rows <- setdiff(1:nrow(exp3_params), remove_rows)
+    exp3_params <- exp3_params[keep_rows, ]
+    
+    
+    # Write exp3_params dataframe to file as a csv
+    write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)
+  }
   
   # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
   # Run all reps: 
-  #   lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+  #   lapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
   # Run single rep:
-  #   lapply(1, ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params, select.sister = FALSE)
+  #   lapply(1, ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params, select.sister = FALSE)
   if (number_parallel_threads == 1){
-    exp3_op_list<- lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
-                          experiment_params_df = exp3_params, select.sister = FALSE, scale.random.tree = FALSE, scale.gene.trees = TRUE)
+    exp3_op_list<- lapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+                          experiment_params_df = exp3_params, select.sister = FALSE, scale.gene.trees = TRUE)
   } else {
-    exp3_op_list <- mclapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
-                             experiment_params_df = exp3_params, select.sister = FALSE, scale.random.tree = FALSE, scale.gene.trees = TRUE, 
+    exp3_op_list <- mclapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+                             experiment_params_df = exp3_params, select.sister = FALSE, scale.gene.trees = TRUE, 
                              mc.cores = number_parallel_threads)
   }
   
   # Change output file names from list to dataframe
   exp3_op_df <- as.data.frame(do.call(rbind, exp3_op_list))
-  exp3_op_df_path <- paste0(output_directory, "exp3_file_output_paths.csv")
+  exp3_op_df_path <- paste0(simulation_directory, "exp3_file_output_paths.csv")
   write.csv(exp3_op_df, file = exp3_op_df_path, row.names = TRUE)
 }
 

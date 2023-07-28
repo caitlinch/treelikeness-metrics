@@ -359,8 +359,12 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }
   nodes <- (ntaxa+1):(ntaxa+t$Nnode)
   # Extract information about all clades from tree
-  node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t, coalescent_times = ms_coal_ints))
-  names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "coalescence_time", "removed_taxa", "ms_input")
+  node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t))
+  names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "clade_depth", "removed_taxa", "ms_input")
+  # Sort rows by clade depth
+  node_df <- node_df[order(node_df$clade_depth, decreasing = TRUE), ]
+  # Add new column for the coalescence time
+  node_df$coalescence_time <- coalescent_times
   # Format coalescences for ms input
   node_df <- determine.coalescence.taxa(node_df)
   # Create a new column containing -ej event for each row

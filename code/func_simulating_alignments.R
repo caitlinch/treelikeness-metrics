@@ -621,6 +621,99 @@ add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, sel
 }
 
 
+add.ancient.ils <- function(i_df, ntaxa, ils_value, select.sister = FALSE){
+  ## Function to add ILS event between two sister taxa by adding commands for simultaneous -es and -ej events 
+  
+  ## Format node dataframe in order of coalescence time, largest to smallest
+  i_df <- i_df[order(i_df$coalescence_time, decreasing = TRUE),]
+  
+  ## Select the two taxa involved the timing of the ILS event
+  if (select.sister == TRUE){
+    # If selecting two taxa that are sister to each other, candidate row for ILS 
+    #    will be row with the largest coalescence time (first row)
+    row_id = 1
+    # Extract row
+    row <- i_df[row_id, ]
+    # Extract taxa numbers
+    taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
+    # Set coalescence time halfway along the coalescent interval
+    #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
+    coal_time <- (0.5 * (i_df$coalescence_time[row_id] - i_df$coalescence_time[row_id+1]))  + i_df$coalescence_time[row_id+1]
+  } else if (select.sister == FALSE){
+    # If not selecting two taxa that are sister to each other, the ILS event must take place
+    #    less basally (will occur closer towards the tips)
+    # Select the second and third rows (will result in 4 taxa remaining)
+    row2 <- i_df[2, ]
+    row3 <- i_df[3, ]
+    # Identify the taxa in rows 2 and 3 (the 4 taxa present at coal_time)
+    taxa2 <- as.numeric(unlist(strsplit(row2$ms_input, " ")))
+    taxa3 <- as.numeric(unlist(strsplit(row3$ms_input, " ")))
+    # Check whether you have four unique taxa or not
+    check_four_taxa <- c(taxa2, taxa3)
+    if (length(unique(check_four_taxa)) == 4){
+      # If you do, randomly select one taxa from each event for the ILS event
+      # To select which taxa are involved in this event, randomly select one taxa from each row
+      taxa <- c(sample(taxa2, 1), sample(taxa3, 1))
+    } else if (length(unique(check_four_taxa)) == 3){
+      # It is possible that a taxa may occur in both events. (e.g. taxa2 = {3,4} and taxa3 = {3,15})
+      # In that case, it means that first taxa 15 and 3 coalesce into taxa 3, then taxa 3 and 4 coalesce into taxa 3.
+      # If it does, remove the doubled-up taxa from taxa2 (the most basal coalescence event) and use the other taxa for taxa2.
+      #             Use the doubled-up taxa for taxa3. (e.g. we would select taxa 3 and 4 for this example)
+      # If you did it the other way (e.g. selecting 3 and 15), you are adding an ILS event between two taxa that have
+      #    just split. There is already ILS between these taxa. Adding ILS will increase the proportion of genetic 
+      #    material moving between these two taxa. However selecting 3 and 4 at coal_time (1/2 way between 3rd and 4th coalescent
+      #    event) does add a new source of incoming genetic material that would not otherwise exist. 
+      doubled_up_taxa <- intersect(taxa2,taxa3)
+      taxa2_remaining <- setdiff(taxa2, doubled_up_taxa)
+      taxa <- c(doubled_up_taxa, taxa2_remaining)
+    } else if (length(unique(check_four_taxa)) == 2){
+      # If somehow both coalescent events involve only the same two taxa (should not be possible),
+      #    simply select those as the taxa
+      taxa <- unique(check_four_taxa)
+    }
+    
+    # Set coalescence time halfway along the coalescent interval
+    #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
+    #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where
+    #          the number of taxa becomes 3 (from 4)
+    coal_time <- (0.5 * (i_df$coalescence_time[3] - i_df$coalescence_time[4])) + i_df$coalescence_time[4]
+  }
+  # Get the two taxa involved in the event
+  receptor = max(taxa)
+  donor = min(taxa)
+  
+  ## Set variables for the ILS commands
+  # Calculate the inheritance probability (which is 1 - the rate of ILS)
+  inheritance_prob <- round(1 - ils_value, digits = 2)
+  # Name the new population (must not share a name with any other population)
+  new_taxa <- ntaxa+1
+  
+  ## Create the commands for the ILS
+  # This is the the instantaneous population split: -es time_of_introgression_event population_splitting inheritance_probability
+  ils_es <- paste0("-es ", coal_time, " ", donor, " ", inheritance_prob)
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  ils_ej <-  paste0("-ej ", coal_time, " ", new_taxa, " ", receptor)
+  
+  ## Create a new row to attach to the dataframe using the two components of the ILS
+  # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
+  ils_command <- paste0(ils_es, " ", ils_ej)
+  if (select.sister == TRUE){
+    new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
+                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = ils_command)
+  } else if (select.sister == FALSE){
+    new_row_df <- data.frame(node = NA, tip_names = NA, tip_numbers = NA, ms_tip_order = NA, ntips = NA, ndepth = NA,
+                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = ils_command)
+  }
+  ## Attach the new row onto the i_df
+  i_df <- rbind(i_df, new_row_df)
+  # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
+  i_df <- i_df[order(i_df$coalescence_time, decreasing = TRUE),]
+  
+  ## Return dataframe with ILS event added
+  return(i_df)
+}
+
+
 add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   

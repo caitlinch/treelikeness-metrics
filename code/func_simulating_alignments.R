@@ -404,7 +404,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
 }
 
 
-extract.clade.from.node <- function(node, tree, coalescent_times){
+extract.clade.from.node.coalescent_times <- function(node, tree, coalescent_times){
   ## Small function to take a node, extract the clade from that node, and return the number and names of taxa in that node
   
   # Extract clade
@@ -431,6 +431,37 @@ extract.clade.from.node <- function(node, tree, coalescent_times){
   # Assemble results into a vector
   o <- c(node = node, tip_names = paste(tip_names, collapse = ","), tip_numbers = paste(tip_numbers, collapse = ","), 
          ms_tip_order = paste(tip_order, collapse = ","), ntips = ntips, ndepth = ndepth, coalescence_time = coal_time,
+         removed_taxa = removed_taxa, ms_input = ms_input)
+  # Return vector
+  return(o)
+}
+
+
+extract.clade.from.node <- function(node, tree){
+  ## Small function to take a node, extract the clade from that node, and return the number and names of taxa in that node
+  
+  # Extract clade
+  clade <- extract.clade(tree, node)
+  # Extract information about clade
+  tip_names <- clade$tip.label
+  tip_numbers <- gsub("t", "", tip_names)
+  tip_order <- tip_numbers[order(as.numeric(tip_numbers), decreasing = TRUE)]
+  ntips <- length(clade$tip.label)
+  # Determine depth of this node (how many species does this node contain)
+  ndepth <- node.depth(tree)[node]
+  # Determine get the max branching time for this node - should match the coalescent time
+  node_max_branching_time <- max(branching.times(clade))
+  # Determine which taxa to remove
+  if (ndepth == 2){
+    removed_taxa = tip_order[1]
+    ms_input = paste0(tip_order[1], " ", tip_order[2])
+  } else {
+    removed_taxa = NA
+    ms_input = NA
+  }
+  # Assemble results into a vector
+  o <- c(node = node, tip_names = paste(tip_names, collapse = ","), tip_numbers = paste(tip_numbers, collapse = ","), 
+         ms_tip_order = paste(tip_order, collapse = ","), ntips = ntips, ndepth = ndepth, clade_depth = node_max_branching_time,
          removed_taxa = removed_taxa, ms_input = ms_input)
   # Return vector
   return(o)

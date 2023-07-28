@@ -200,8 +200,9 @@ if (run.experiment.3 == TRUE){
     # Write exp3_params dataframe to file as a csv
     write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)
   }
-  
-  # Errors testing: 900 (Ancient) and 6666 (Recent)
+
+  #### NOTE: BEFORE RUNNING, NEED TO SPECIFY SUBSTITUTIONS/SITE RATE (TREE DEPTH CONVERSION) - CURRENTLY 0.1 SUBSTITUTIONS PER SITE
+  ####          PICK DIFFERENT VALUES BASED ON EVOLUTIONARY RATE? OR PICK DIFFERENT VALUES BASED ON TREE DEPTH?
   
   # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
   # Run all reps: 

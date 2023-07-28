@@ -253,35 +253,21 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   
   # Create a new folder to store results for this file and create output folders for trees/gene trees/output data
   if (is.na(row$uid) == FALSE){
-    row_folder            <- paste0(output_directory, row$uid, "/")
-    row_csv_path          <- paste0(row_folder, row$uid, "_parameters.csv")
-    start_coal_tree_file  <- paste0(row_folder, row$uid, "_starting_tree.txt")
-    gene_trees_file       <- paste0(row_folder, row$uid, "_ms_gene_trees.txt")
+    uid <- row$uid
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
-    row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_parameters.csv")
-    start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_starting_tree.txt")
-    gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_ms_gene_trees.txt")
+    uid <- paste0(sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
+                  "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", 
+                  row$recombination_type, "_", row$speciation_rate)
   } else {
-    row_folder            <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type, "/")
-    row_csv_path          <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_parameters.csv")
-    start_coal_tree_file  <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_starting_tree.txt")
-    gene_trees_file       <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                                    "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", row$recombination_type,
-                                    "_ms_gene_trees.txt")
+    uid <- paste0(sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
+                  "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", 
+                  row$recombination_value, "_", row$recombination_type, "_", row$speciation_rate)
   }
+  
+  row_folder            <- paste0(output_directory, uid, "/")
+  row_csv_path          <- paste0(row_folder, uid, "_parameters.csv")
+  start_coal_tree_file  <- paste0(row_folder, uid, "_starting_tree.txt")
+  gene_trees_file       <- paste0(row_folder, uid, "_ms_gene_trees.txt")
   
   # Create the folder to store information for this row, if it doesn't already exist
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
@@ -292,10 +278,10 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   # If the output alignment file doesn't exist, generate it
   if (file.exists(output_alignment_file) == FALSE){
     # Call ms
-    ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, tree_depth_coalescent = row$tree_depth_coalescent, 
-                                         recombination_value = row$recombination_value, recombination_type = row$recombination_type, 
-                                         select.sister = FALSE, output_directory = row_folder, ms_path = ms_path, replicate_number = NA, 
-                                         unique_id = row$uid)
+    ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, speciation_rate = row$speciation_rate, 
+                                         tree_depth_coalescent = row$tree_depth_coalescent, recombination_value = row$recombination_value, 
+                                         recombination_type = row$recombination_type, select.sister = FALSE, output_directory = row_folder,
+                                         ms_path = ms_path, replicate_number = NA, unique_id = uid)
     start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
     # Scale the gene trees by the row$tree_depth_subs_per_sites
@@ -341,35 +327,28 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, recombination_value = 0, recombination_type = NA, 
+ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_rate, recombination_value = 0, recombination_type = NA, 
                               select.sister = FALSE, output_directory, ms_path = "ms", replicate_number = NA,
                               unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
   
   ## Generate file paths using either unique id or information about this set of parameters (number of taxa/trees and replicate number)
   if (is.na(unique_id) == FALSE){
-    t_path <- paste0(output_directory, unique_id, "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, unique_id, "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, unique_id, "_ms_gene_trees.txt")
+    op_unique_id <- unique_id
   } else if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
-    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
-                     "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
-                         "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
-                                 "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_ms_gene_trees.txt")
+    op_unique_id <- paste0(sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
+                           "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_", speciation_rate)
   } else {
-    t_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
-                     "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_starting_tree.txt")
-    ms_op_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
-                         "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_ms_output.txt")
-    ms_gene_trees_path <- paste0(output_directory, sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
-                                 "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_ms_gene_trees.txt")
+    op_unique_id <- paste0(sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
+                           "_", tree_depth_coalescent, "_", recombination_value, "_", 
+                           recombination_type, "_", speciation_rate)
   }
+  t_path <- paste0(output_directory, op_unique_id, "_starting_tree.txt")
+  ms_op_path <- paste0(output_directory, op_unique_id, "_ms_output.txt")
+  ms_gene_trees_path <- paste0(output_directory, op_unique_id, "_ms_gene_trees.txt")
   
   ## Create a base tree for the simulations
-  # Generate a random tree under the coalescent using the TreeSim R package
-  speciation_rate = 1
+  # Generate a tree using the TreeSim R package
   t <- sim.bd.taxa.age(n = ntaxa, numbsim = 1, lambda = speciation_rate, mu = 0, frac = 1, age = tree_depth_coalescent, mrca = TRUE)
   # Save the random tree
   write.tree(t, file = t_path)

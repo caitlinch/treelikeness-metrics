@@ -714,66 +714,48 @@ add.ancient.ils <- function(i_df, ntaxa, ils_value, select.sister = FALSE){
 }
 
 
-add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){
+add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value){
   ## Function to add introgression event between two sister taxa by adding commands for simultaneous -es and -ej events 
   
   ## Format node dataframe in order of coalescence time, largest to smallest
+  r_df$coalescence_time <- as.numeric(r_df$coalescence_time) # ensure numeric to order correctly
   r_df <- r_df[order(r_df$coalescence_time, decreasing = TRUE),]
   
+  ## Select the interval for introgression
+  #     Place the event after the second node (counting from the root), involving on tip from each side of the first node split
+  #     The event will occur halfway through the interval that both tips exist for. I.e. if tip a is present for the interval
+  #             10-5 and tip b is present for the interval 8-6, the overlap is 8-6 and the event will occur at time 7
+  # Select the second row as a starting point. This is information about the second node (starting counting from the root)
+  row_n2 <- r_df[2, ]
+  # Identify which taxa coalesce at the second node
+  n2_names <- strsplit(row_n2$ms_input, " ")[[1]]
+  # Now, look at the row for node 1. Check which taxa exists at this node
+  row_n1 <- r_df[1, ]
+  n1_names <- strsplit(row_n1$ms_input, " ")[[1]]
+  # Identify the intervals for each of the three taxa - i.e., what are the intervals that these taxa are stable at, between coalescent events?
+  i_tips_df <- as.data.frame(do.call(rbind, lapply(c(n1_names[which(! n1_names %in% n2_names)], n2_names[1], n2_names[2]), return.tip.time.intervals, tip_df = r_df)))
+  i_tips_df$tip_letter <- c("a", "b", "c")
+  i_tips_df$split <- c("T", "F", "F")
+  i_tips_df$upper_limit <- as.numeric(i_tips_df$upper_limit)
+  i_tips_df$lower_limit <- as.numeric(i_tips_df$lower_limit)
+  # Randomly select a taxa from the side of the split with two tips. 
+  # This tip will be removed and NOT be involved in the introgression event
+  remove_row <- sample(which(i_tips_df$split == "F"), 1)
+  i_tips_df <- i_tips_df[setdiff(1:nrow(i_tips_df), remove_row), ]
+  # The event needs to happen at a time when both taxa exist
+  # Update the times to be the interval where both taxa exist
+  i_tips_df$upper_limit = min(i_tips_df$upper_limit)
+  i_tips_df$lower_limit = max(i_tips_df$lower_limit)
+  
   ## Select the two taxa involved the timing of the recombination event
-  if (select.sister == TRUE){
-    # If selecting two taxa that are sister to each other, candidate row for introgression 
-    #    will be row with the largest coalescence time (first row)
-    row_id = 1
-    # Extract row
-    row <- r_df[row_id, ]
-    # Extract taxa numbers
-    taxa <- as.numeric(unlist(strsplit(row$ms_input, " ")))
-    # Set coalescence time halfway along the coalescent interval
-    #     [to find length of interval, subtract start of interval (second coalescence time) from end of interval (longest coalescence time)]
-    coal_time <- (0.5 * (r_df$coalescence_time[row_id] - r_df$coalescence_time[row_id+1]))  + r_df$coalescence_time[row_id+1]
-  } else if (select.sister == FALSE){
-    # If not selecting two taxa that are sister to each other, the introgression event must take place
-    #    less basally (will occur closer towards the tips)
-    # Select the second and third rows (will result in 4 taxa remaining)
-    row2 <- r_df[2, ]
-    row3 <- r_df[3, ]
-    # Identify the taxa in rows 2 and 3 (the 4 taxa present at coal_time)
-    taxa2 <- as.numeric(unlist(strsplit(row2$ms_input, " ")))
-    taxa3 <- as.numeric(unlist(strsplit(row3$ms_input, " ")))
-    # Check whether you have four unique taxa or not
-    check_four_taxa <- c(taxa2, taxa3)
-    if (length(unique(check_four_taxa)) == 4){
-      # If you do, randomly select one taxa from each event for the introgression event
-      # To select which taxa are involved in this event, randomly select one taxa from each row
-      taxa <- c(sample(taxa2, 1), sample(taxa3, 1))
-    } else if (length(unique(check_four_taxa)) == 3){
-      # It is possible that a taxa may occur in both events. (e.g. taxa2 = {3,4} and taxa3 = {3,15})
-      # In that case, it means that first taxa 15 and 3 coalesce into taxa 3, then taxa 3 and 4 coalesce into taxa 3.
-      # If it does, remove the doubled-up taxa from taxa2 (the most basal coalescence event) and use the other taxa for taxa2.
-      #             Use the doubled-up taxa for taxa3. (e.g. we would select taxa 3 and 4 for this example)
-      # If you did it the other way (e.g. selecting 3 and 15), you are adding an introgression event between two taxa that have
-      #    just split. There is already ILS between these taxa. Adding introgression will increase the proportion of genetic 
-      #    material moving between these two taxa. However selecting 3 and 4 at coal_time (1/2 way between 3rd and 4th coalescent
-      #    event) does add a new source of incoming genetic material that would not otherwise exist. 
-      doubled_up_taxa <- intersect(taxa2,taxa3)
-      taxa2_remaining <- setdiff(taxa2, doubled_up_taxa)
-      taxa <- c(doubled_up_taxa, taxa2_remaining)
-    } else if (length(unique(check_four_taxa)) == 2){
-      # If somehow both coalescent events involve only the same two taxa (should not be possible),
-      #    simply select those as the taxa
-      taxa <- unique(check_four_taxa)
-    }
-    
-    # Set coalescence time halfway along the coalescent interval
-    #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
-    #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where
-    #          the number of taxa becomes 3 (from 4)
-    coal_time <- (0.5 * (r_df$coalescence_time[3] - r_df$coalescence_time[4])) + r_df$coalescence_time[4]
-  }
-  # Get the two taxa involved in the event
-  receptor = max(taxa)
-  donor = min(taxa)
+  receptor = max(as.numeric(i_tips_df$tip))
+  donor = min(as.numeric(i_tips_df$tip))
+  
+  # Set coalescence time halfway along the coalescent interval
+  #     [to find length of interval, subtract start of interval (fourth coalescence time) from end of interval (third coalescence time)]
+  #     That places event halfway between the point where the number of taxa becomes 4 (from 5) and the point where
+  #          the number of taxa becomes 3 (from 4)
+  coal_time <- (0.5 * (i_tips_df$upper_limit[1] - i_tips_df$lower_limit[1])) + i_tips_df$lower_limit[1]
   
   ## Set variables for the recombination event commands
   # Calculate the inheritance probability (which is 1 - the rate of introgression)
@@ -790,13 +772,8 @@ add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, se
   ## Create a new row to attach to the dataframe using the two components of the recombination event
   # This is the instantaneous population join: -ej time_of_introgression_event new_population recipient_population 
   recombination_command <- paste0(recombination_es, " ", recombination_ej)
-  if (select.sister == TRUE){
-    new_row_df <- data.frame(node = NA, tip_names = row$tip_names, tip_numbers = row$tip_numbers, ms_tip_order = row$ms_tip_order, ntips = NA, ndepth = NA,
-                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
-  } else if (select.sister == FALSE){
-    new_row_df <- data.frame(node = NA, tip_names = NA, tip_numbers = NA, ms_tip_order = NA, ntips = NA, ndepth = NA,
-                             clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0(donor, " ", receptor), ej = recombination_command)
-  }
+  new_row_df <- data.frame(node = NA, tip_names = NA, tip_numbers = NA, ms_tip_order = NA, ntips = NA, ndepth = NA,
+                           clade_depth = NA, coalescence_time = coal_time, removed_taxa = NA, ms_input = paste0("R:",donor, " ", receptor), ej = recombination_command)
   ## Attach the new row onto the r_df
   r_df <- rbind(r_df, new_row_df)
   # Sort rows by coalescence time (longest coalescence time to shortest coalescence time)
@@ -806,6 +783,36 @@ add.ancient.introgression.event <- function(r_df, ntaxa, recombination_value, se
   return(r_df)
 }
 
+
+return.tip.time.intervals <- function(tip, tip_df){
+  # Quick function to check where a tip exists and return the time interval for that tip, around the second node in the tree
+  #     Nodes counted from the root stemward
+  
+  # Make columns for which taxa is the donor and which is the receptor
+  tip_df$donor <- unlist(strsplit(tip_df$ms_input, " "))[c(T, F)]
+  tip_df$receptor <- unlist(strsplit(tip_df$ms_input, " "))[c(F, T)]
+  # Check if the tip is the smallest tip (i.e. the tip is the lowest number and is only a receptor, not a donator)
+  tip_check <- (min(c(tip_df$receptor, tip_df$donor)) == tip) & (tip %in% tip_df$receptor) & ( ! (tip %in% tip_df$donor) )
+  if (tip_check == TRUE){
+    # Tip IS the root tip
+    # Extract the THIRD occurence of the tip. (First is root, second is for introgression node, third is for end of interval)
+    tip_min <- tip_df[which(tip_df$receptor == tip),"coalescence_time"][3]
+    tip_max <- tip_df[which(tip_df$receptor == tip),"coalescence_time"][2]
+  } else if (tip_check == FALSE){
+    # Tip is NOT the root tip
+    tip_min <- tip_df[which(tip_df$receptor == tip),"coalescence_time"][1]
+    tip_max <- tip_df[which(tip_df$donor == tip),"coalescence_time"][1]
+  }
+  # If the minimum tip time is NA, that means the tip is present in only one coalescent event
+  # Change the minimum tip time to 0
+  if (is.na(tip_min) == TRUE){
+    tip_min <- 0
+  }
+  # Assemble times into an output row
+  tip_row <- c("tip" = tip, "upper_limit" = tip_max, "lower_limit" = tip_min)
+  # Return output
+  return(tip_row)
+}
 
 
 #### Utility functions ####

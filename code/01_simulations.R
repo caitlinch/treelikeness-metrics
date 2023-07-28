@@ -7,13 +7,19 @@
 
 
 #### 1. Set parameters ####
+## CONTROL PARAMETERS
+# parameter.values                <- Control flag for creating the simulation parameter values (TRUE to create objects containing simulation parameter values)
+# run.experiment.1                <- Control flag for experiment 1 (TRUE to run code to generate simulations for Experiment 1)
+# run.experiment.3                <- Control flag for experiment 3 (TRUE to run code to generate simulations for Experiment 3)
+
+## DIRECTORY PATHS
 # simulation_directory            <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory                  <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
 # ms_path                         <- Path to ms executable 
-
 # iqtree2_path                    <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included). 
 # number_parallel_threads         <- Number of threads to run simultaneously in mclapply when generating alignments
 
+## SIMULATION PARAMETERS
 # total_alignment_length          <- Total length of concatenated alignments in base pairs (we chose 10000) for the random tree analyses (experiment 1).
 # gene_length                     <- Length of each gene generated in ms. Total alignment length will be length of each gene multiplied by number of gene trees. 
 #                                     For Total Alignment Length = 10000, use 100 gene trees of 100 bp each.
@@ -29,9 +35,13 @@
 # alisim_gene_tree_length         <- Gene-specific tree length for Alisim
 # conversion_depth_subs_per_site     <- Tree depth for ML tree - used to convert depth of ms gene trees from coalescent units to substitutions per site
 
-# run.experiment.1                <- Control flag for experiment 1 (TRUE to run code to generate simulations for Experiment 1)
-# run.experiment.3                <- Control flag for experiment 3 (TRUE to run code to generate simulations for Experiment 3)
 
+## CONTROL PARAMETERS
+parameter.values            <- FALSE
+run.experiment.1            <- FALSE
+run.experiment.3            <- TRUE
+
+## DIRECTORY PATHS
 run_location = "soma"
 if (run_location == "local"){
   simulation_directory    <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
@@ -47,22 +57,22 @@ if (run_location == "local"){
   number_parallel_threads <- 20
 }
 
-total_alignment_length          <- 10000
-gene_length                     <- 500
-sequence_type                   <- "DNA"
-taxa_vec                        <- c(5,10,20,50,100)
-num_reps                        <- 10
-tree_depth_random_sims          <- c(0.01, 0.1, 1)
-tree_depth_coalescent_sims      <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
-speciation_rates                <- c(0.1, 1) # for generating Yule tree for the introgression experiments (experiment 3)
-number_gene_trees               <- 200
-r_vec                           <- seq(0, 0.5, 0.05)
-alisim_gene_models              <- "JC"
-alisim_gene_tree_length         <- NA
-conversion_depth_subs_per_site  <- 0.1
-
-run.experiment.1 <- FALSE
-run.experiment.3 <- TRUE
+## SIMULATION PARAMETERS
+if (parameter.values == TRUE){
+  total_alignment_length          <- 10000
+  gene_length                     <- 500
+  sequence_type                   <- "DNA"
+  taxa_vec                        <- c(5,10,20,50,100)
+  num_reps                        <- 10
+  tree_depth_random_sims          <- c(0.01, 0.1, 1)
+  tree_depth_coalescent_sims      <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
+  speciation_rates                <- c(0.1, 1) # for generating Yule tree for the introgression experiments (experiment 3)
+  number_gene_trees               <- 200
+  r_vec                           <- seq(0, 0.5, 0.05)
+  alisim_gene_models              <- "JC"
+  alisim_gene_tree_length         <- NA
+  conversion_depth_subs_per_site  <- 0.1
+}
 
 
 
@@ -186,7 +196,7 @@ if (run.experiment.3 == TRUE){
     remove_rows <- which(exp3_params$num_taxa == 5 & exp3_params$recombination_type == "Ancient")
     keep_rows <- setdiff(1:nrow(exp3_params), remove_rows)
     exp3_params <- exp3_params[keep_rows, ]
-    
+    row.names(exp3_params) <- 1:nrow(exp3_params)
     
     # Write exp3_params dataframe to file as a csv
     write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)

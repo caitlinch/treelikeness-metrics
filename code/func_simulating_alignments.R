@@ -362,7 +362,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   node_df <- do.call(rbind.data.frame, lapply(nodes, extract.clade.from.node, tree = t))
   names(node_df) <- c("node", "tip_names", "tip_numbers", "ms_tip_order", "ntips", "ndepth", "clade_depth", "removed_taxa", "ms_input")
   # Sort rows by clade depth
-  node_df <- node_df[order(node_df$clade_depth, decreasing = TRUE), ]
+  node_df <- node_df[order(as.numeric(node_df$clade_depth), decreasing = TRUE), ]
   # Add new column for the coalescence time
   node_df$coalescence_time <- ms_coal_ints
   # Format coalescences for ms input

@@ -65,13 +65,20 @@ if (parameter.values == TRUE){
   taxa_vec                        <- c(5,10,20,50,100)
   num_reps                        <- 10
   tree_depth_random_sims          <- c(0.01, 0.1, 1)
-  tree_depth_coalescent_sims      <- c(0.1, 1, 10, 100) # where bounds for coalescent tree depth are 0.1 (minimum) and 100 (maximum) in coalescent units
+  tree_depth_coalescent_sims      <- c(5, 50, 500) # where bounds for coalescent tree depth are in millions of years (see TreeSim doco)
   speciation_rates                <- c(0.1, 1) # for generating Yule tree for the introgression experiments (experiment 3)
   number_gene_trees               <- 200
   r_vec                           <- seq(0, 0.5, 0.05)
   alisim_gene_models              <- "JC"
   alisim_gene_tree_length         <- NA
   conversion_depth_subs_per_site  <- 0.1
+  
+  # Determine number of trees - all whole numbers that are a divisor of the total alignment length
+  number_of_trees <- divisors(total_alignment_length)
+  # Set number of taxa equal to taxa_vec
+  number_of_taxa <- taxa_vec
+  # Create a list of all replicate numbers using the num_reps value
+  number_of_replicates <- 1:num_reps
 }
 
 
@@ -85,14 +92,6 @@ library(parallel)
 
 #### 3. Prepare analyses ####
 source(paste0(repo_directory, "code/func_simulating_alignments.R"))
-
-## Prepare variables that remain stable for all experiments using the input parameters
-# Determine number of trees - all whole numbers that are a divisor of the total alignment length
-number_of_trees <- divisors(total_alignment_length)
-# Set number of taxa equal to taxa_vec
-number_of_taxa <- taxa_vec
-# Create a list of all replicate numbers using the num_reps value
-number_of_replicates <- 1:num_reps
 
 
 
@@ -201,6 +200,8 @@ if (run.experiment.3 == TRUE){
     # Write exp3_params dataframe to file as a csv
     write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)
   }
+  
+  # Errors testing: 900 (Ancient) and 6666 (Recent)
   
   # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
   # Run all reps: 

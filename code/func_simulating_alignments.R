@@ -355,7 +355,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   
   ##
   # Calculate times for ms -ej commands by finding coalescence times (coalescent intervals found using ape::coalescent.intervals)
-  ms_coal_ints <- calculate.ms.coalescent.times(t$Nnode, coalescent.intervals(t))
+  ms_coal_ints <- calculate.ms.coalescent.times(t)
   # Determine the nodes that lead to non-terminal branches {e.g. which(node.depth(t) != 1) }
   nodes <- (ntaxa+1):(ntaxa+t$Nnode)
   # Extract information about all clades from tree
@@ -437,10 +437,24 @@ extract.clade.from.node <- function(node, tree, coalescent_times){
 }
 
 
-calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals){
+calculate.ms.coalescent.times <- function(tree, simulation.function = "TreeSim"){
   ## Small function to take a number of nodes and determine all the coalescent times needed to run ms
   
-  ints <- coalescent_intervals$interval.length
+  # Determine number of nodes in the tree
+  number_of_nodes <- Nnode(tree)
+  # Check the interval vector
+  simulation.function <- tolower(simulation.function)
+  # Calculate the cumulative distance between nodes  
+  if (simulation.function == "treesim" | simulation.function == "yule" | simulation.function == "birth-death"){
+    # Extract coalescent intervals from the tree
+    # If tree generated in TreeSim, correct interval lengths by reversing the vector
+    ints <- coalescent.intervals(tree)$interval.length
+  } else if (simulation.function == "rcoal" | simulation.function == "ape" | simulation.function == "coalescent"){
+    # Extract coalescent intervals from the tree
+    # If tree generated using the rcoal() function, leave the ints as is
+    ints <- coalescent.intervals(tree)$interval.length
+  }
+  
   # The interval length is the length between two coalescent events: to find the time for e.g. the second event, add the first and second interval together
   # The last interval should be the same as the total depth
   times_vec <- c()
@@ -448,11 +462,11 @@ calculate.ms.coalescent.times <- function(number_of_nodes, coalescent_intervals)
     temp_time <- sum(ints[1:i])
     times_vec <- c(times_vec, temp_time)
   }
-  
   # Round to 6dp (to allow for values as small as 0.000001)
   times_vec <- round(times_vec, digits = 6)
   # Reverse vector so that the longest time aligns with the deepest node
   times_vec <- rev(times_vec)
+  
   # Return coalescent times
   return(times_vec)
 }

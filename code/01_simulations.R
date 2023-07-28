@@ -126,14 +126,14 @@ if (run.experiment.1 == TRUE){
   
   # Iterate through each row in the parameters dataframe
   # Run all reps:
-  #   lapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+  #   lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   # Run single rep:
-  #   lapply(1, random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+  #   lapply(1, random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   
   if (number_parallel_threads == 1){
-    exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
+    exp1_op_list <- lapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params)
   } else {
-    exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, simulation_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
+    exp1_op_list <- mclapply(1:nrow(exp1_params), random.trees.generate.alignment, output_directory = exp1_dir, iqtree2_path = iqtree2_path, experiment_params = exp1_params,
                              mc.cores = number_parallel_threads)
   }
   
@@ -194,14 +194,14 @@ if (run.experiment.3 == TRUE){
   
   # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
   # Run all reps: 
-  #   lapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
+  #   lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params)
   # Run single rep:
-  #   lapply(1, ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params, select.sister = FALSE)
+  #   lapply(1, ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path, experiment_params_df = exp3_params, select.sister = FALSE)
   if (number_parallel_threads == 1){
-    exp3_op_list<- lapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+    exp3_op_list<- lapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
                           experiment_params_df = exp3_params, select.sister = FALSE, scale.gene.trees = TRUE)
   } else {
-    exp3_op_list <- mclapply(1:nrow(exp3_params), ms.generate.alignment, simulation_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
+    exp3_op_list <- mclapply(1:nrow(exp3_params), ms.generate.alignment, output_directory = exp3_dir, ms_path = ms_path, iqtree2_path = iqtree2_path,
                              experiment_params_df = exp3_params, select.sister = FALSE, scale.gene.trees = TRUE, 
                              mc.cores = number_parallel_threads)
   }

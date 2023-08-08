@@ -50,7 +50,7 @@ if (run_location == "local"){
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths
-  iqtree2_path <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
+  iqtree2_path <- "/data/caitlin/executables/iqtree-2.2.2-Linux/bin/iqtree2"
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
@@ -76,7 +76,7 @@ source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 # Find the folders of simulated alignments
-exp_folders <- paste0(local_directory, c("exp_1/", "exp_2/"))
+exp_folders <- paste0(local_directory, c("exp_1/", "exp_3/"))
 
 
 
@@ -135,8 +135,7 @@ if (run_exp3 == TRUE){
            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
            num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
            run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
-           apply.TIGER = FALSE, redo = FALSE, 
-           save_timers = TRUE,
+           apply.TIGER = TRUE, redo = FALSE,
            mc.cores = num_cores)
   
   # Collect and collate results

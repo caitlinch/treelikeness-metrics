@@ -255,13 +255,13 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   if (is.na(row$uid) == FALSE){
     uid <- row$uid
   } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
-    uid <- paste0(sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                  "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", row$recombination_value, "_", 
-                  row$recombination_type, "_", row$speciation_rate)
+    uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
+                  sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_age, "_", exp3_params$recombination_value,
+                  "_", exp3_params$recombination_type, "_", exp3_params$speciation_rate)
   } else {
-    uid <- paste0(sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", "NA",
-                  "_", row$tree_depth_coalescent, "_", row$tree_depth_subs_per_sites, "_", 
-                  row$recombination_value, "_", row$recombination_type, "_", row$speciation_rate)
+    uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_", "NA", "_",
+           exp3_params$tree_age, "_", exp3_params$recombination_value, "_", exp3_params$recombination_type, "_",
+           exp3_params$speciation_rate)
   }
   
   row_folder            <- paste0(output_directory, uid, "/")
@@ -279,17 +279,17 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
   if (file.exists(output_alignment_file) == FALSE){
     # Call ms
     ms_output_files <- ms.generate.trees(ntaxa = row$num_taxa, ntrees = row$num_trees, speciation_rate = row$speciation_rate, 
-                                         tree_depth_coalescent = row$tree_depth_coalescent, recombination_value = row$recombination_value, 
+                                         tree_age = row$tree_age, recombination_value = row$recombination_value, 
                                          recombination_type = row$recombination_type, select.sister = FALSE, output_directory = row_folder,
                                          ms_path = ms_path, replicate_number = NA, unique_id = uid)
     start_coal_tree_file <- ms_output_files[[1]]
     gene_trees_file <- ms_output_files[[3]]
-    # Scale the gene trees by the row$tree_depth_subs_per_sites
+    # Scale the gene trees by the row$tree_depth_subspersite
     if (scale.gene.trees == TRUE){
       # Open the gene tree file
       gene_trees <- read.tree(gene_trees_file)
       # Scale the gene trees
-      scaled_gene_trees <- scale.gene.tree.depths(gene_trees = gene_trees, new_tree_depth = row$tree_depth_subs_per_sites)
+      scaled_gene_trees <- scale.gene.tree.depths(gene_trees = gene_trees, new_tree_depth = row$tree_depth_subspersite)
       # Save the scaled gene trees
       write.tree(scaled_gene_trees, file = gene_trees_file)
     }
@@ -310,7 +310,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
     row$gene_tree_file <- gene_trees_file
     row$partition_file <- paste0(row_folder, row$partition_file)
     row$output_alignment_file <- output_alignment_file
-    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth_coalescent", "tree_depth_subs_per_sites",
+    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_age", "tree_depth_subspersite",
                            "recombination_value", "recombination_type", "speciation_rate", "uid", "alisim_gene_models", "alisim_gene_tree_length", 
                            "total_alignment_length", "sequence_type", "starting_tree_file", "gene_tree_file", "partition_file", 
                            "output_alignment_file")]
@@ -327,7 +327,7 @@ ms.generate.alignment <- function(row_id, output_directory, ms_path, iqtree2_pat
 
 
 #### Functions for ms ####
-ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_rate, recombination_value = 0, recombination_type = NA, 
+ms.generate.trees <- function(ntaxa, ntrees, tree_age, speciation_rate, recombination_value = 0, recombination_type = NA, 
                               select.sister = FALSE, output_directory, ms_path = "ms", replicate_number = NA,
                               unique_id = NA){
   ## Randomly generate a tree with n taxa; format into an ms command and run ms; generate and save the resulting gene trees
@@ -337,10 +337,10 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
     op_unique_id <- unique_id
   } else if (is.na(unique_id) == TRUE & is.na(replicate_number) == FALSE){
     op_unique_id <- paste0(sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", sprintf("%03d", replicate_number),
-                           "_", tree_depth_coalescent, "_", recombination_value, "_", recombination_type, "_", speciation_rate)
+                           "_", tree_age, "_", recombination_value, "_", recombination_type, "_", speciation_rate)
   } else {
     op_unique_id <- paste0(sprintf("%05d", ntrees), "_", sprintf("%04d", ntaxa), "_", "NA",
-                           "_", tree_depth_coalescent, "_", recombination_value, "_", 
+                           "_", tree_age, "_", recombination_value, "_", 
                            recombination_type, "_", speciation_rate)
   }
   t_path <- paste0(output_directory, op_unique_id, "_starting_tree.txt")
@@ -349,7 +349,7 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   
   ## Create a base tree for the simulations
   # Generate a tree using the TreeSim R package
-  t <- sim.bd.taxa.age(n = ntaxa, numbsim = 1, lambda = speciation_rate, mu = 0, frac = 1, age = tree_depth_coalescent, mrca = TRUE)[[1]]
+  t <- sim.bd.taxa.age(n = ntaxa, numbsim = 1, lambda = speciation_rate, mu = 0, frac = 1, age = tree_age, mrca = TRUE)[[1]]
   # Save the random tree
   write.tree(t, file = t_path)
   
@@ -366,6 +366,8 @@ ms.generate.trees <- function(ntaxa, ntrees, tree_depth_coalescent, speciation_r
   node_df <- node_df[order(node_df$clade_depth, decreasing = TRUE), ]
   # Add new column for the coalescence time
   node_df$coalescence_time <- ms_coal_ints
+  # Check for duplicate events
+  node_df <- check.duplicated.coalescent.times(node_df)
   # Format coalescences for ms input
   node_df <- determine.coalescence.taxa(node_df)
   # Create a new column containing -ej event for each row
@@ -551,6 +553,99 @@ determine.coalescence.taxa <- function(node_dataframe){
   # Return the dataframe
   return(node_dataframe)
 }
+
+
+check.duplicated.coalescent.times <- function(node_df){
+  ## Small function to check for duplicate coalescent events and space them out so no events occur at the same time
+  
+  # Identify all duplicate times
+  if (length(unique(node_df$coalescence_time)) != length(node_df$coalescence_time)){
+    ## Work out which rows have multiple values
+    # Determine the matching rows
+    duplicate_rows <- which(duplicated(node_df$coalescence_time))
+    # For each duplicated row, get all rows with the same time
+    rows_equal_to_duplicate_rows <- which(node_df$coalescence_time %in% node_df$coalescence_time[duplicate_rows])
+    unduplicate_rows <- setdiff(rows_equal_to_duplicate_rows, duplicate_rows)
+    
+    ## Find smallest difference between coalescent times
+    all_diff_times <- unlist(lapply(1:length(node_df$coalescence_time), function(i){node_df$coalescence_time[i]-node_df$coalescence_time[i+1]}))
+    diff_times <- all_diff_times[which(all_diff_times != 0)]
+    min_diff_time <- min(diff_times, na.rm = TRUE)
+    
+    ## Copy the node_df
+    updated_node_df <- node_df
+    
+    ## For each of the unduplicated rows, need to update coalescent times so that there is no duplicate
+    for (u in unduplicate_rows){
+      # Get which rows are identical to this row
+      u_dupes <- which(node_df$coalescence_time == node_df$coalescence_time[u])
+      # Copy the dataframe for these rows
+      u_df <- node_df[u_dupes, ]
+      # Separate involved taxa
+      dupes_ms_input <- node_df$ms_input[u_dupes]
+      u_df$taxa_1 <- unlist(lapply(1:length(dupes_ms_input), function(x){strsplit(dupes_ms_input, " ")[[x]][1]}))
+      u_df$taxa_2 <-  unlist(lapply(1:length(dupes_ms_input), function(x){strsplit(dupes_ms_input, " ")[[x]][2]}))
+      u_df$min_taxa <- unlist(lapply(1:length(dupes_ms_input), function(x){min(as.numeric(strsplit(dupes_ms_input, " ")[[x]]))}))
+      u_df$max_taxa <- unlist(lapply(1:length(dupes_ms_input), function(x){max(as.numeric(strsplit(dupes_ms_input, " ")[[x]]))}))
+      # Order rows from biggest to smallest taxa numbers (backwards in terms of coalescent timings)
+      u_df <- u_df[order(u_df$min_taxa, u_df$max_taxa, decreasing = TRUE), ]
+      # Find any rows that include the same taxa and the same time
+      double_dupes_check <- c( which(duplicated(u_df$min_taxa)), which(duplicated(u_df$max_taxa)), which(u_df$min_taxa %in% u_df$max_taxa) )
+      # If there are rows with duplicate times and overlapping taxa, correct the times
+      if (length(double_dupes_check) > 0){
+        double_dupes_rows <- unique(c(which(u_df$min_taxa %in% u_df$min_taxa[double_dupes_check]), 
+                                      which(u_df$max_taxa %in% u_df$max_taxa[double_dupes_check]), 
+                                      which(u_df$min_taxa %in% u_df$max_taxa[double_dupes_check]), 
+                                      which(u_df$max_taxa %in% u_df$min_taxa[double_dupes_check])))
+        # Create table of duplicate taxa
+        duplicate_table <- table(c(u_df$min_taxa[double_dupes_rows], u_df$max_taxa[double_dupes_rows]))
+        # Identify the tips involved in the event
+        identical_tip <- names(duplicate_table)[which(duplicate_table > 1)]
+        different_tips <- names(duplicate_table)[which(duplicate_table == 1)]
+        smallest_tip <- min(as.numeric(different_tips))
+        smallest_row_tips <- as.numeric(c(smallest_tip, identical_tip))
+        # Remove the row with the SMALLEST event
+        smallest_tip_row <- which(u_df$min_taxa == min(smallest_row_tips) & u_df$max_taxa == max(smallest_row_tips))
+        rows_to_update <- setdiff(double_dupes_rows, smallest_tip_row)
+        # Set current (duplicated) coalescent time
+        max_time <- unique(u_df$coalescence_time)
+        # Find minimum time limit - maximum of time at (next coalescent event) OR (current coalescent event minus preferred time diff.)
+        min_time <- max(c(node_df$coalescence_time[max(u_dupes)+1], (max_time - min_diff_time)) )
+        # Generate times between the duplicated times and the next coalescent time. Do NOT include the next coalescent time
+        time_sequence <- seq(from = max_time, to = min_time, length = (length(rows_to_update) + 2))
+        time_adjustments <- time_sequence[2:(length(time_sequence)-1)] # Remove first and last value from the time sequence
+        # For each of the rows to update, change the time
+        for (i in 1:length(rows_to_update)){
+          # Find the relevant row
+          r <- rows_to_update[i]
+          # Find the new time
+          r_new_time <- time_adjustments[i]
+          # Replace the new time in the u_df
+          u_df$coalescence_time[r] <- r_new_time
+        }
+        # Order rows from smallest to biggest taxa numbers (forwards in terms of coalescent timings)
+        u_df <- u_df[order(u_df$min_taxa, u_df$max_taxa, decreasing = FALSE), ]
+        # Reorder rows by coalescence time
+        u_df <- u_df[order(u_df$coalescence_time, decreasing = TRUE), ]
+        # Attach the new times onto the updated_node_df
+        u_df <- u_df[, names(node_df)]
+        updated_node_df[u_dupes, ] <- u_df
+        # Reorder the dataframe by coalescent time value
+        updated_node_df <- updated_node_df[order(updated_node_df$coalescence_time, decreasing = TRUE), ]
+      }
+    }
+  } else {
+    # Return the dataframe unchanged
+    updated_node_df <- node_df
+  }
+  
+  # Do one last sort to make sure coalescent times are in order
+  updated_node_df <- updated_node_df[order(updated_node_df$coalescence_time, decreasing = TRUE), ]
+  
+  # Return the node_df with updated coalescent times
+  return(updated_node_df)
+}
+
 
 
 add.recent.introgression.event <- function(r_df, ntaxa, recombination_value, select.sister = FALSE){

@@ -769,8 +769,8 @@ treelikeness.metrics.simulations <- function(alignment_path,
         random_trees_file <- paste0(replicate_folder, grep("random_trees", aln_folder_files, value = TRUE))
         random_trees <- read.tree(random_trees_file)
         n_tree_tips <- unique(Ntip(random_trees))[[1]]
-      } else if ((grepl("exp2", unique_id)) | (!identical(agrep("starting_tree", aln_folder_files), integer(0)))) {
-        # If either the unique id contains "exp2" OR there is a file name containing the phrase "starting_tree",
+      } else if ((grepl("exp3", unique_id)) | (!identical(agrep("starting_tree", aln_folder_files), integer(0)))) {
+        # If either the unique id contains "exp3" OR there is a file name containing the phrase "starting_tree",
         #    open the starting tree and see how many number of taxa present
         start_tree_file <- paste0(replicate_folder, grep("starting_tree", aln_folder_files, value = TRUE))
         start_tree <- read.tree(start_tree_file)

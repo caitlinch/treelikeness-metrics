@@ -60,7 +60,7 @@ if (run_location == "local"){
 ## SIMULATION PARAMETERS
 if (parameter.values == TRUE){
   total_alignment_length          <- 10000
-  gene_length                     <- 500
+  gene_length                     <- 200
   sequence_type                   <- "DNA"
   taxa_vec                        <- c(5,10,20,50,100)
   num_reps                        <- 10
@@ -184,10 +184,10 @@ if (run.experiment.3 == TRUE){
                               "_", exp3_params$recombination_type, "_", exp3_params$speciation_rate)
     # Add parameters for Alisim
     exp3_params$alisim_gene_models <- alisim_gene_models
-    exp3_params$alisim_gene_tree_length <- alisim_gene_tree_length
+    exp3_params$alisim_gene_tree_length <- gene_length
     # Add other parameters
     exp3_params$tree_depth_subs_per_sites <- conversion_depth_subs_per_site
-    exp3_params$total_alignment_length <- number_gene_trees * gene_length
+    exp3_params$total_alignment_length <- exp3_params$num_trees * exp3_params$alisim_gene_tree_length
     exp3_params$sequence_type <- sequence_type
     # Add name for the partition file and output alignment file for each simulated alignment
     exp3_params$partition_file <- paste0(exp3_params$uid, "_partitions.nex")

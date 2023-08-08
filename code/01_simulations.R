@@ -73,8 +73,6 @@ if (parameter.values == TRUE){
   alisim_gene_tree_length         <- NA
   conversion_depth_subs_per_site  <- 0.1
   
-  # Determine number of trees - all whole numbers that are a divisor of the total alignment length
-  number_of_trees <- divisors(total_alignment_length)
   # Set number of taxa equal to taxa_vec
   number_of_taxa <- taxa_vec
   # Create a list of all replicate numbers using the num_reps value
@@ -114,7 +112,8 @@ if (run.experiment.1 == TRUE){
     exp1_params <- read.csv(exp1_df_path)
   } else {
     # Create matrix with parameters for generating each simulated alignment
-    exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_of_trees, "tree_depth" = tree_depth_random_sims)
+    exp1_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = divisors(total_alignment_length), 
+                               "tree_depth" = tree_depth_random_sims)
     # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`
     exp1_params$uid <- paste0("exp1_",sprintf("%05d", exp1_params$num_trees), "_", sprintf("%04d", exp1_params$num_taxa), "_",
                               sprintf("%03d", exp1_params$num_reps), "_", exp1_params$tree_depth)

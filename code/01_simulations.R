@@ -33,7 +33,6 @@
 # r_vec                           <- Values of introgression (we chose from 0 to 1 in intervals of 0.05)
 # alisim_gene_models              <- Model of sequence evolution for Alisim 
 # alisim_gene_tree_length         <- Gene-specific tree length for Alisim
-# conversion_depth_subs_per_site     <- Tree depth for ML tree - used to convert depth of ms gene trees from coalescent units to substitutions per site
 
 
 ## CONTROL PARAMETERS
@@ -71,7 +70,6 @@ if (parameter.values == TRUE){
   r_vec                           <- seq(0, 0.5, 0.05)
   alisim_gene_models              <- "JC"
   alisim_gene_tree_length         <- NA
-  conversion_depth_subs_per_site  <- 0.1
   
   # Set number of taxa equal to taxa_vec
   number_of_taxa <- taxa_vec
@@ -186,7 +184,6 @@ if (run.experiment.3 == TRUE){
     exp3_params$alisim_gene_models <- alisim_gene_models
     exp3_params$alisim_gene_tree_length <- gene_length
     # Add other parameters
-    exp3_params$tree_depth_subs_per_sites <- conversion_depth_subs_per_site
     exp3_params$total_alignment_length <- exp3_params$num_trees * exp3_params$alisim_gene_tree_length
     exp3_params$sequence_type <- sequence_type
     # Add name for the partition file and output alignment file for each simulated alignment

@@ -36,7 +36,7 @@
 
 
 ## CONTROL PARAMETERS
-parameter.values            <- TRUE
+parameter.values            <- FALSE
 run.experiment.1            <- FALSE
 run.experiment.3            <- TRUE
 
@@ -53,7 +53,7 @@ if (run_location == "local"){
   repo_directory          <- "/data/caitlin/treelikeness_metrics/"
   ms_path                 <- "/data/caitlin/executables/msdir/ms"
   iqtree2_path            <- "/data/caitlin/linux_executables/iqtree-2.2.0-Linux/bin/iqtree2"
-  number_parallel_threads <- 20
+  number_parallel_threads <- 30
 }
 
 ## SIMULATION PARAMETERS

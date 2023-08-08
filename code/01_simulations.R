@@ -65,7 +65,7 @@ if (parameter.values == TRUE){
   taxa_vec                        <- c(5,10,20,50,100)
   num_reps                        <- 10
   tree_depth_random_sims          <- c(0.01, 0.1, 1)
-  tree_depth_coalescent_sims      <- c(5, 50, 500) # where bounds for coalescent tree depth are in millions of years (see TreeSim doco)
+  tree_age                        <- c(5, 50, 500) # where bounds for coalescent tree depth are in millions of years (see TreeSim doco)
   speciation_rates                <- c(0.1, 1) # for generating Yule tree for the introgression experiments (experiment 3)
   number_gene_trees               <- 200
   r_vec                           <- seq(0, 0.5, 0.05)
@@ -171,11 +171,16 @@ if (run.experiment.3 == TRUE){
     exp3_params <- read.csv(exp3_df_path)
   } else {
     exp3_params <- expand.grid("num_reps" = number_of_replicates, "num_taxa" = number_of_taxa, "num_trees" = number_gene_trees, 
-                               "tree_depth_coalescent" = tree_depth_coalescent_sims, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"),
+                               "tree_age" = tree_age, "recombination_value" = r_vec, "recombination_type" = c("Ancient","Recent"),
                                "speciation_rate" = speciation_rates)
-    # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_depth`_`recombination proportion`_`introgression event type`
+    # Add conversion to substitutions per site
+    exp3_params$tree_depth_subspersite <- exp3_params$tree_age
+    exp3_params$tree_depth_subspersite[which(exp3_params$tree_age == 5)] <- 0.005
+    exp3_params$tree_depth_subspersite[which(exp3_params$tree_age == 50)] <- 0.05
+    exp3_params$tree_depth_subspersite[which(exp3_params$tree_age == 500)] <- 0.5
+    # Add a unique identifier (uid) of the form: experiment_`number of trees`_`number of taxa`_`replicate number`_`tree_age (MY)`_`recombination proportion`_`introgression event type`_`speciation_rate`
     exp3_params$uid <- paste0("exp3_",sprintf("%05d", exp3_params$num_trees), "_", sprintf("%04d", exp3_params$num_taxa), "_",
-                              sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_depth, "_", exp3_params$recombination_value,
+                              sprintf("%03d", exp3_params$num_reps), "_", exp3_params$tree_age, "_", exp3_params$recombination_value,
                               "_", exp3_params$recombination_type, "_", exp3_params$speciation_rate)
     # Add parameters for Alisim
     exp3_params$alisim_gene_models <- alisim_gene_models
@@ -199,9 +204,6 @@ if (run.experiment.3 == TRUE){
     # Write exp3_params dataframe to file as a csv
     write.csv(exp3_params, file = exp3_df_path, row.names = TRUE)
   }
-
-  #### NOTE: BEFORE RUNNING, NEED TO SPECIFY SUBSTITUTIONS/SITE RATE (TREE DEPTH CONVERSION) - CURRENTLY 0.1 SUBSTITUTIONS PER SITE
-  ####          PICK DIFFERENT VALUES BASED ON EVOLUTIONARY RATE? OR PICK DIFFERENT VALUES BASED ON TREE DEPTH?
   
   # Iterate through each row in the parameters dataframe and generate an alignment for each set of parameters
   # Run all reps: 

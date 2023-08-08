@@ -23,10 +23,10 @@
 
 ## Control variables
 # run_exp1             <- Whether to apply the treelikeness test statistics to the first set of alignments (logical)
-# run_exp2             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
+# run_exp3             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
 # rerun_missing_runs   <- Whether or not to rerun alignments that do not have treelikeness test metrics complete (logical)
 # rerun_experiment_ids <- Which experiments to check for incomplete runs and rerun missing alignments. 
-#                           To check both exp1 and exp2, set <- c("exp1", "exp2")
+#                           To check both exp1 and exp3, set <- c("exp1", "exp3")
 
 run_location = "soma"
 if (run_location == "local"){
@@ -61,9 +61,9 @@ if (run_location == "local"){
 
 # Control variables
 run_exp1 <- FALSE
-run_exp2 <- TRUE
+run_exp3 <- TRUE
 rerun_missing_runs <- TRUE
-rerun_experiment_ids <- c("exp2")
+rerun_experiment_ids <- c("exp3")
 
 
 
@@ -117,17 +117,17 @@ if (run_exp1 == FALSE){
   write.csv(exp1_df, exp1_df_name, row.names = FALSE)
 }
 
-if (run_exp2 == TRUE){
+if (run_exp3 == TRUE){
   ## For experiment 2:
   # Extract all file names from results folder
   results_files <- list.files(results_directory)
   # Open output df and get names of alignments
-  exp2_op_file <- paste0(results_directory, grep("rerun", grep("exp2", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-  exp2_op_df <- read.csv(exp2_op_file, stringsAsFactors = FALSE)
+  exp3_op_file <- paste0(results_directory, grep("rerun", grep("exp3", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  exp3_op_df <- read.csv(exp3_op_file, stringsAsFactors = FALSE)
   # Get list of alignments
-  exp2_als <- exp2_op_df$output_alignment_file
+  exp3_als <- exp3_op_df$output_alignment_file
   # Apply treelikeness metrics to all alignments 
-  mclapply(exp2_als, treelikeness.metrics.simulations,
+  mclapply(exp3_als, treelikeness.metrics.simulations,
            iqtree2_path, splitstree_path, 
            phylogemetric_path, fast_TIGER_path, 
            supply_number_of_taxa = FALSE, number_of_taxa = NA, 
@@ -140,14 +140,14 @@ if (run_exp2 == TRUE){
            mc.cores = num_cores)
   
   # Collect and collate results
-  exp2_list <- mclapply(exp2_als, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
+  exp3_list <- mclapply(exp3_als, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
-  keep_indexes <- which(!sapply(exp2_list, is.null))
-  exp2_list_filtered <- exp2_list[keep_indexes]
+  keep_indexes <- which(!sapply(exp3_list, is.null))
+  exp3_list_filtered <- exp3_list[keep_indexes]
   # Save output dataframe
-  exp2_df <- as.data.frame(do.call("rbind", exp2_list_filtered))
-  exp2_df_name <- paste0(results_directory, "exp2_treelikeness_metrics_collated_results.csv")
-  write.csv(exp2_df, exp2_df_name, row.names = FALSE)
+  exp3_df <- as.data.frame(do.call("rbind", exp3_list_filtered))
+  exp3_df_name <- paste0(results_directory, "exp3_treelikeness_metrics_collated_results.csv")
+  write.csv(exp3_df, exp3_df_name, row.names = FALSE)
 }
 
 
@@ -221,7 +221,7 @@ for (e in exp_ids){
         # Collect and collate ALL results
         if (e == "exp1"){
           e_list <- mclapply(all_alignments, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)  
-        } else if (e == "exp2"){
+        } else if (e == "exp3"){
           e_list <- mclapply(all_alignments, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
         }
         
@@ -255,8 +255,8 @@ for (e in exp_ids){
 #### 5. Collate times ####
 # Collate csvs for identifying how long each test statistic took to run
 ## For experiments 1 and 2 (simulations)
-exp_ids <- c("exp1", "exp2")
-results_folders <- c("exp1" = "exp_1", "exp2" = "exp_2")
+exp_ids <- c("exp1", "exp3")
+results_folders <- c("exp1" = "exp_1", "exp3" = "exp_2")
 for (e in exp_ids){
   # List all output files for this experiment
   e_results_folder <- paste0(results_directory, results_folders[[e]], "/")

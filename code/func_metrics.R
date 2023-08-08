@@ -530,8 +530,8 @@ scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", 
   }
   # for sCFl: iqtree -t concat.treefile -s ALN_FILE --scfl 100 --prefix concord -nt 10
   treefile <- paste0(alignment_path, ".treefile")
-  call <- paste0(iqtree2_path, " -t ", treefile, " -s ", alignment_path, " -m ", substitution_model, " --scfl ", number_scf_quartets,
-                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre scfl")
+  call <- paste0(iqtree2_path, " -te ", treefile, " -s ", alignment_path, " -m ", substitution_model, " --scfl ", number_scf_quartets,
+                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre ", dirname(alignment_path), "/scfl")
   system(call)
   
   ## Retrieve the site concordance factors from the output table

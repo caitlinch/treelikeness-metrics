@@ -36,7 +36,7 @@
 
 
 ## CONTROL PARAMETERS
-parameter.values            <- FALSE
+parameter.values            <- TRUE
 run.experiment.1            <- FALSE
 run.experiment.3            <- TRUE
 

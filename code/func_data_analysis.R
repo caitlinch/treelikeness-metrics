@@ -26,9 +26,7 @@ collate.treelikeness.results <- function(alignment_path, experiment_number){
       p_df <- p_df[,c("row_id", "uid" , "num_taxa", "num_trees", "tree_depth_coalescent", "recombination_value", "recombination_type", "num_reps", "alisim_gene_models", "alisim_gene_tree_length", 
                       "total_alignment_length", "sequence_type")]
     } else if (experiment_number == 3){
-      p_df <- p_df[,c("row_id", "uid", "num_reps", "num_taxa", "num_trees", "tree_age", "tree_depth_subspersite",
-                     "recombination_value", "recombination_type", "speciation_rate", "alisim_gene_models", "alisim_gene_tree_length", 
-                     "total_alignment_length", "sequence_type")]
+      p_df <- p_df
     }
     
     # Check the uids match

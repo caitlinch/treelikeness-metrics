@@ -139,7 +139,7 @@ if (run_exp3 == TRUE){
            mc.cores = num_cores)
   
   # Collect and collate results
-  exp3_list <- mclapply(exp3_als, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
+  exp3_list <- mclapply(exp3_als, collate.treelikeness.results, experiment_number = 3, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
   keep_indexes <- which(!sapply(exp3_list, is.null))
   exp3_list_filtered <- exp3_list[keep_indexes]

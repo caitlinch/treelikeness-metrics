@@ -24,9 +24,6 @@
 ## Control variables
 # run_exp1             <- Whether to apply the treelikeness test statistics to the first set of alignments (logical)
 # run_exp3             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
-# rerun_missing_runs   <- Whether or not to rerun alignments that do not have treelikeness test metrics complete (logical)
-# rerun_experiment_ids <- Which experiments to check for incomplete runs and rerun missing alignments. 
-#                           To check both exp1 and exp3, set <- c("exp1", "exp3")
 
 run_location = "soma"
 if (run_location == "local"){
@@ -62,8 +59,6 @@ if (run_location == "local"){
 # Control variables
 run_exp1 <- FALSE
 run_exp3 <- TRUE
-rerun_missing_runs <- TRUE
-rerun_experiment_ids <- c("exp3")
 
 
 
@@ -148,105 +143,5 @@ if (run_exp3 == TRUE){
   exp3_df_name <- paste0(results_directory, "exp3_treelikeness_metrics_collated_results.csv")
   write.csv(exp3_df, exp3_df_name, row.names = FALSE)
 }
-
-
-
-#### 4. Print list of alignments that do not have treelikeness results files ####
-# Compare ids with those in parameters csv to determine if there are any incomplete/missing alignments
-## For experiments 1 and 2 (simulations)
-exp_ids <- rerun_experiment_ids
-for (e in exp_ids){
-  # Extract all filenames from results folder
-  results_files <- list.files(results_directory)
-  
-  # Open parameters csv
-  e_params_file <- paste0(results_directory, grep("rerun", grep(e, grep("parameters", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-  e_params_df <- read.csv(e_params_file, stringsAsFactors = FALSE)
-  # Open results csv
-  e_results_file <- paste0(results_directory, grep("rerun", grep(e, grep("treelikeness_metrics_collated_results", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-  e_results_df <- read.csv(e_results_file, stringsAsFactors = FALSE)
-  # Open output paths csv
-  e_op_file <- paste0(results_directory, grep("rerun", grep(e, grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
-  e_op_df <- read.csv(e_op_file, stringsAsFactors = FALSE)
-  
-  # Extract the list of all alignments
-  all_alignments <- e_op_df$output_alignment_file
-  
-  # Check that all unique ids have a match
-  all_uids_present = setequal(e_results_df$uid, e_params_df$uid)
-  # If some uids are missing, report and print which
-  if (all_uids_present == FALSE){
-    # Get both lists of unique identifiers
-    params_ids <- e_params_df$uid
-    results_ids <- e_results_df$uid
-    # Check which is longer and save the list of uids missing from one dataframe
-    if (length(params_ids) > length(results_ids)){
-      # Set output id
-      output_id <- "missing.from.results"
-      
-      # Get ids of alignments missing from results df (unrun - need to run) and save
-      missing_ids <- params_ids[!(params_ids %in% results_ids)]
-      missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt")
-      write(missing_ids, file = missing_ids_file)
-      
-      # Make dataframe consisting of only missing alignments that need running and save
-      missing_als_df <- e_op_df[e_op_df$uid %in% missing_ids, ]
-      missing_als_file <- paste0(results_directory, e, "_parameters_rerun_", output_id, ".csv")
-      write.csv(missing_als_df, file = missing_als_file, row.names = TRUE)
-      
-      if (rerun_missing_runs == TRUE){
-        # Set which alignments to rerun (remove alignments with certain parameters that are too slow or have insufficient information to run)
-        if (e == "exp1"){
-          # For experiment 1, remove rows with substitution rates that are too low
-          missing_als_df  <- missing_als_df[(missing_als_df$tree_depth != 1e-04 & missing_als_df$tree_depth != 1e-03), ]
-        }
-        
-        # Extract vector of alignments to rerun
-        rerun_al_paths <- missing_als_df$output_alignment_file
-        
-        # Run missing alignments
-        mclapply(rerun_al_paths, treelikeness.metrics.simulations,
-                 iqtree2_path, splitstree_path, 
-                 phylogemetric_path, fast_TIGER_path, 
-                 supply_number_of_taxa = FALSE, number_of_taxa = NA, 
-                 num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                 iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-                 num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-                 run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
-                 apply.TIGER = FALSE, redo = FALSE, 
-                 save_timers = TRUE,
-                 mc.cores = num_cores)
-        
-        # Collect and collate ALL results
-        if (e == "exp1"){
-          e_list <- mclapply(all_alignments, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)  
-        } else if (e == "exp3"){
-          e_list <- mclapply(all_alignments, collate.treelikeness.results, experiment_number = 2, mc.cores = num_cores)
-        }
-        
-        # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
-        keep_indexes <- which(!sapply(e_list, is.null))
-        e_list_filtered <- e_list[keep_indexes]
-        # Save output dataframe
-        e_df <- as.data.frame(do.call("rbind", e_list_filtered))
-        e_df_name <- paste0(results_directory, e, "_treelikeness_metrics_collated_results.csv")
-        write.csv(e_df, e_df_name, row.names = FALSE)
-        
-      } else if (length(results_ids) > length(params_ids)){
-        # Set output id
-        output_id <- "missing.from.params"
-        
-        # Get ids of alignments missing from params df (safety check - shouldn't be possible) and save
-        missing_ids <- results_ids[!(results_ids %in% params_ids)]
-        missing_ids_file <- paste0(results_directory, e, "_uids_", output_id, ".txt") 
-        write(missing_its, file = missing_ids_file)
-        
-      } # end (rerun_missing_runs == TRUE)
-      
-    } # end (length(results_ids) > length(params_ids))
-    
-  } # end (all_uids_present == FALSE)
-  
-} # end for (e in exp_ids)
 
 

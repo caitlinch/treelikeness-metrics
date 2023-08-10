@@ -315,7 +315,6 @@ if (plot_exp3 == TRUE){
                                               expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                               expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
                                               expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
-  
 } # end if (plot_exp3 == TRUE)
 
 
@@ -325,233 +324,241 @@ if (plot_exp3 == TRUE){
   # Set color palette for plots 1 and 2
   viridis_picks = scales::viridis_pal(direction = -1)(5)
   
-  ## Plot 1: Ancient events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
-  # Set dataset for plot
-  plot_df <- exp3_long_df
-  plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
-  # Construct plot with fixed y axis
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75, 
-                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
-    facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[2:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "mainFig_exp3_plot1_tree_depth_Ancient."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
+  speciation_rates <- unique(exp3_long_df$speciation_rate)
+  for (s in speciation_rates){
+    print(s)
+    # Remove speciation rate of 1.0
+    s_df <- exp3_long_df[exp3_long_df$speciation_rate == s, ]
+    
+    ## Plot 1: Ancient events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
+    # Set dataset for plot
+    plot_df <- s_df
+    plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
+    # Construct plot with fixed y axis
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75, 
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
+      facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[2:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "mainFig_exp3_plot1_tree_depth_Ancient_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with points only
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_point(alpha = 0.4) +
+      facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[2:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot1_tree_depth_Ancient_points_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with free y axis
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+      facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[2:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot1_tree_depth_Ancient_freey_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    
+    ## Plot 2: Recent events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
+    # Set dataset for plot
+    plot_df <- s_df
+    plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
+    # Construct plot
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
+      facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[1:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "mainFig_exp3_plot2_tree_depth_Recent_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with points only
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_point(alpha = 0.4) +
+      facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[1:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot2_tree_depth_Recent_points_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with free y axis
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+      facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
+      scale_color_manual(values = viridis_picks[1:5]) +
+      guides(color = guide_legend(title = "Number of\ntaxa")) +
+      labs(title = "Tree age (Million years)") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot2_tree_depth_Recent_freey_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    
+    ## Plot 3: Ancient events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
+    # Set dataset for plot
+    plot_df <- s_df
+    plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
+    # Construct plot
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) + 
+      facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_viridis_d(direction = -1, option = "C") +
+      guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
+      labs(title = "Number of taxa") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot3_num_taxa_Ancient_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with points
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
+      geom_point(alpha = 0.4) +
+      facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_viridis_d(direction = -1, option = "C") +
+      guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
+      labs(title = "Number of taxa") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot3_num_taxa_Ancient_points_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    
+    
+    ## Plot 4: Recent events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
+    # Set dataset for plot
+    plot_df <- s_df
+    plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
+    # Construct plot
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
+      facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_viridis_d(direction = -1, option = "C") +
+      guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
+      labs(title = "Number of taxa") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot4_num_taxa_Recent_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+    
+    # Construct plot with points
+    p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
+      geom_point(alpha = 0.4) +
+      facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
+      scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
+      scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+      scale_color_viridis_d(direction = -1, option = "C") +
+      guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
+      labs(title = "Number of taxa") +
+      theme_bw() +
+      theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+            axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
+            legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
+            strip.text = element_text(size = 11),
+            plot.title = element_text(size = 18, hjust = 0.5))
+    # Save plot
+    plot_prefix <- "exp3_plot4_num_taxa_Recent_points_s"
+    ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
+    ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, s, ".png"), width = 10, height = 12.5, units = "in")
+  } # end iterating through substitution rates
   
-  # Construct plot with points only
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[2:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot1_tree_depth_Ancient_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  # Construct plot with free y axis
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[2:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot1_tree_depth_Ancient_freey."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  
-  ## Plot 2: Recent events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
-  # Set dataset for plot
-  plot_df <- exp3_long_df
-  plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
-  # Construct plot
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
-                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 0.7, span = 0.75) +
-    facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[1:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "mainFig_exp3_plot2_tree_depth_Recent."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  # Construct plot with points only
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~tree_age, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[1:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot2_tree_depth_Recent_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  # Construct plot with free y axis
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
-    scale_color_manual(values = viridis_picks[1:5]) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree age (Million years)") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot2_tree_depth_Recent_freey."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  
-  ## Plot 3: Ancient events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
-  # Set dataset for plot
-  plot_df <- exp3_long_df
-  plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
-  # Construct plot
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) + 
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
-    labs(title = "Number of taxa") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot3_num_taxa_Ancient."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  # Construct plot with points
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
-    labs(title = "Number of taxa") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot3_num_taxa_Ancient_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  
-  
-  ## Plot 4: Recent events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
-  # Set dataset for plot
-  plot_df <- exp3_long_df
-  plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
-  # Construct plot
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
-    labs(title = "Number of taxa") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot4_num_taxa_Recent."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-  
-  # Construct plot with points
-  p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) + 
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(coalescent units)")) +
-    labs(title = "Number of taxa") +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(size = 18, hjust = 0.5))
-  # Save plot
-  plot_prefix <- "exp3_plot4_num_taxa_Recent_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-}
+} # end plotting experiment 3
 
 

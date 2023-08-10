@@ -10,14 +10,14 @@
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
 # plot_exp1 <- either TRUE to plot experiment 1 results, or FALSE to skip
-# plot_exp2 <- either TRUE to plot experiment 2 results, or FALSE to skip
+# plot_exp3 <- either TRUE to plot experiment 3 results, or FALSE to skip
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 plot_exp1 = TRUE
-plot_exp2 = TRUE
+plot_exp3 = TRUE
 
 
 
@@ -267,24 +267,24 @@ if (plot_exp1 == TRUE){
 
 
 
-#### 5. Prepare data from Experiment 2 for plotting ####
-if (plot_exp2 == TRUE){
-  # Open data file from Experiment 2 as a dataframe
-  exp2_data_file <- grep("00_", grep("exp2", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE)
-  exp2_df <- read.csv(file = exp2_data_file, stringsAsFactors = FALSE)
+#### 5. Prepare data from Experiment 3 for plotting ####
+if (plot_exp3 == TRUE){
+  # Open data file from Experiment 3 as a dataframe
+  exp3_data_file <- grep("00_", grep("exp3", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE)
+  exp3_df <- read.csv(file = exp3_data_file, stringsAsFactors = FALSE)
   
   # Manage test statistic columns
   # Convert sCFL values to decimal from percentage
-  exp2_df$sCFL_mean <- exp2_df$sCFL_mean / 100
+  exp3_df$sCFL_mean <- exp3_df$sCFL_mean / 100
   # Convert likelihood mapping results to numeric
   # Values will be characters because 386 alignments or 9.7% have value of "no_iqtree_file" (which means could not perform LM)
-  exp2_df$LM_proportion_resolved_quartets <- as.numeric(exp2_df$LM_proportion_resolved_quartets)
+  exp3_df$LM_proportion_resolved_quartets <- as.numeric(exp3_df$LM_proportion_resolved_quartets)
   
   # Select test statistics for plotting (by subsetting columns)
-  if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
+  if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run"){
     # Remove columns you don't want for plotting
-    # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
-    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", 
+    # Do not plot TIGER (fast TIGER was not run for exp3, too time consuming)
+    exp3_wide_df <- exp3_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", 
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                 "LM_proportion_resolved_quartets", "mean_Q_residual", 
@@ -292,43 +292,43 @@ if (plot_exp2 == TRUE){
   } else {
     # TIGER was run, so plot TIGER results with other test statistic results
     # Convert TIGER results to numeric
-    exp2_df$mean_TIGER_value <- as.numeric(exp2_df$mean_TIGER_value)
+    exp3_df$mean_TIGER_value <- as.numeric(exp3_df$mean_TIGER_value)
     # Remove columns you don't want for plotting
-    exp2_wide_df <- exp2_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent",
+    exp3_wide_df <- exp3_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent",
                                 "recombination_value", "recombination_type",
                                 "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                 "LM_proportion_resolved_quartets", "mean_Q_residual",
                                 "sCFL_mean", "mean_TIGER_value")]
-  }  # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
+  }  # end if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run")
   
-  # Melt exp2_wide_df for better plotting
-  exp2_long_df <- melt(exp2_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", "recombination_value", "recombination_type"))
+  # Melt exp3_wide_df for better plotting
+  exp3_long_df <- melt(exp3_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", "recombination_value", "recombination_type"))
   
   # Transform the Network Treelikeness Test results into more plottable format
   # Make a table of all possible parameter values for the network treelikeness test
-  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp2_df$num_taxa)), "tree_depth_coalescent" = sort(unique(exp2_df$tree_depth_coalescent)), 
-                             "recombination_value" = sort(unique(exp2_df$recombination_value)), "recombination_type" = unique(exp2_df$recombination_type))
+  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp3_df$num_taxa)), "tree_depth_coalescent" = sort(unique(exp3_df$tree_depth_coalescent)), 
+                             "recombination_value" = sort(unique(exp3_df$recombination_value)), "recombination_type" = unique(exp3_df$recombination_type))
   # Calculate proportion of treelike alignments for each set of parameter values
-  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp2, params_df = ntlt_params, results_df = exp2_df))
-  # Add columns to match the exp2_long_df
+  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp3, params_df = ntlt_params, results_df = exp3_df))
+  # Add columns to match the exp3_long_df
   ntlt_params$row_id <- rep(NA, length(prop_tl_results))
   ntlt_params$uid <- rep(NA, length(prop_tl_results))
   ntlt_params$num_trees <- 1000
   ntlt_params$value <- prop_tl_results
   ntlt_params$variable <- "NetworkTreelikenessTest"
-  # Restructure the dataframe to match the exp2_long_df
-  ntlt_params <- ntlt_params[,c(names(exp2_long_df)),]
+  # Restructure the dataframe to match the exp3_long_df
+  ntlt_params <- ntlt_params[,c(names(exp3_long_df)),]
   # Remove rows with 5 taxa and Ancient event (not conducted)
   remove_rows <- which(ntlt_params$num_taxa == 5 & ntlt_params$recombination_type == "Ancient")
   keep_rows <- setdiff(1:nrow(ntlt_params), remove_rows)
   ntlt_params <- ntlt_params[keep_rows, ]
-  # Bind to the exp2_long_df
-  exp2_long_df <- rbind(exp2_long_df, ntlt_params)
+  # Bind to the exp3_long_df
+  exp3_long_df <- rbind(exp3_long_df, ntlt_params)
   
   # Add fancy labels for facets (based on which test statistics were selected)
-  if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run"){
+  if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run"){
     # Add fancy labels for facets
-    exp2_long_df$var_label <- factor(exp2_long_df$variable,
+    exp3_long_df$var_label <- factor(exp3_long_df$variable,
                                      levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
                                                 "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
                                                 "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
@@ -339,8 +339,8 @@ if (plot_exp2 == TRUE){
                                                 expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
   } else {
     # Add fancy labels for facets
-    # Do not plot TIGER (fast TIGER was not run for exp2, too time consuming)
-    exp2_long_df$var_label <- factor(exp2_long_df$variable, 
+    # Do not plot TIGER (fast TIGER was not run for exp3, too time consuming)
+    exp3_long_df$var_label <- factor(exp3_long_df$variable, 
                                      levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
                                                 "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
                                                 "mean_Q_residual", "sCFL_mean"), 
@@ -349,20 +349,20 @@ if (plot_exp2 == TRUE){
                                                 expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                                 expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
                                                 expression(atop("Mean", "sCFL value")) ) )
-  } # end if (unique(exp2_df$mean_TIGER_value) == "no_TIGER_run")
+  } # end if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run")
   
-} # end if (plot_exp2 == TRUE)
+} # end if (plot_exp3 == TRUE)
 
 
 
-#### 6. Plot data from Experiment 2 ####
-if (plot_exp2 == TRUE){
+#### 6. Plot data from Experiment 3 ####
+if (plot_exp3 == TRUE){
   # Set color palette for plots 1 and 2
   viridis_picks = scales::viridis_pal(direction = -1)(5)
   
   ## Plot 1: Ancient events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
   # Set dataset for plot
-  plot_df <- exp2_long_df
+  plot_df <- exp3_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
   # Construct plot with fixed y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
@@ -382,7 +382,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "mainFig_exp2_plot1_tree_depth_Ancient."
+  plot_prefix <- "mainFig_exp3_plot1_tree_depth_Ancient."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -402,7 +402,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot1_tree_depth_Ancient_points."
+  plot_prefix <- "exp3_plot1_tree_depth_Ancient_points."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -423,14 +423,14 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot1_tree_depth_Ancient_freey."
+  plot_prefix <- "exp3_plot1_tree_depth_Ancient_freey."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
   
   ## Plot 2: Recent events. Smooth lines showing average values for each test statistic as the amount of recombination increases, faceted by tree depth ##
   # Set dataset for plot
-  plot_df <- exp2_long_df
+  plot_df <- exp3_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
   # Construct plot
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
@@ -450,7 +450,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "mainFig_exp2_plot2_tree_depth_Recent."
+  plot_prefix <- "mainFig_exp3_plot2_tree_depth_Recent."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -470,7 +470,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot2_tree_depth_Recent_points."
+  plot_prefix <- "exp3_plot2_tree_depth_Recent_points."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
 
@@ -491,14 +491,14 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot2_tree_depth_Recent_freey."
+  plot_prefix <- "exp3_plot2_tree_depth_Recent_freey."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
   
   ## Plot 3: Ancient events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
   # Set dataset for plot
-  plot_df <- exp2_long_df
+  plot_df <- exp3_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
   # Construct plot
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth_coalescent))) + 
@@ -517,7 +517,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot3_num_taxa_Ancient."
+  plot_prefix <- "exp3_plot3_num_taxa_Ancient."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -537,7 +537,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot3_num_taxa_Ancient_points."
+  plot_prefix <- "exp3_plot3_num_taxa_Ancient_points."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -545,7 +545,7 @@ if (plot_exp2 == TRUE){
   
   ## Plot 4: Recent events. Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
   # Set dataset for plot
-  plot_df <- exp2_long_df
+  plot_df <- exp3_long_df
   plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
   # Construct plot
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_depth_coalescent))) + 
@@ -564,7 +564,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot4_num_taxa_Recent."
+  plot_prefix <- "exp3_plot4_num_taxa_Recent."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
   
@@ -584,7 +584,7 @@ if (plot_exp2 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(size = 18, hjust = 0.5))
   # Save plot
-  plot_prefix <- "exp2_plot4_num_taxa_Recent_points."
+  plot_prefix <- "exp3_plot4_num_taxa_Recent_points."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
 }

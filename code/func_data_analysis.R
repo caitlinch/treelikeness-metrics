@@ -131,6 +131,33 @@ reformat.network.treelikeness.test.results.exp2 <- function(id, params_df, resul
 }
 
 
+
+reformat.network.treelikeness.test.results.exp3 <- function(id, params_df, results_df){
+  # For processing experiment 3 results
+  # Function to collect the proportion of treelike alignments for each set of parameters
+  # Reformat network treelikeness test results for pretty plotting
+  
+  # Extract relevant row
+  row <- params_df[id, ]
+  
+  # Filter results_df to only rows including the relevent params
+  row_results_df <- results_df[(results_df$num_taxa == row$num_taxa & 
+                                  results_df$tree_age == row$tree_age &
+                                  results_df$speciation_rate == row$speciation_rate &
+                                  results_df$recombination_value == row$recombination_value &
+                                  results_df$recombination_type == row$recombination_type), ]
+  # Find number of treelike and non-treelike results
+  tl_results <- length(which(row_results_df$NetworkTreelikenessTest == "Treelike"))
+  ntl_results <- length(which(row_results_df$NetworkTreelikenessTest == "Non-treelike"))
+  # Find total number of alignments with these parameters
+  n_als <- nrow(row_results_df)
+  # Find proportion of treelike results
+  prop_tl_als <- tl_results/n_als
+  # Return the proportion of treelike alignments for this set of parameter values
+  return(prop_tl_als)
+}
+
+
 reformat.network.treelikeness.test.results.empirical <- function(id, params_df, results_df){
   # For processing experiment 2 results
   # Function to collect the proportion of treelike alignments for each set of parameters

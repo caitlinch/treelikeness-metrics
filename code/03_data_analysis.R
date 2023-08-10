@@ -16,7 +16,7 @@ data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_res
 output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
-plot_exp1 = TRUE
+plot_exp1 = FALSE
 plot_exp3 = TRUE
 
 
@@ -192,7 +192,7 @@ if (plot_exp1 == TRUE){
   plot_prefix <- "exp1_plot1_freey_tree_depth."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
-
+  
   
   ## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
   # Set dataset for plot
@@ -269,44 +269,24 @@ if (plot_exp1 == TRUE){
 
 #### 5. Prepare data from Experiment 3 for plotting ####
 if (plot_exp3 == TRUE){
-  # Open data file from Experiment 3 as a dataframe
+  ## Open data file from Experiment 3 as a dataframe
   exp3_data_file <- grep("00_", grep("exp3", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE)
   exp3_df <- read.csv(file = exp3_data_file, stringsAsFactors = FALSE)
   
-  # Manage test statistic columns
+  ## Manage test statistic columns
   # Convert sCFL values to decimal from percentage
-  exp3_df$sCFL_mean <- exp3_df$sCFL_mean / 100
-  # Convert likelihood mapping results to numeric
-  # Values will be characters because 386 alignments or 9.7% have value of "no_iqtree_file" (which means could not perform LM)
-  exp3_df$LM_proportion_resolved_quartets <- as.numeric(exp3_df$LM_proportion_resolved_quartets)
+  exp3_df$sCFL_mean <- exp3_df$sCF_mean / 100
+  exp3_df$sCFL_median <- exp3_df$sCF_median / 100
   
-  # Select test statistics for plotting (by subsetting columns)
-  if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run"){
-    # Remove columns you don't want for plotting
-    # Do not plot TIGER (fast TIGER was not run for exp3, too time consuming)
-    exp3_wide_df <- exp3_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", 
-                                "recombination_value", "recombination_type",
-                                "tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                "LM_proportion_resolved_quartets", "mean_Q_residual", 
-                                "sCFL_mean")]
-  } else {
-    # TIGER was run, so plot TIGER results with other test statistic results
-    # Convert TIGER results to numeric
-    exp3_df$mean_TIGER_value <- as.numeric(exp3_df$mean_TIGER_value)
-    # Remove columns you don't want for plotting
-    exp3_wide_df <- exp3_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent",
-                                "recombination_value", "recombination_type",
-                                "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
-                                "LM_proportion_resolved_quartets", "mean_Q_residual",
-                                "sCFL_mean", "mean_TIGER_value")]
-  }  # end if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run")
-  
-  # Melt exp3_wide_df for better plotting
-  exp3_long_df <- melt(exp3_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth_coalescent", "recombination_value", "recombination_type"))
+  ## Melt exp3_wide_df for better plotting
+  id_var_columns <- c("row_id", "uid", "num_trees", "num_taxa", "tree_age", "recombination_value", "recombination_type", "speciation_rate", "tree_depth_subspersite")
+  exp3_long_df <- melt(exp3_df, id.vars = id_var_columns, measure.vars = c("LM_proportion_resolved_quartets", "sCFL_mean", "mean_delta_plot_value", "mean_Q_residual",
+                                                                           "mean_TIGER_value", "Cunningham_test", "tree_proportion") ) 
   
   # Transform the Network Treelikeness Test results into more plottable format
   # Make a table of all possible parameter values for the network treelikeness test
-  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp3_df$num_taxa)), "tree_depth_coalescent" = sort(unique(exp3_df$tree_depth_coalescent)), 
+  ntlt_params <- expand.grid("num_taxa" = sort(unique(exp3_df$num_taxa)), "tree_age" = sort(unique(exp3_df$tree_age)), 
+                             "speciation_rate" = sort(unique(exp3_df$speciation_rate)), "tree_depth_subspersite" = sort(unique(exp3_df$tree_depth_subspersite)), 
                              "recombination_value" = sort(unique(exp3_df$recombination_value)), "recombination_type" = unique(exp3_df$recombination_type))
   # Calculate proportion of treelike alignments for each set of parameter values
   prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp3, params_df = ntlt_params, results_df = exp3_df))
@@ -326,30 +306,15 @@ if (plot_exp3 == TRUE){
   exp3_long_df <- rbind(exp3_long_df, ntlt_params)
   
   # Add fancy labels for facets (based on which test statistics were selected)
-  if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run"){
-    # Add fancy labels for facets
-    exp3_long_df$var_label <- factor(exp3_long_df$variable,
-                                     levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
-                                                "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                                "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
-                                     ordered = TRUE,
-                                     labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
-                                                expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                                expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
-                                                expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
-  } else {
-    # Add fancy labels for facets
-    # Do not plot TIGER (fast TIGER was not run for exp3, too time consuming)
-    exp3_long_df$var_label <- factor(exp3_long_df$variable, 
-                                     levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", 
-                                                "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                                "mean_Q_residual", "sCFL_mean"), 
-                                     ordered = TRUE, 
-                                     labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
-                                                expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                                expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                                expression(atop("Mean", "sCFL value")) ) )
-  } # end if (unique(exp3_df$mean_TIGER_value) == "no_TIGER_run")
+  exp3_long_df$var_label <- factor(exp3_long_df$variable,
+                                   levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
+                                              "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
+                                              "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
+                                   ordered = TRUE,
+                                   labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
+                                              expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
+                                              expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
+                                              expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
   
 } # end if (plot_exp3 == TRUE)
 
@@ -473,7 +438,7 @@ if (plot_exp3 == TRUE){
   plot_prefix <- "exp3_plot2_tree_depth_Recent_points."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 12.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 12.5, units = "in")
-
+  
   # Construct plot with free y axis
   p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
     geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +

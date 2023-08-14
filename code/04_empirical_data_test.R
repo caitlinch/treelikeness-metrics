@@ -1,15 +1,19 @@
 # caitlinch/treelikeness-metrics/code/04_empirical_data_test.R
 # Caitlin Cherryh 2023
 
-# This program will apply various tests for treelikeness to simulated alignments
+## Script summary:
+# This program will apply various tests for treelikeness to empirical alignments
 # This program requires IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, and SplitsTree (4.17.2 or above).
 
+## Empirical dataset:
+# Paper: 
+# Data repository: 
 
 
 #### 1. Set parameters ####
 ## Directories
-# local_directory         <- Directory where alignments will be saved/treelikeness metrics will be run
-# results_directory       <- Directory where collated results from the treelikeness test statistics will be saved
+# run_directory           <- Directory where alignments will be saved/treelikeness metrics will be run
+# data_directory          <- Location of empirical dataset
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
 ## Executable paths
@@ -24,8 +28,8 @@
 run_location = "soma"
 if (run_location == "local"){
   # Directories
-  local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  results_directory <- paste0(local_directory, "01_results/")
+  run_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
+  data_directory <- ""
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   
   # Executable paths
@@ -38,8 +42,8 @@ if (run_location == "local"){
   num_cores <- 1
 } else if (run_location == "soma"){
   # Directories
-  local_directory <- "/data/caitlin/treelikeness_metrics/"
-  results_directory <- local_directory
+  run_directory <- "/data/caitlin/treelikeness_metrics/"
+  data_directory <- ""
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths
@@ -63,13 +67,13 @@ source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 # Find the folders of simulated alignments
-exp_folder <- paste0(local_directory, "emp/")
+exp_folder <- paste0(run_directory, "emp/")
 
 
 
 #### 3. Apply tests for treelikeness to each gene within the alignment ####
 # Open output df and get names of alignments
-emp_op_file <- paste0(results_directory, grep("rerun", grep("emp", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+emp_op_file <- paste0(run_directory, grep("rerun", grep("emp", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
 emp_op_df <- read.csv(emp_op_file, stringsAsFactors = FALSE)
 # Get list of alignments
 emp_als <- emp_op_df$output_alignment_file
@@ -89,7 +93,7 @@ mclapply(emp_als, treelikeness.metrics.empirical,
 emp_list <- mclapply(emp_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
 # Save output dataframe
 emp_df <- as.data.frame(do.call("rbind", emp_list))
-emp_df_name <- paste0(results_directory, "emp_treelikeness_metrics_collated_results.csv")
+emp_df_name <- paste0(run_directory, "emp_treelikeness_metrics_collated_results.csv")
 write.csv(emp_df, emp_df_name, row.names = FALSE)
 
 

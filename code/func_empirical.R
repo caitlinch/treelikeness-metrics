@@ -5,6 +5,36 @@
 # Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
 
 
+
+#### Wrapper functions ####
+empirical.treelikeness.test.wrapper <- function(alignment_path, 
+                                                iqtree2_path, splitstree_path, 
+                                                phylogemetric_path, fast_TIGER_path, 
+                                                supply_number_of_taxa = FALSE, number_of_taxa = NA, 
+                                                num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                                                iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
+                                                num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
+                                                run_splitstree_for_tree_proportion = FALSE, sequence_format = "DNA", 
+                                                apply.TIGER = FALSE, redo = FALSE){
+  ### Function to apply treelikeness metrics to an empirical dataset, perform a parametric bootstrap with 100 replicates, 
+  #       and return the output and p-values for each metric
+  
+  ## Copy alignment to new dataframe
+  
+  ## Apply treelikeness metric to alignment
+  
+  ## Extract parameters from the IQ-Tree run of the alignment
+  
+  ## Perform 100 parametric bootstrap replicates
+  
+  ## Calculate p-values
+  
+  ## Assemble output csv
+}
+
+
+
+
 #### Treelikeness test functions ####
 treelikeness.metrics.empirical <- function(alignment_path, 
                                            iqtree2_path, splitstree_path, 
@@ -149,3 +179,15 @@ tiger.empirical <- function(alignment_path, fast_TIGER_path,
   # Return the tiger dataframe
   return(results_df)
 } # end function
+
+
+
+#### Model extraction functions ####
+
+
+
+#### Parametric bootstrap replicate functions ####
+
+
+
+

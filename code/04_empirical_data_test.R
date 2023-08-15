@@ -28,8 +28,7 @@
 run_location = "soma"
 if (run_location == "local"){
   # Directories
-  run_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
-  data_directory <- ""
+  run_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical/"
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   
   # Executable paths
@@ -55,6 +54,22 @@ if (run_location == "local"){
   # Run parameters
   num_cores <- 30
 }
+
+# For testing treelikeness metrics
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical/ITS_GB/ITS_GB.nxs"
+supply_number_of_taxa = TRUE
+number_of_taxa = 37
+num_iqtree2_threads = "AUTO"
+num_iqtree2_scf_quartets = 100
+iqtree_substitution_model = "JC"
+distance_matrix_substitution_method = "JC69"
+num_phylogemetric_threads = NA
+tree_proportion_remove_trivial_splits = TRUE
+run_splitstree_for_tree_proportion = FALSE
+sequence_format = "DNA"
+apply.TIGER = TRUE
+redo = FALSE
+
 
 
 

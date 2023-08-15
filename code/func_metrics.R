@@ -214,7 +214,7 @@ cunningham.test <- function(alignment_path, sequence_format = "DNA", iqtree2_pat
 
 
 ## Network tree-likeness test (Huson and Bryant 2006)
-network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA"){
+network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_format = "DNA", nexus.file.format = TRUE){
   ## Uses Splitstree4.17.1 software to implement the Network Treelikeness Test described in Huson and Bryant (2006)
   # Software available from:
   # https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/algorithms-in-bioinformatics/software/splitstree/
@@ -229,8 +229,12 @@ network.treelikeness.test <- function(alignment_path, splitstree_path, sequence_
   #         - Reject the null hypothesis if and only if this set is incompatible
   
   ## Construct and bootstrap a NeighborNet network
-  # Convert fasta to nexus
-  nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  if (nexus.file.format == TRUE){
+    nexus_alignment_path = alignment_path
+  } else {
+    # Convert fasta to nexus
+    nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+  }
   # Name output path
   confidence_path <- paste0(alignment_path, "_confidence.nexus")
   output_path <- paste0(alignment_path, "_Splitstree_output.nex")
@@ -698,7 +702,7 @@ recalculate.scf <- function(alignment_path, iqtree2_path,  num_iqtree2_threads =
   ## Apply Site concordance factors (Minh et. al. 2020)
   # Apply scfl- site concordance factors with likelihood (iqtree2 v2.2.2)
   scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
-              substitution_model = iqtree_substitution_model, force.redo = force.redo)
+               substitution_model = iqtree_substitution_model, force.redo = force.redo)
   
   # Assemble results into a dataframe and save
   results_vec <- c(unique_id, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), alignment_path)
@@ -771,35 +775,35 @@ treelikeness.metrics.simulations <- function(alignment_path,
     # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                              number_of_taxa = n_tree_tips, sequence_format = sequence_format)
-
+    
     # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
     scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                  substitution_model = iqtree_substitution_model)
-
+    
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
-    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format)
-
+    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
+    
     # Apply Delta plots (Holland et. al. 2002)
     mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
                                                    base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
-
+    
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
     mean_q_residual <- q_residual_results$mean_q_residual
-
+    
     if (apply.TIGER == TRUE){
       # Apply TIGER (Cummins and McInerney 2011)
       mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
     } else if (apply.TIGER == FALSE){
       mean_tiger_value <- "no_TIGER_run"
     }
-
+    
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
                                          iqtree_substitution_model = iqtree_substitution_model, 
                                          distance_matrix_substitution_model = distance_matrix_substitution_method,
                                          base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
-
+    
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                             remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 

@@ -91,8 +91,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Open ML dist matrix from IQ-Tree run
     
     # Calculate delta plot values
-    mean_delta_plot_value <- delta.plot.empirical(nexus_alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
-                                                  base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
+    mean_delta_plot_value <- delta.plot.empirical(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
     
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
@@ -134,7 +133,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
 
 #### Treelikeness test functions ####
 ## Delta plots (Holland et. al. 2002)
-mean.delta.plot.value <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
+delta.plot.empirical <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   

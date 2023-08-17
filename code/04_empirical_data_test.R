@@ -56,9 +56,9 @@ if (run_location == "local"){
 }
 
 # For testing treelikeness metrics
-alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical/ITS_GB/ITS_GB.nxs"
+alignment_path <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical/WEA17_filtered/Whelan2017MCRS_filtered.fasta"
 supply_number_of_taxa = TRUE
-number_of_taxa = 37
+number_of_taxa = 76
 num_iqtree2_threads = "AUTO"
 num_iqtree2_scf_quartets = 100
 iqtree_substitution_model = "JC"

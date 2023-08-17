@@ -61,12 +61,12 @@ supply_number_of_taxa = TRUE
 number_of_taxa = 76
 num_iqtree2_threads = "AUTO"
 num_iqtree2_scf_quartets = 100
-iqtree_substitution_model = "JC"
+iqtree_substitution_model = "LG"
 distance_matrix_substitution_method = "JC69"
 num_phylogemetric_threads = NA
 tree_proportion_remove_trivial_splits = TRUE
-run_splitstree_for_tree_proportion = FALSE
-sequence_format = "DNA"
+run_splitstree_for_tree_proportion = TRUE
+sequence_format = "AA"
 apply.TIGER = TRUE
 redo = FALSE
 
@@ -96,7 +96,6 @@ emp_als <- emp_op_df$output_alignment_file
 mclapply(emp_als, treelikeness.metrics.empirical,
          iqtree2_path, splitstree_path, 
          phylogemetric_path, fast_TIGER_path, 
-         supply_number_of_taxa = FALSE, number_of_taxa = NA, 
          num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
          iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
          num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 

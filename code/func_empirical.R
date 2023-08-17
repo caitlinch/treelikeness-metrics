@@ -35,11 +35,10 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
 
 
 
-#### Treelikeness test functions ####
+#### Apply all treelikeness metrics ####
 treelikeness.metrics.empirical <- function(alignment_path, 
                                            iqtree2_path, splitstree_path, 
                                            phylogemetric_path, fast_TIGER_path, 
-                                           supply_number_of_taxa = FALSE, number_of_taxa = NA, 
                                            num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                                            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
                                            num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
@@ -58,7 +57,16 @@ treelikeness.metrics.empirical <- function(alignment_path,
   # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
   
-  ## Convert alignment to FASTA
+  ## Convert alignment to NEXUS
+  # Open alignment file
+  f <- read.FASTA(alignment_path, type = "AA")
+  # Write out alignment file as nexus format
+  nexus_alignment_path <- paste0(replicate_folder, unique_id, ".nex")
+  write.nexus.data(f, file = nexus_alignment_path, format = "protein", datablock = FALSE, interleaved = FALSE)
+  
+  # Extract number of taxa in file
+  number_of_taxa <- length(f)
+  
   
   ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
@@ -77,11 +85,14 @@ treelikeness.metrics.empirical <- function(alignment_path,
                  substitution_model = iqtree_substitution_model)
     
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
-    ntlt <- network.treelikeness.test(alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = FALSE)
+    ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
     
     # Apply Delta plots (Holland et. al. 2002)
-    mean_delta_plot_value <- mean.delta.plot.value(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
-                                                   base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
+    # Open ML dist matrix from IQ-Tree run
+    
+    # Calculate delta plot values
+    mean_delta_plot_value <- delta.plot.empirical(nexus_alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method,
+                                                  base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
     
     # Apply Q-residuals (Gray et. al. 2010)
     q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
@@ -120,6 +131,41 @@ treelikeness.metrics.empirical <- function(alignment_path,
 } # end function
 
 
+
+#### Treelikeness test functions ####
+## Delta plots (Holland et. al. 2002)
+mean.delta.plot.value <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
+  # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
+  # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
+  
+  ## Open the alignment as a phyDat object
+  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
+  ## Calculate a distance matrix of pairwise distances from AA sequences using a model of AA substitution
+  # Default model is WAG
+  pdm <- dist.ml(p, model = substitution_model)
+  ## Call ape::delta.plot function
+  # Set the number of intervals for the delta plot
+  dp_intervals = 100
+  # Make a delta.plot based on the pairwise distance matrix
+  dp <- delta.plot(pdm, k = dp_intervals, plot = FALSE)
+  ## To calculate the mean delta q from ALL quartets:
+  # Create two vectors, one containing the counts and one containing the midpoint of each interval
+  # To determine the midpoint of each interval, first find the intervals (e.g. for k = 2, there will be 2 intervals: 0-0.5 and 0.5-1),
+  #     and the midpoint of each interval will be 0.25 and 0.75 (the mean of the start and endpoint of each interval)
+  interval_midpoint = (seq(0,0.999,1/(dp_intervals)) + (0.5 * (0 + seq(0,1,1/(dp_intervals))[2])))
+  interval_count = dp$counts
+  # To calculate the mean delta_q, calculate a weighted mean from the 
+  mean_dq <- weighted.mean(interval_midpoint, interval_count)
+  ## To calculate the mean delta bar (the mean value across all taxa e.g. the mean of the mean values for each taxa):
+  # Calculate the mean delta bar (delta bar = the mean delta value for each observation/taxa)
+  mean_db <- mean(dp$delta.bar)
+  ## Return values to outside function
+  # Return the mean delta bar (the mean delta q value across all taxa)
+  return(mean_db)
+}
+
+
+
 tiger.empirical <- function(alignment_path, fast_TIGER_path,
                             sequence_format = "DNA"){
   ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
@@ -153,6 +199,7 @@ tiger.empirical <- function(alignment_path, fast_TIGER_path,
   # Return the tiger dataframe
   return(results_df)
 } # end function
+
 
 
 likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, substitution_model = "MFP", 
@@ -196,6 +243,7 @@ likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_n
   ## Return results
   return(lm_results)
 }
+
 
 
 #### Model extraction functions ####

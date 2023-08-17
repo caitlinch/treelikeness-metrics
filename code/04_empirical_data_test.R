@@ -78,6 +78,8 @@ redo = FALSE
 library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
+source(paste0(repo_directory, "code/func_empirical.R"))
+source(paste0(repo_directory, "code/func_parametric_bootstraps.R"))
 source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 

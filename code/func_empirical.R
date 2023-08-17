@@ -105,10 +105,9 @@ treelikeness.metrics.empirical <- function(alignment_path,
     }
     
     # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
-                                         iqtree_substitution_model = iqtree_substitution_model, 
-                                         distance_matrix_substitution_model = distance_matrix_substitution_method,
-                                         base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
+    cunningham_metric <- cunningham.test.empirical(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
+                                                   iqtree_substitution_model = iqtree_substitution_model, 
+                                                   distance_matrix_substitution_model = distance_matrix_substitution_method)
     
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
@@ -132,75 +131,6 @@ treelikeness.metrics.empirical <- function(alignment_path,
 
 
 #### Treelikeness test functions ####
-## Delta plots (Holland et. al. 2002)
-delta.plot.empirical <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
-  # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
-  # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
-  
-  ## Open the alignment as a phyDat object
-  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
-  ## Calculate a distance matrix of pairwise distances from AA sequences using a model of AA substitution
-  # Default model is WAG
-  pdm <- dist.ml(p, model = substitution_model)
-  ## Call ape::delta.plot function
-  # Set the number of intervals for the delta plot
-  dp_intervals = 100
-  # Make a delta.plot based on the pairwise distance matrix
-  dp <- delta.plot(pdm, k = dp_intervals, plot = FALSE)
-  ## To calculate the mean delta q from ALL quartets:
-  # Create two vectors, one containing the counts and one containing the midpoint of each interval
-  # To determine the midpoint of each interval, first find the intervals (e.g. for k = 2, there will be 2 intervals: 0-0.5 and 0.5-1),
-  #     and the midpoint of each interval will be 0.25 and 0.75 (the mean of the start and endpoint of each interval)
-  interval_midpoint = (seq(0,0.999,1/(dp_intervals)) + (0.5 * (0 + seq(0,1,1/(dp_intervals))[2])))
-  interval_count = dp$counts
-  # To calculate the mean delta_q, calculate a weighted mean from the 
-  mean_dq <- weighted.mean(interval_midpoint, interval_count)
-  ## To calculate the mean delta bar (the mean value across all taxa e.g. the mean of the mean values for each taxa):
-  # Calculate the mean delta bar (delta bar = the mean delta value for each observation/taxa)
-  mean_db <- mean(dp$delta.bar)
-  ## Return values to outside function
-  # Return the mean delta bar (the mean delta q value across all taxa)
-  return(mean_db)
-}
-
-
-
-tiger.empirical <- function(alignment_path, fast_TIGER_path,
-                            sequence_format = "DNA"){
-  ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
-  
-  # Print alignment path
-  print(alignment_path)
-  
-  ## Prepare variables and output file names for run
-  # Get directory path
-  replicate_folder <- paste0(dirname(alignment_path), "/")
-  # Get unique id for the alignment
-  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
-  
-  # Create name for output dataframe
-  df_name <- paste0(replicate_folder, unique_id, "_tiger_results.csv")
-  
-  if (file.exists(df_name) == TRUE){
-    results_df <- read.csv(df_name)
-  } else if (file.exists(df_name) == FALSE){
-    # Apply TIGER (Cummins and McInerney 2011)
-    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
-    
-    # Assemble results into a dataframe and save
-    results_vec <- c(unique_id, mean_tiger_value)
-    results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
-    names_vec <- c("uid", "mean_TIGER_value")
-    names(results_df) <- names_vec
-    write.csv(results_df, file = df_name, row.names = FALSE) 
-  }
-  
-  # Return the tiger dataframe
-  return(results_df)
-} # end function
-
-
-
 likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_number_threads = 1, substitution_model = "MFP", 
                                          number_of_taxa = NA, sequence_format = "DNA"){
   # Function to call IQ-Tree and create a likelihood map for the alignment
@@ -242,6 +172,122 @@ likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_n
   ## Return results
   return(lm_results)
 }
+
+
+
+## Delta plots (Holland et. al. 2002)
+delta.plot.empirical <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
+  # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
+  # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
+  
+  ## Open the alignment as a phyDat object
+  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
+  ## Calculate a distance matrix of pairwise distances from AA sequences using a model of AA substitution
+  # Default model is WAG
+  pdm <- dist.ml(p, model = substitution_model)
+  ## Call ape::delta.plot function
+  # Set the number of intervals for the delta plot
+  dp_intervals = 100
+  # Make a delta.plot based on the pairwise distance matrix
+  dp <- delta.plot(pdm, k = dp_intervals, plot = FALSE)
+  ## To calculate the mean delta q from ALL quartets:
+  # Create two vectors, one containing the counts and one containing the midpoint of each interval
+  # To determine the midpoint of each interval, first find the intervals (e.g. for k = 2, there will be 2 intervals: 0-0.5 and 0.5-1),
+  #     and the midpoint of each interval will be 0.25 and 0.75 (the mean of the start and endpoint of each interval)
+  interval_midpoint = (seq(0,0.999,1/(dp_intervals)) + (0.5 * (0 + seq(0,1,1/(dp_intervals))[2])))
+  interval_count = dp$counts
+  # To calculate the mean delta_q, calculate a weighted mean from the 
+  mean_dq <- weighted.mean(interval_midpoint, interval_count)
+  ## To calculate the mean delta bar (the mean value across all taxa e.g. the mean of the mean values for each taxa):
+  # Calculate the mean delta bar (delta bar = the mean delta value for each observation/taxa)
+  mean_db <- mean(dp$delta.bar)
+  ## Return values to outside function
+  # Return the mean delta bar (the mean delta q value across all taxa)
+  return(mean_db)
+}
+
+
+
+cunningham.test.empirical <- function(alignment_path, sequence_format = "AA", iqtree2_path, iqtree2_number_threads = "AUTO", 
+                                      iqtree_substitution_model = "LG", distance_matrix_substitution_model = "LG"){
+  ## Function to estimate what proportion of the variance in the data is represented by the tree
+  
+  ## Test steps:
+  # 1. Calculate the observed distances from the alignment (d_ij)
+  # 2. Calculate the predicted distances from the tree (p_ij)
+  # 3. Calculate the total sum of squares. TSS = sum of (d_ij)^2
+  # 4. Calculate the residual sum of squares. RSS = sum of (p_ij - d_ij)^2
+  # 5. Calculate the R^2 = (TSS - RSS)/ RSS
+  
+  ## Test:
+  # 1. Calculate the observed distances (d_ij)
+  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
+  dna_mat <- dist.ml(p, model = distance_matrix_substitution_model)
+  d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
+  
+  # 2. Calculate the predicted distances (p_ij)
+  # Infer a tree (if one does not already exist) and open it
+  if (file.exists(paste0(alignment_path, ".treefile")) == FALSE){
+    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = iqtree_substitution_model)
+  }
+  # Open the tree
+  t <- read.tree(paste0(alignment_path, ".treefile"))
+  # Extract the distance matrix from the tree
+  t_cophenetic_mat <- cophenetic.phylo(t) # in substitutions per site
+  # Now reorder the t_mat so the taxa are in the same order
+  dna_order <- attr(dna_mat, "Labels")
+  t_ordering_mat <- as.matrix(t_cophenetic_mat)[dna_order, dna_order]
+  t_mat <- as.dist(t_ordering_mat)
+  p_ij <- as.vector(t_mat) # predicted distances between taxa i and j
+  
+  # 3. Calculate the TSS = sum of (d_ij)^2
+  TSS = sum((d_ij)^2)
+  
+  # 4. Calculate the RSS = sum of (p_ij - d_ij)^2
+  RSS = sum((p_ij - d_ij)^2)
+  
+  # 5. Calculate the R^2
+  r_squared = 1 - ((RSS)/(TSS))
+  
+  ## Return the r_squared value
+  return(r_squared)
+}
+
+
+
+tiger.empirical <- function(alignment_path, fast_TIGER_path,
+                            sequence_format = "DNA"){
+  ## Function to take one empirical alignment, apply fast TIGER and return results in a dataframe
+  
+  # Print alignment path
+  print(alignment_path)
+  
+  ## Prepare variables and output file names for run
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Get unique id for the alignment
+  unique_id <- paste(gsub("_output_alignment", "", unlist(strsplit(basename(alignment_path), "\\."))[1:(length(unlist(strsplit(basename(alignment_path), "\\."))) - 1)]), collapse = ".") 
+  
+  # Create name for output dataframe
+  df_name <- paste0(replicate_folder, unique_id, "_tiger_results.csv")
+  
+  if (file.exists(df_name) == TRUE){
+    results_df <- read.csv(df_name)
+  } else if (file.exists(df_name) == FALSE){
+    # Apply TIGER (Cummins and McInerney 2011)
+    mean_tiger_value <- TIGER(alignment_path, fast_TIGER_path, sequence_format = sequence_format)
+    
+    # Assemble results into a dataframe and save
+    results_vec <- c(unique_id, mean_tiger_value)
+    results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+    names_vec <- c("uid", "mean_TIGER_value")
+    names(results_df) <- names_vec
+    write.csv(results_df, file = df_name, row.names = FALSE) 
+  }
+  
+  # Return the tiger dataframe
+  return(results_df)
+} # end function
 
 
 

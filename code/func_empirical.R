@@ -18,9 +18,12 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
   #       and return the output and p-values for each metric
   
   ## Estimate IQ-Tree with MFP
+  # Call IQ-Tree with MFP (and perform quartet mapping)
   number_of_quartets <- 25 * as.numeric(number_of_taxa)
   iqtree_run <- paste0(iqtree2_path, " -s ", alignment_path, " -m MFP -nt ", iqtree2_number_threads, " -lmap ", number_of_quartets, " -redo -safe")
   system(iqtree_run)
+  # Extract the treefile path
+  tree_path <- paste0(alignment_path, ".treefile")
   
   ## Extract parameters from the IQ-Tree run of the alignment
   iqtree_file <- paste0(alignment_path, ".iqtree")
@@ -41,6 +44,15 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
                                  redo = redo)
   
   ## Perform 100 parametric bootstrap replicates
+  # Generate a dataframe to perform parametric bootstraps
+  params_df <- expand.grid(replicate = 1:100, 
+                           num_taxa = number_of_taxa, 
+                           num_sites = model_parameters$parameters[4,2], 
+                           substitution_model = model_parameters$parameters[9,2], 
+                           sequence_type = model_parameters$parameters[2,2])
+  params_df$id <- paste0("bs_rep_", sprintf("000%d", 1:100))
+  params_df$tree_file <- tree_path
+  params_df <- params_df[,c("id", "replicate", "num_taxa", "num_sites", "substitution_model", "sequence_type", "tree_file")]
   
   ## Calculate p-values
   

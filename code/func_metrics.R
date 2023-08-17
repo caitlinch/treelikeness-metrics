@@ -828,13 +828,26 @@ treelikeness.metrics.simulations <- function(alignment_path,
 #### Utility functions ####
 make.splitstree.neighbornet <- function(alignment_path, splitstree_path, return.splits = TRUE){
   ## Construct a NeighborNet network using SplitsTree
-  # Convert fasta to nexus (if the conversion has not already occured)
-  check_nexus_path <- paste0(alignment_path,"_converted.nex")
-  if (file.exists(check_nexus_path) == FALSE){
-    nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
-  } else if (file.exists(check_nexus_path) == TRUE) {
-    nexus_alignment_path <- check_nexus_path
+  
+  ## Check file format and convert to nexus if necessary
+  # Check if the file is already a nexus file
+  file_format <- tail(strsplit(basename(alignment_path), "\\.")[[1]], n = 1)
+  
+  if (file_format == "fasta" | file_format == "fas" | file_format == "fa" | file_format == "fna" | 
+      file_format == "ffn" | file_format == "faa" | file_format == "frn"){
+    # Convert fasta to nexus (if the conversion has not already occured)
+    check_nexus_path <- paste0(alignment_path,"_converted.nex")
+    if (file.exists(check_nexus_path) == FALSE){
+      nexus_alignment_path <- convert.to.nexus(alignment_path, sequence_format = "DNA", include_taxablock = TRUE)
+    } else if (file.exists(check_nexus_path) == TRUE) {
+      nexus_alignment_path <- check_nexus_path
+    }
+  } else if (file_format == "nex" | file_format == "nexus"){
+    # File format already nexus file - do not convert file
+    nexus_alignment_path <- alignment_path
   }
+  
+  ## Construct a NeighborNet network using SplitsTree
   # Name output path
   splits_output_path <- paste0(alignment_path, "_Splitstree_NeighborNet_splits.nex")
   # Run Splitstree4 if the confidence_path and output_path files do not exist

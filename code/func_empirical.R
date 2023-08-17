@@ -45,14 +45,14 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
   
   ## Perform 100 parametric bootstrap replicates
   # Generate a dataframe to perform parametric bootstraps
-  params_df <- expand.grid(replicate = 1:100, 
+  bootstrap_df <- expand.grid(replicate = 1:100, 
                            num_taxa = number_of_taxa, 
                            num_sites = model_parameters$parameters[4,2], 
                            substitution_model = model_parameters$parameters[9,2], 
                            sequence_type = model_parameters$parameters[2,2])
-  params_df$id <- paste0("bs_rep_", sprintf("000%d", 1:100))
-  params_df$tree_file <- tree_path
-  params_df <- params_df[,c("id", "replicate", "num_taxa", "num_sites", "substitution_model", "sequence_type", "tree_file")]
+  bootstrap_df$id <- paste0("bs_rep_", sprintf("000%d", 1:100))
+  bootstrap_df$tree_file <- tree_path
+  bootstrap_df <- bootstrap_df[,c("id", "replicate", "num_taxa", "num_sites", "substitution_model", "sequence_type", "tree_file")]
   
   ## Calculate p-values
   

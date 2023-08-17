@@ -56,7 +56,8 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
   
   ## Perform 100 parametric bootstrap replicates
   # Extract all simulated alignments
-  all_files <- list.files(replicate_directory())
+  all_files <- list.files(replicate_folder)
+  bootstrap_alignments <- paste0(replicate_folder, grep(sim_al_prefix, all_files))
   # Run treelikeness tests
   lapply(alignment_path,  treelikeness.metrics.empirical,
          iqtree2_path = iqtree2_path, 
@@ -72,11 +73,20 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
          mc.cores = number_parallel_cores)
   
   ## Create a nice dataframe of all the output values
+  # Identify csv files
+  all_files <- list.files(replicate_folder, recursive = TRUE)
+  csv_files <- paste0(replicate_folder, grep("_treelikeness_results.csv", all_files, value = T))
+  # Read in csv files
+  csv_list <- lapply(csv_files, read.csv, stringsAsFactors = FALSE)
+  csv_df <- as.data.frame(do.call(rbind, csv_list))
+  # Save csv list
+  name_split <- strsplit(basename(alignment_path), "\\.")[[1]]
+  op_id <- paste(name_split[1:(length(name_split) - 1)], collapse = ".")
+  csv_df_file <- paste0(replicate_folder, "collated_results_", op_id, ".csv")
+  write.csv(csv_df, file = csv_df_file, row.names = FALSE)
   
-
-## Calculate p-values
-
-## Assemble output csv
+  ## Return output csv
+  return(csv_df)
 }
 
 

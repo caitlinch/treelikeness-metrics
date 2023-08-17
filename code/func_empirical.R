@@ -54,10 +54,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
   # Get unique id for the alignment
-  unique_id <- gsub("\\.nxs", "", basename(alignment_path))
-  # Get list of files in the replicate_folder
-  all_folder_files <- list.files(replicate_folder)
-  aln_folder_files <- grep(unique_id, all_folder_files, value = TRUE)
+  unique_id <- basename(dirname(alignment_path))
   # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
   

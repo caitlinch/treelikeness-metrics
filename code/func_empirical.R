@@ -52,6 +52,7 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
                            sequence_type = model_parameters$parameters[2,2])
   bootstrap_df$id <- paste0("bs_rep_", sprintf("000%d", 1:100))
   bootstrap_df$tree_file <- tree_path
+  bootstrap_df$alignment_file <- alignment_path
   bootstrap_df$replicate_folder <- paste0(dirname(alignment_path), "/", bootstrap_df$id, "/")
   bootstrap_df <- bootstrap_df[,c("id", "replicate", "num_taxa", "num_sites", "substitution_model", "sequence_type", "replicate_folder", "tree_file")]
   

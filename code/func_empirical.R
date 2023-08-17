@@ -112,8 +112,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                             remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                            run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path,
-                                            base_frequencies = NA, Q_matrix = NA, number_of_rate_categories = NA)
+                                            run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
     
     # Assemble results into a dataframe and save
     results_vec <- c(lm, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,

@@ -81,8 +81,8 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                        number_of_taxa = number_of_taxa, sequence_format = sequence_format)
     
     # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
-    scfl <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
-                 substitution_model = iqtree_substitution_model)
+    scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+                        substitution_model = iqtree_substitution_model)
     
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
@@ -115,10 +115,10 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                             run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
     
     # Assemble results into a dataframe and save
-    results_vec <- c(lm, scfl$mean_scf, scfl$median_scf, min(scfl$all_scfs), max(scfl$all_scfs), ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value,
-                     cunningham_metric, tree_proportion, alignment_path)
+    results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
+                     ntlt, mean_delta_plot_value, mean_q_residual, mean_tiger_value, cunningham_metric, tree_proportion, alignment_path)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
-    names_vec <- c("LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
+    names_vec <- c("unique_id", "LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
                    "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual", "mean_TIGER_value",
                    "Cunningham_test", "tree_proportion", "input_alignment_path")
     names(results_df) <- names_vec

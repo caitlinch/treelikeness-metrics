@@ -9,26 +9,27 @@
 #### Wrapper functions ####
 empirical.treelikeness.test.wrapper <- function(alignment_path, 
                                                 iqtree2_path, splitstree_path, 
-                                                number_of_taxa, sequence_format = "AA", 
+                                                sequence_format = "AA", 
                                                 num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                                                iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
+                                                iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
                                                 tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
-                                                redo = FALSE){
+                                                redo = FALSE, number_parallel_cores = 1){
   ### Function to apply treelikeness metrics to an empirical dataset, perform a parametric bootstrap with 100 replicates, 
   #       and return the output and p-values for each metric
   
   ## Estimate IQ-Tree with MFP
-  # Call IQ-Tree with MFP (and perform quartet mapping)
-  number_of_quartets <- 25 * as.numeric(number_of_taxa)
-  iqtree_run <- paste0(iqtree2_path, " -s ", alignment_path, " -m MFP -nt ", iqtree2_number_threads, " -lmap ", number_of_quartets, " -redo -safe")
+  # Call IQ-Tree with MFP to determine the best model for this alignment
+  iqtree_run <- paste0(iqtree2_path, " -s ", alignment_path, " -m MFP -nt ", num_iqtree2_threads)
   system(iqtree_run)
   # Extract the treefile path
   tree_path <- paste0(alignment_path, ".treefile")
   
   ## Extract parameters from the IQ-Tree run of the alignment
+  # Get directory path
+  replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Get IQ-Tree file names
   iqtree_file <- paste0(alignment_path, ".iqtree")
   log_file <- paste0(alignment_path, ".log")
-  model_parameters <- get.simulation.parameters(iqtree_file)
   
   ## Apply treelikeness metric to alignment
   treelikeness.metrics.empirical(alignment_path = alignment_path, 
@@ -43,22 +44,39 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
                                  sequence_format = sequence_format, 
                                  redo = redo)
   
+  ## Generate 100 replicate alignments
+  sim_al_prefix <- "bs_rep_"
+  generate.mimic.alignment(output_prefix = paste0(replicate_folder, sim_al_prefix), 
+                           alignment_path = alignment_path, 
+                           iqtree_path = iqtree2_path, 
+                           substitution_model = "MFP", 
+                           output_format = "fasta", 
+                           sequence_type = "AA",
+                           num_output_alignments = 100)
+  
   ## Perform 100 parametric bootstrap replicates
-  # Generate a dataframe to perform parametric bootstraps
-  bootstrap_df <- expand.grid(replicate = 1:100, 
-                           num_taxa = number_of_taxa, 
-                           num_sites = model_parameters$parameters[4,2], 
-                           substitution_model = model_parameters$parameters[9,2], 
-                           sequence_type = model_parameters$parameters[2,2])
-  bootstrap_df$id <- paste0("bs_rep_", sprintf("000%d", 1:100))
-  bootstrap_df$tree_file <- tree_path
-  bootstrap_df$alignment_file <- alignment_path
-  bootstrap_df$replicate_folder <- paste0(dirname(alignment_path), "/", bootstrap_df$id, "/")
-  bootstrap_df <- bootstrap_df[,c("id", "replicate", "num_taxa", "num_sites", "substitution_model", "sequence_type", "replicate_folder", "tree_file")]
+  # Extract all simulated alignments
+  all_files <- list.files(replicate_directory())
+  # Run treelikeness tests
+  lapply(alignment_path,  treelikeness.metrics.empirical,
+         iqtree2_path = iqtree2_path, 
+         splitstree_path = iqtree2_path, 
+         num_iqtree2_threads = num_iqtree2_threads, 
+         num_iqtree2_scf_quartets = num_iqtree2_scf_quartets, 
+         iqtree_substitution_model = iqtree_substitution_model, 
+         distance_matrix_substitution_method = distance_matrix_substitution_method, 
+         tree_proportion_remove_trivial_splits = tree_proportion_remove_trivial_splits, 
+         run_splitstree_for_tree_proportion = run_splitstree_for_tree_proportion, 
+         sequence_format = sequence_format, 
+         redo = redo,
+         mc.cores = number_parallel_cores)
   
-  ## Calculate p-values
+  ## Create a nice dataframe of all the output values
   
-  ## Assemble output csv
+
+## Calculate p-values
+
+## Assemble output csv
 }
 
 
@@ -300,6 +318,26 @@ tiger.empirical <- function(alignment_path, fast_TIGER_path,
   # Return the tiger dataframe
   return(results_df)
 } # end function
+
+
+
+#### Generate alignment ####
+generate.mimic.alignment <- function(output_prefix, alignment_path, iqtree_path, 
+                                     substitution_model, output_format = "fasta", sequence_type = "AA",
+                                     num_output_alignments = 1){
+  ## This function uses the topology-unlinked partition model in Alisim to generate a sequence alignment
+  #     containing multiple concatenated genes, each with its own tree topology and branch lengths
+  
+  # Assemble function call 
+  function_call <- paste0(iqtree_path, " --alisim ", output_prefix, " -s ", alignment_path, 
+                          " -m ", substitution_model, " --seqtype ", sequence_type,
+                          " --out-format ", output_format, " --num-alignments ", num_output_alignments)
+  # Invoke the OS command and call IQ-Tree
+  system(function_call)
+  
+  # Print completion statement
+  print("Alisim (IQ-Tree2) run complete")
+}
 
 
 

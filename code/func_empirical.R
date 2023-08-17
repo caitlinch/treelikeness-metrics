@@ -9,19 +9,25 @@
 #### Wrapper functions ####
 empirical.treelikeness.test.wrapper <- function(alignment_path, 
                                                 iqtree2_path, splitstree_path, 
-                                                phylogemetric_path, fast_TIGER_path, 
-                                                supply_number_of_taxa = FALSE, number_of_taxa = NA, 
-                                                num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                                                sequence_format = "AA", num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                                                 iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-                                                num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-                                                run_splitstree_for_tree_proportion = FALSE, sequence_format = "DNA", 
-                                                apply.TIGER = FALSE, redo = FALSE){
+                                                tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
+                                                redo = FALSE){
   ### Function to apply treelikeness metrics to an empirical dataset, perform a parametric bootstrap with 100 replicates, 
   #       and return the output and p-values for each metric
   
-  ## Copy alignment to new dataframe
-  
   ## Apply treelikeness metric to alignment
+  treelikeness.metrics.empirical(alignment_path = alignment_path, 
+                                 iqtree2_path = iqtree2_path, 
+                                 splitstree_path = iqtree2_path, 
+                                 num_iqtree2_threads = num_iqtree2_threads, 
+                                 num_iqtree2_scf_quartets = num_iqtree2_scf_quartets, 
+                                 iqtree_substitution_model = iqtree_substitution_model, 
+                                 distance_matrix_substitution_method = distance_matrix_substitution_method, 
+                                 tree_proportion_remove_trivial_splits = tree_proportion_remove_trivial_splits, 
+                                 run_splitstree_for_tree_proportion = run_splitstree_for_tree_proportion, 
+                                 sequence_format = sequence_format, 
+                                 redo = redo)
   
   ## Extract parameters from the IQ-Tree run of the alignment
   
@@ -38,11 +44,9 @@ empirical.treelikeness.test.wrapper <- function(alignment_path,
 #### Apply all treelikeness metrics ####
 treelikeness.metrics.empirical <- function(alignment_path, 
                                            iqtree2_path, splitstree_path, 
-                                           phylogemetric_path,
-                                           num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                                           sequence_format = "AA", num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
                                            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-                                           num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-                                           run_splitstree_for_tree_proportion = FALSE, sequence_format = "DNA", 
+                                           tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
                                            redo = FALSE){
   ## Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
@@ -88,14 +92,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
     
     # Apply Delta plots (Holland et. al. 2002)
-    # Open ML dist matrix from IQ-Tree run
-    
-    # Calculate delta plot values
     mean_delta_plot_value <- delta.plot.empirical(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
-    
-    # Apply Q-residuals (Gray et. al. 2010)
-    q_residual_results <- q_residuals(alignment_path, phylogemetric_path, sequence_format = sequence_format, phylogemetric_number_of_threads = num_phylogemetric_threads)
-    mean_q_residual <- q_residual_results$mean_q_residual
     
     # Apply Cunningham test (Cunningham 1975)
     cunningham_metric <- cunningham.test.empirical(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
@@ -109,11 +106,11 @@ treelikeness.metrics.empirical <- function(alignment_path,
     
     # Assemble results into a dataframe and save
     results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
-                     ntlt, mean_delta_plot_value, mean_q_residual, cunningham_metric, tree_proportion, alignment_path)
+                     ntlt, mean_delta_plot_value, cunningham_metric, tree_proportion, alignment_path)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
-    names_vec <- c("unique_id", "LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets", "LM_total_num_quartets", "LM_proportion_resolved_quartets",
-                   "sCF_mean", "sCF_median", "sCF_min", "sCF_max", "NetworkTreelikenessTest", "mean_delta_plot_value", "mean_Q_residual",
-                   "Cunningham_test", "tree_proportion", "input_alignment_path")
+    names_vec <- c("unique_id", "LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets",
+                   "LM_total_num_quartets", "LM_proportion_resolved_quartets", "sCF_mean", "sCF_median", "sCF_min", "sCF_max",
+                   "NetworkTreelikenessTest", "mean_delta_plot_value", "Cunningham_test", "tree_proportion", "input_alignment_path")
     names(results_df) <- names_vec
     write.csv(results_df, file = df_name, row.names = FALSE)
   } # end run treelikeness tests

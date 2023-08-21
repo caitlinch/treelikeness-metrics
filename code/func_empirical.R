@@ -58,11 +58,8 @@ bootstrap.wrapper <- function(alignment_path,
 
 
 #### Apply all treelikeness metrics ####
-treelikeness.metrics.empirical <- function(alignment_path, 
-                                           iqtree2_path, splitstree_path, 
-                                           sequence_format = "AA", num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                                           iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-                                           tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
+treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtree2_path, 
+                                           num_iqtree2_threads = "AUTO", sequence_format = "AA", 
                                            redo = FALSE){
   #### Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
@@ -102,7 +99,7 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                        number_of_taxa = number_of_taxa, sequence_format = sequence_format)
     
     ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
-    scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
+    scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = 100, 
                         substitution_model = iqtree_substitution_model)
   
     ## Apply Network Treelikeness Test (Huson and Bryant 2006)
@@ -120,9 +117,9 @@ treelikeness.metrics.empirical <- function(alignment_path,
     cunningham_metric <- cunningham.test.empirical(mldist_file, tree_file)
     
     ## Apply tree proportion (new test)
-    tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
-                                            remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
-                                            run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
+    tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = NA, 
+                                            remove_trivial_splits = TRUE, check_iqtree_log_for_identical_sequences = FALSE, 
+                                            run_splitstree = TRUE, splitstree_path = splitstree_path)
     
     ## Assemble results into a dataframe and save
     results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 

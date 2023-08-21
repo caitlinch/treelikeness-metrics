@@ -10,21 +10,26 @@ library(ape)
 
 
 #### Wrapper functions ####
-bootstrap.wrapper <- function(bs_rep_al_paths, bootstrap_rep_directory, 
+bootstrap.wrapper <- function(bs_rep_al_paths, output_directory, 
                               splitstree_path, iqtree2_path, 
                               num_iqtree2_threads = "AUTO", sequence_format = "AA", 
                               redo = FALSE){
   ### Function to apply treelikeness metrics to a single replicate of a parametric bootstrap and return the output for each metric
   
-  ## Perform 100 parametric bootstrap replicates
-  # Extract all simulated alignments
-  all_files <- list.files(bootstrap_rep_directory)
+  ## Copy each alignment into a separate folder in the output_directory
+  # Extract the id from each filepath
+  unique_ids <- unlist(lapply(1:length(bs_rep_al_paths), function(i){strsplit(basename(bs_rep_al_paths), "\\.")[[i]][1]}))
   # Create a new folder for each alignment folder and make each folder
+  new_folders <- paste0(output_directory, unique_ids, "/")
+  lapply(new_folders, dir.create)
+  # Copy each alignment into its own folder
+  file_format <- unlist(lapply(1:length(bs_rep_al_paths), function(i){tail(strsplit(basename(bs_rep_al_paths), "\\.")[[i]],1)}))
+  alignment_paths <- paste0(output_directory, unique_ids, "/", unique_ids, ".", file_format)
+  # Copy each alignment into its own new folder
+  lapply(1:length(unique_ids), function(i){file.copy(from = bs_rep_al_paths[i], to = alignment_paths[i])})
   
-  # Copy each alignment into its new folder
-  bootstrap_alignments <- paste0(replicate_folder, grep(sim_al_prefix, all_files))
-  # Run treelikeness tests
-  lapply(alignment_path,  treelikeness.metrics.empirical,
+  ## Run treelikeness tests
+  lapply(alignment_paths,  treelikeness.metrics.empirical,
          iqtree2_path = iqtree2_path, 
          splitstree_path = iqtree2_path, 
          num_iqtree2_threads = num_iqtree2_threads, 

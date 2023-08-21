@@ -20,7 +20,8 @@
 run_location = "soma"
 if (run_location == "local"){
   # Directories
-  run_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical/"
+  output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/04_empirical_treelikeness_results/"
+  replicate_alignment_folder <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_generate_replicate_alignments/"
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
   
   # Executable paths
@@ -32,6 +33,7 @@ if (run_location == "local"){
 } else if (run_location == "soma"){
   # Directories
   run_directory <- "/data/caitlin/treelikeness_metrics/"
+  replicate_alignment_folder <- ""
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths
@@ -42,6 +44,7 @@ if (run_location == "local"){
   num_cores <- 30
 }
 
+alignment_ids <- c("WEA17", "WEA17_F")
 control_parameters <- list(edit.replicate.alignments = FALSE,
                            apply.treelikeness.tests = FALSE)
 
@@ -59,25 +62,22 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 #### 5. Apply tests for treelikeness to each alignment ####
-data_dir <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_generate_replicate_alignments/WEA17F_bs_reps/"
-bs_rep_al_paths <- paste0(data_dir, list.files(data_dir))
+## For WEA17
+# Extract the list of alignments using the id (WEA17)
 
-bootstrap_rep_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_treelikeness_results/"
-
-# For WEA17
-wea17_df <- empirical.treelikeness.test.wrapper(alignment_path = "", 
-                                                iqtree2_path = iqtree2_path, splitstree_path = splitstree_path, 
-                                                sequence_format = "AA",  num_iqtree2_threads = "10", num_iqtree2_scf_quartets = 100, 
-                                                iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
-                                                tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE, 
+# Apply the wrapper function
+wea17_df <- bootstrap.wrapper(bs_rep_al_paths, output_directory = output_directory, 
+                                                splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
+                                                num_iqtree2_threads = "AUTO", sequence_format = "AA", 
                                                 redo = FALSE, number_parallel_cores = num_cores)
 
-# For WEA17_filtered
-wea17_filtered_df <- empirical.treelikeness.test.wrapper(alignment_path = "", 
-                                                         iqtree2_path = iqtree2_path, splitstree_path = splitstree_path, 
-                                                         sequence_format = "AA",  num_iqtree2_threads = "10", num_iqtree2_scf_quartets = 100, 
-                                                         iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
-                                                         tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = TRUE, 
+## For WEA17_filtered
+# Extract the list of alignments using the id (WEA17F)
+
+# Apply the wrapper function
+wea17_filtered_df <- bootstrap.wrapper(bs_rep_al_paths, output_directory = output_directory, 
+                                                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
+                                                         num_iqtree2_threads = "AUTO", sequence_format = "AA", 
                                                          redo = FALSE, number_parallel_cores = num_cores)
 
 

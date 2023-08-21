@@ -42,6 +42,8 @@ if (run_location == "local"){
   num_cores <- 30
 }
 
+control_parameters <- list(edit.replicate.alignments = FALSE,
+                           apply.treelikeness.tests = FALSE)
 
 
 #### 2. Prepare analyses ####
@@ -56,7 +58,7 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 
-#### 3. Apply tests for treelikeness to each alignment ####
+#### 5. Apply tests for treelikeness to each alignment ####
 # For WEA17
 wea17_df <- empirical.treelikeness.test.wrapper(alignment_path = "", 
                                                 iqtree2_path = iqtree2_path, splitstree_path = splitstree_path, 

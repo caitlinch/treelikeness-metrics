@@ -10,29 +10,24 @@ library(ape)
 
 
 #### Wrapper functions ####
-bootstrap.wrapper <- function(alignment_path, 
-                              iqtree2_path, splitstree_path, 
-                              sequence_format = "AA", 
-                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                              iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
-                              tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
-                              redo = FALSE, number_parallel_cores = 1){
+bootstrap.wrapper <- function(bs_rep_al_paths, bootstrap_rep_directory, 
+                              splitstree_path, iqtree2_path, 
+                              num_iqtree2_threads = "AUTO", sequence_format = "AA", 
+                              redo = FALSE){
   ### Function to apply treelikeness metrics to a single replicate of a parametric bootstrap and return the output for each metric
   
   ## Perform 100 parametric bootstrap replicates
   # Extract all simulated alignments
-  all_files <- list.files(replicate_folder)
+  all_files <- list.files(bootstrap_rep_directory)
+  # Create a new folder for each alignment folder and make each folder
+  
+  # Copy each alignment into its new folder
   bootstrap_alignments <- paste0(replicate_folder, grep(sim_al_prefix, all_files))
   # Run treelikeness tests
   lapply(alignment_path,  treelikeness.metrics.empirical,
          iqtree2_path = iqtree2_path, 
          splitstree_path = iqtree2_path, 
          num_iqtree2_threads = num_iqtree2_threads, 
-         num_iqtree2_scf_quartets = num_iqtree2_scf_quartets, 
-         iqtree_substitution_model = iqtree_substitution_model, 
-         distance_matrix_substitution_method = distance_matrix_substitution_method, 
-         tree_proportion_remove_trivial_splits = tree_proportion_remove_trivial_splits, 
-         run_splitstree_for_tree_proportion = run_splitstree_for_tree_proportion, 
          sequence_format = sequence_format, 
          redo = redo,
          mc.cores = number_parallel_cores)

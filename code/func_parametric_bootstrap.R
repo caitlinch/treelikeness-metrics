@@ -6,6 +6,36 @@
 
 
 #### Model extraction functions ####
+identify.best.model <- function(iqtree_file){
+  ## Collate best model and rate from iqtree file
+  
+  # Extract model
+  model <- extract.best.model(iqtree_file)
+  # Extract rates
+  rates <- extract.rates(iqtree_file)
+  # Check whether both exist
+  if (is.na(model) == FALSE & is.na(rates) == FALSE){
+    ## Both model and rates exist
+    # Break up model and remove the rate category argument
+    model_split <- strsplit(model, "\\+")[[1]]
+    other_model_chunks <- grep("R1|R2|R3|R4|R5|R6|R7|R8|R9|R10", model_split, value = T, invert = T)
+    rate_model_chunks <- grep("R1|R2|R3|R4|R5|R6|R7|R8|R9|R10", model_split, value = T, invert = F)
+    # Collate all bits of the model into one string
+    best_model <- paste0("'", paste(other_model_chunks, collapse = "+"), "+", rate_model_chunks, "{", rates, "}", "'")
+  } else if (is.na(model) == FALSE & is.na(rates) == TRUE){
+    ## Only model exists (no rates)
+    best_model <- model
+  } else {
+    ## In any other case, return NA
+    best_model <- NA
+  }
+  
+  # Return the best model
+  return(best_model)
+}
+
+
+
 extract.best.model <- function(iqtree_file){
   ### Extracts the best model of sequence evolution given a .iqtree file
   
@@ -60,6 +90,49 @@ extract.best.model <- function(iqtree_file){
   
   # Return the best model from the iqtree_file (if the file exists)
   return(best_model)
+}
+
+
+
+extract.rates <- function(iqtree_file){
+  # Function to extract the rate parameters of a model from in IQ-Tree
+  
+  # Check if the iqtree file exists
+  if (file.exists(iqtree_file) == TRUE){
+    # If the iqtree_file does exist:
+    ## Open the .iqtree file:
+    iq_lines <- readLines(iqtree_file)
+    
+    # Check for +R parameters 
+    rate_ind <- grep("Site proportion and rates\\:", iq_lines)
+    # Check if the rate_ind is present (if yes, that means there's a line containing the rates and weights)
+    if (identical(rate_ind,integer(0)) == FALSE & class(rate_ind) == "integer"){
+      ## Rates (+R)
+      # The site proportion and weights values are present
+      # Extract the rate weights and parameters from the iqtree file
+      rates_line <- iq_lines[rate_ind]
+      # Remove text from the beginning of the line
+      rates_raw <- strsplit(rates_line, "\\:")[[1]][2]
+      # Split up by the spaces
+      split_rates <- strsplit(rates_raw, " ")[[1]]
+      # Remove any entries that are empty characters (i.e. "")
+      split_rates <- split_rates[split_rates != ""]
+      # Split rates again by the commas (",")
+      split2_rates <- unlist(strsplit(split_rates, ","))
+      # Remove brackets from values
+      rate_vals <- unlist(strsplit(unlist(strsplit(split2_rates, "\\(")), "\\)"))
+      # Make output (for attaching into IQ-Tree2 command line)
+      # Order is: proportion_1, rate_1, proportion_2, rate_2, ....., proportion_n, rate_n
+      rates_op <- paste(rate_vals, collapse = ",")
+    } else {
+      # The site proportion and weights values are missing
+      # Return NA for this file
+      rates_op <- NA
+    } # end if (identical(rate_ind,logical(0)) == FALSE & class(rate_ind) == "integer")
+  } # end if (file.exists(iqtree_file) == TRUE)
+  
+  # Return the output
+  return(rates_op)
 }
 
 

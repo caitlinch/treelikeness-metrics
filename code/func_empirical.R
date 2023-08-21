@@ -4,6 +4,9 @@
 # This file contains functions to apply tests for treelikeness to a single alignment
 # Some functions require IQ-Tree2 (2.2-beta or above), fast TIGER, phylogemetric, or SplitsTree (4.17.2 or above).
 
+#### Required packages ####
+library(ape)
+
 
 
 #### Wrapper functions ####
@@ -182,15 +185,12 @@ likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_n
 
 
 ## Delta plots (Holland et. al. 2002)
-delta.plot.empirical <- function(alignment_path, sequence_format = "AA", substitution_model = "WAG"){
+delta.plot.empirical <- function(dist_matrix){
   # This function takes an alignment, calculates a distance matrix for the alignment, and the applies the
   # `ape` function `delta.plot`. We take the mean delta plot value as the test statistic. 
   
-  ## Open the alignment as a phyDat object
-  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
-  ## Calculate a distance matrix of pairwise distances from AA sequences using a model of AA substitution
-  # Default model is WAG
-  pdm <- dist.ml(p, model = substitution_model)
+  ## Take the pairwise distance matrix from the input distance matrix
+  pdm <- dist_matrix
   ## Call ape::delta.plot function
   # Set the number of intervals for the delta plot
   dp_intervals = 100

@@ -7,52 +7,14 @@
 
 
 #### Wrapper functions ####
-empirical.treelikeness.test.wrapper <- function(alignment_path, 
-                                                iqtree2_path, splitstree_path, 
-                                                sequence_format = "AA", 
-                                                num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-                                                iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
-                                                tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
-                                                redo = FALSE, number_parallel_cores = 1){
-  ### Function to apply treelikeness metrics to an empirical dataset, perform a parametric bootstrap with 100 replicates, 
-  #       and return the output and p-values for each metric
-  
-  ## Estimate IQ-Tree with MFP
-  # Call IQ-Tree with MFP to determine the best model for this alignment
-  iqtree_run <- paste0(iqtree2_path, " -s ", alignment_path, " -m MFP -nt ", num_iqtree2_threads)
-  system(iqtree_run)
-  # Extract the treefile path
-  tree_path <- paste0(alignment_path, ".treefile")
-  
-  ## Extract parameters from the IQ-Tree run of the alignment
-  # Get directory path
-  replicate_folder <- paste0(dirname(alignment_path), "/")
-  # Get IQ-Tree file names
-  iqtree_file <- paste0(alignment_path, ".iqtree")
-  log_file <- paste0(alignment_path, ".log")
-  
-  ## Apply treelikeness metric to alignment
-  treelikeness.metrics.empirical(alignment_path = alignment_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 splitstree_path = iqtree2_path, 
-                                 num_iqtree2_threads = num_iqtree2_threads, 
-                                 num_iqtree2_scf_quartets = num_iqtree2_scf_quartets, 
-                                 iqtree_substitution_model = iqtree_substitution_model, 
-                                 distance_matrix_substitution_method = distance_matrix_substitution_method, 
-                                 tree_proportion_remove_trivial_splits = tree_proportion_remove_trivial_splits, 
-                                 run_splitstree_for_tree_proportion = run_splitstree_for_tree_proportion, 
-                                 sequence_format = sequence_format, 
-                                 redo = redo)
-  
-  ## Generate 100 replicate alignments
-  sim_al_prefix <- "bs_rep_"
-  generate.mimic.alignment(output_prefix = paste0(replicate_folder, sim_al_prefix), 
-                           alignment_path = alignment_path, 
-                           iqtree_path = iqtree2_path, 
-                           substitution_model = "MFP", 
-                           output_format = "fasta", 
-                           sequence_type = "AA",
-                           num_output_alignments = 100)
+bootstrap.wrapper <- function(alignment_path, 
+                              iqtree2_path, splitstree_path, 
+                              sequence_format = "AA", 
+                              num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
+                              iqtree_substitution_model = "LG", distance_matrix_substitution_method = "LG", 
+                              tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
+                              redo = FALSE, number_parallel_cores = 1){
+  ### Function to apply treelikeness metrics to a single replicate of a parametric bootstrap and return the output for each metric
   
   ## Perform 100 parametric bootstrap replicates
   # Extract all simulated alignments
@@ -122,7 +84,6 @@ treelikeness.metrics.empirical <- function(alignment_path,
   # Extract number of taxa in file
   number_of_taxa <- length(f)
   
-  
   ## Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
   if (file.exists(df_name) == TRUE & redo == FALSE){
@@ -138,6 +99,11 @@ treelikeness.metrics.empirical <- function(alignment_path,
     # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                         substitution_model = iqtree_substitution_model)
+    
+    ## Open and format the .mldist file from IQ-Tree as a matrix
+    # Create file path by adding suffix to alignment path
+    mldist_file <- paste0(alignment_path, ".mldist")
+    mldist_mat <- mldist.matrix(mldist_file)
     
     # Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
@@ -328,6 +294,50 @@ tiger.empirical <- function(alignment_path, fast_TIGER_path,
   # Return the tiger dataframe
   return(results_df)
 } # end function
+
+
+
+#### Utility functions
+mldist.matrix <- function(mldist_file){
+  ## Open and format the .mldist file from IQ-Tree as a matrix
+  # Open .mldist file as a text file
+  mldist_text <- readLines(mldist_file)
+  # Remove the first line (only gives number of taxa in matrix)
+  mldist_text <- mldist_text[2:length(mldist_text)]
+  # Transform text file into the ML dist matrix
+  mat_list <- lapply(mldist_text, process.distance.matrix.text.line)
+  dist_mat <- as.matrix(do.call(rbind, mat_list))
+  # Add species names as row and column names
+  mat_species <- unlist(lapply(mldist_text, extract.distance.matrix.species))
+  rownames(dist_mat) <- mat_species
+  colnames(dist_mat) <- mat_species
+  # Return the distance matrix
+  return(dist_mat)
+}
+
+process.distance.matrix.text.line <- function(line){
+  ## Function to nicely format each line of the distml file output by IQ-Tree
+  # Split the line at the spaces
+  split_line <- strsplit(line, split = " ")[[1]]
+  # Remove the first element from the line
+  split_line <- split_line[2:length(split_line)]
+  # Remove any empty elements
+  split_line <- split_line[which( ! (split_line == "") )]
+  # Change line into numbers
+  split_line <- as.numeric(split_line)
+  # Return the split_line as a vector
+  return(split_line)
+}
+
+extract.distance.matrix.species <- function(line){
+  ## Function to nicely format each line of the distml file output by IQ-Tree
+  # Split the line at the spaces
+  split_line <- strsplit(line, split = " ")[[1]]
+  # Extract the species from the line text
+  line_species <- split_line[1]
+  # Return the species name
+  return(line_species)
+}
 
 
 

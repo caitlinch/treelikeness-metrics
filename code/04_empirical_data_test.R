@@ -59,6 +59,11 @@ source(paste0(repo_directory, "code/func_data_analysis.R"))
 
 
 #### 5. Apply tests for treelikeness to each alignment ####
+data_dir <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_generate_replicate_alignments/WEA17F_bs_reps/"
+bs_rep_al_paths <- paste0(data_dir, list.files(data_dir))
+
+bootstrap_rep_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_treelikeness_results/"
+
 # For WEA17
 wea17_df <- empirical.treelikeness.test.wrapper(alignment_path = "", 
                                                 iqtree2_path = iqtree2_path, splitstree_path = splitstree_path, 

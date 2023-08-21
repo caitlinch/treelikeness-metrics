@@ -9,64 +9,55 @@
 extract.best.model <- function(iqtree_file){
   ### Extracts the best model of sequence evolution given a .iqtree file
   
-  # Check if the file is a PMSF file
-  # The PMSF models do not include a model search or a BIC score for the model
-  pmsf_check <- grepl("PMSF", iqtree_file)
-  if (pmsf_check == FALSE){
-    # The model is not a PMSF model. Continue to extract best model
-    # Check if the iqtree file exists
-    if (file.exists(iqtree_file) == TRUE){
-      # If the iqtree_file does exist:
-      ## Open the .iqtree file:
-      iq_lines <- readLines(iqtree_file)
-      
-      ## Check for a ModelFinder section:
-      # Determine whether there is a ModelFinder section
-      mf_ind <- grep("ModelFinder", iq_lines)
-      # Determine whether there is a line detailing the best model
-      bm_ind <- grep("Best-fit model according to", iq_lines)
-      
-      ## Check for a Substitution Process section:
-      # Determine the starting line of this section
-      sp_ind <- grep("SUBSTITUTION PROCESS", iq_lines)
-      # Determine the line detailing the model used
-      mos_ind <- grep("Model of substitution", iq_lines)
-      
-      ## Extract the best fit model from the .iqtree file:
-      if ((identical(mf_ind, integer(0)) == FALSE) & (identical(bm_ind, integer(0)) == FALSE)){
-        # If ModelFinder was run, extract the best model from the ModelFinder section of the .iqtree file
-        # Extract the line containing the best fit model
-        m_line <- iq_lines[bm_ind]
-      } else if ((identical(sp_ind, integer(0)) == FALSE) & (identical(mos_ind, integer(0)) == FALSE)) {
-        # If there is no ModelFinder section, extract the model used from the substitution process section
-        m_line <- iq_lines[mos_ind]
-      } else {
-        m_line <- "NA:NA"
-      }
-      
-      ## Format the model nicely for output: 
-      # Split the line at the colon into two parts
-      m_line_split <- strsplit(m_line, ":")[[1]]
-      # If the best model is a single model, the length of m_line_split will be 2
-      #     One section for the explanatory text and one for the model
-      # If the best model is a partition model, it will have more than two sections when split by colons
-      # Extract the second part of the line onwards (contains the best fit model)
-      best_model <- m_line_split[2:length(m_line_split)]
-      # If best_model is longer than 1, paste it together again using colons
-      if (length(best_model) >1){
-        best_model <- paste(best_model, collapse = ":")
-      }
-      # Remove any white space from the best model
-      best_model <- gsub(" ", "", best_model)
-    } else if (file.exists(iqtree_file) == FALSE){
-      # If the iqtree_file doesn't exist, return NA
-      best_model = NA
-    } # end if (file.exists(iqtree_file) == TRUE){
-  } else if (pmsf_check == TRUE){
-    # If the PMSF model was used, there is no modelfinder output to search and no comparison BIC
-    # Return NA
+  # Check if the iqtree file exists
+  if (file.exists(iqtree_file) == TRUE){
+    # If the iqtree_file does exist:
+    ## Open the .iqtree file:
+    iq_lines <- readLines(iqtree_file)
+    
+    ## Check for a ModelFinder section:
+    # Determine whether there is a ModelFinder section
+    mf_ind <- grep("ModelFinder", iq_lines)
+    # Determine whether there is a line detailing the best model
+    bm_ind <- grep("Best-fit model according to", iq_lines)
+    
+    ## Check for a Substitution Process section:
+    # Determine the starting line of this section
+    sp_ind <- grep("SUBSTITUTION PROCESS", iq_lines)
+    # Determine the line detailing the model used
+    mos_ind <- grep("Model of substitution", iq_lines)
+    
+    ## Extract the best fit model from the .iqtree file:
+    if ((identical(mf_ind, integer(0)) == FALSE) & (identical(bm_ind, integer(0)) == FALSE)){
+      # If ModelFinder was run, extract the best model from the ModelFinder section of the .iqtree file
+      # Extract the line containing the best fit model
+      m_line <- iq_lines[bm_ind]
+    } else if ((identical(sp_ind, integer(0)) == FALSE) & (identical(mos_ind, integer(0)) == FALSE)) {
+      # If there is no ModelFinder section, extract the model used from the substitution process section
+      m_line <- iq_lines[mos_ind]
+    } else {
+      m_line <- "NA:NA"
+    }
+    
+    ## Format the model nicely for output: 
+    # Split the line at the colon into two parts
+    m_line_split <- strsplit(m_line, ":")[[1]]
+    # If the best model is a single model, the length of m_line_split will be 2
+    #     One section for the explanatory text and one for the model
+    # If the best model is a partition model, it will have more than two sections when split by colons
+    # Extract the second part of the line onwards (contains the best fit model)
+    best_model <- m_line_split[2:length(m_line_split)]
+    # If best_model is longer than 1, paste it together again using colons
+    if (length(best_model) >1){
+      best_model <- paste(best_model, collapse = ":")
+    }
+    # Remove any white space from the best model
+    best_model <- gsub(" ", "", best_model)
+  } else if (file.exists(iqtree_file) == FALSE){
+    # If the iqtree_file doesn't exist, return NA
     best_model = NA
-  } # end if (pmsf_check == FALSE){
+  } # end if (file.exists(iqtree_file) == TRUE){
+  
   # Return the best model from the iqtree_file (if the file exists)
   return(best_model)
 }

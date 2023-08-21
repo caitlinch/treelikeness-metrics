@@ -95,13 +95,19 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     ### Apply all treelikeness test statistics to generate the results csv file
     
     ## Apply Likelihood mapping (Strimmer and von Haeseler 1997)
-    lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
+    lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = "MFP", 
                                        number_of_taxa = number_of_taxa, sequence_format = sequence_format)
     
     ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
+    # Extract the best model from the IQ-Tree run for the likelihood mapping
+    iqtree_file <- paste0(alignment_path, ".iqtree")
+    best_model <- identify.best.model(iqtree_file)
+    # If the best model is NA, change it to MFP (to perform a full model search for the scf calculation)
+    if (is.na(best_model) == TRUE){ best_model <- "MFP" }
+    # Calculate the site concordance factors
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = 100, 
-                        substitution_model = iqtree_substitution_model)
-  
+                        substitution_model = best_model)
+    
     ## Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
     
@@ -226,7 +232,7 @@ cunningham.test.empirical <- function(mldist_file, tree_file){
   mldist_matrix_raw <- mldist.matrix(mldist_file) # Feed in distance matrix (mldist file from IQ-Tree run)
   al_mat <- as.dist(mldist_matrix_raw)
   d_ij <- as.vector(al_mat) # observed distances between taxa i and j
-
+  
   # 2. Calculate the predicted distances (p_ij)
   # Open the tree
   t <- read.tree(tree_file)

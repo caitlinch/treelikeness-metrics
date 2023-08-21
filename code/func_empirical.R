@@ -214,8 +214,7 @@ delta.plot.empirical <- function(dist_matrix){
 
 
 
-cunningham.test.empirical <- function(alignment_path, sequence_format = "AA", iqtree2_path, iqtree2_number_threads = "AUTO", 
-                                      iqtree_substitution_model = "LG", distance_matrix_substitution_model = "LG"){
+cunningham.test.empirical <- function(mldist_file, tree_file){
   ## Function to estimate what proportion of the variance in the data is represented by the tree
   
   ## Test steps:
@@ -227,22 +226,17 @@ cunningham.test.empirical <- function(alignment_path, sequence_format = "AA", iq
   
   ## Test:
   # 1. Calculate the observed distances (d_ij)
-  p <- phyDat(read.FASTA(alignment_path, type = sequence_format), type = sequence_format)
-  dna_mat <- dist.ml(p, model = distance_matrix_substitution_model)
-  d_ij <- as.vector(dna_mat) # observed distances between taxa i and j
-  
+  site_mat <- mldist.matrix(mldist_file) # Feed in distance matrix (mldist file from IQ-Tree run)
+  d_ij <- as.vector(site_mat) # observed distances between taxa i and j
+
   # 2. Calculate the predicted distances (p_ij)
-  # Infer a tree (if one does not already exist) and open it
-  if (file.exists(paste0(alignment_path, ".treefile")) == FALSE){
-    call.iqtree2(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", redo_flag = FALSE, safe_flag = FALSE, bootstraps = NA, model = iqtree_substitution_model)
-  }
   # Open the tree
   t <- read.tree(paste0(alignment_path, ".treefile"))
   # Extract the distance matrix from the tree
   t_cophenetic_mat <- cophenetic.phylo(t) # in substitutions per site
   # Now reorder the t_mat so the taxa are in the same order
-  dna_order <- attr(dna_mat, "Labels")
-  t_ordering_mat <- as.matrix(t_cophenetic_mat)[dna_order, dna_order]
+  taxa_order <- attr(site_mat, "Labels")
+  t_ordering_mat <- as.matrix(t_cophenetic_mat)[taxa_order, taxa_order]
   t_mat <- as.dist(t_ordering_mat)
   p_ij <- as.vector(t_mat) # predicted distances between taxa i and j
   

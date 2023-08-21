@@ -64,67 +64,67 @@ treelikeness.metrics.empirical <- function(alignment_path,
                                            iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
                                            tree_proportion_remove_trivial_splits = TRUE, run_splitstree_for_tree_proportion = FALSE, 
                                            redo = FALSE){
-  ## Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
+  #### Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
-  # Print alignment path
+  ### Print alignment path
   print(alignment_path)
   
-  ## Prepare variables and output file names for run
+  ### Prepare variables and output file names for run
   # Get directory path
   replicate_folder <- paste0(dirname(alignment_path), "/")
+  # Identify the prefix for the alignment path
+  file_prefix <- tail(strsplit(basename(alignment_path), "\\.")[[1]], 1)
   # Get unique id for the alignment
-  unique_id <- basename(dirname(alignment_path))
+  unique_id <- gsub(paste0(".", file_prefix), "", basename(alignment_path))
   # Create name for output dataframes
   df_name <- paste0(replicate_folder, unique_id, "_treelikeness_results.csv")
   
-  ## Convert alignment to NEXUS
+  ### Convert alignment to NEXUS
   # Open alignment file
   f <- read.FASTA(alignment_path, type = "AA")
   # Write out alignment file as nexus format
   nexus_alignment_path <- paste0(replicate_folder, unique_id, ".nex")
   write.nexus.data(f, file = nexus_alignment_path, format = "protein", datablock = FALSE, interleaved = FALSE)
   
-  # Extract number of taxa in file
+  ### Extract number of taxa in file
   number_of_taxa <- length(f)
   
-  ## Prepare results dataframe
+  ### Prepare results dataframe
   # Check whether dataframe .csv file already exists. If it does, import the dataframe. If it doesn't, make it by running all treelikeness metrics
   if (file.exists(df_name) == TRUE & redo == FALSE){
     ## Read in the results csv file
     results_df <- read.csv(df_name)
   } else if (file.exists(df_name) == FALSE | redo == TRUE){
-    ## Apply all treelikeness test statistics to generate the results csv file
+    ### Apply all treelikeness test statistics to generate the results csv file
     
-    # Apply Likelihood mapping (Strimmer and von Haeseler 1997)
+    ## Apply Likelihood mapping (Strimmer and von Haeseler 1997)
     lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = iqtree_substitution_model, 
                                        number_of_taxa = number_of_taxa, sequence_format = sequence_format)
     
-    # Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
+    ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = num_iqtree2_scf_quartets, 
                         substitution_model = iqtree_substitution_model)
-    
-    ## Open and format the .mldist file from IQ-Tree as a matrix
-    # Create file path by adding suffix to alignment path
-    mldist_file <- paste0(alignment_path, ".mldist")
-    mldist_mat <- mldist.matrix(mldist_file)
-    
-    # Apply Network Treelikeness Test (Huson and Bryant 2006)
+  
+    ## Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
     
-    # Apply Delta plots (Holland et. al. 2002)
-    mean_delta_plot_value <- delta.plot.empirical(alignment_path, sequence_format = sequence_format, substitution_model = distance_matrix_substitution_method)
+    ## Apply Delta plots (Holland et. al. 2002)
+    mldist_file <- paste0(alignment_path, ".mldist")
+    mean_delta_plot_value <- delta.plot.empirical( dist_matrix = mldist.matrix(mldist_file) )
     
-    # Apply Cunningham test (Cunningham 1975)
-    cunningham_metric <- cunningham.test.empirical(alignment_path, sequence_format, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, 
-                                                   iqtree_substitution_model = iqtree_substitution_model, 
-                                                   distance_matrix_substitution_model = distance_matrix_substitution_method)
+    ## Apply Cunningham test (Cunningham 1975)
+    # Find the .mldist and .treefile output paths from IQ-Tree
+    mldist_file <- paste0(alignment_path, ".mldist")
+    tree_file <- paste0(alignment_path, ".treefile")
+    # Calculate Cunningham metric
+    cunningham_metric <- cunningham.test.empirical(mldist_file, tree_file)
     
-    # Apply tree proportion (new test)
+    ## Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = distance_matrix_substitution_method, 
                                             remove_trivial_splits = tree_proportion_remove_trivial_splits, check_iqtree_log_for_identical_sequences = FALSE, 
                                             run_splitstree = run_splitstree_for_tree_proportion, splitstree_path = splitstree_path)
     
-    # Assemble results into a dataframe and save
+    ## Assemble results into a dataframe and save
     results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
                      ntlt, mean_delta_plot_value, cunningham_metric, tree_proportion, alignment_path)
     results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
@@ -226,17 +226,18 @@ cunningham.test.empirical <- function(mldist_file, tree_file){
   
   ## Test:
   # 1. Calculate the observed distances (d_ij)
-  site_mat <- mldist.matrix(mldist_file) # Feed in distance matrix (mldist file from IQ-Tree run)
-  d_ij <- as.vector(site_mat) # observed distances between taxa i and j
+  mldist_matrix_raw <- mldist.matrix(mldist_file) # Feed in distance matrix (mldist file from IQ-Tree run)
+  al_mat <- as.dist(mldist_matrix_raw)
+  d_ij <- as.vector(al_mat) # observed distances between taxa i and j
 
   # 2. Calculate the predicted distances (p_ij)
   # Open the tree
-  t <- read.tree(paste0(alignment_path, ".treefile"))
+  t <- read.tree(tree_file)
   # Extract the distance matrix from the tree
   t_cophenetic_mat <- cophenetic.phylo(t) # in substitutions per site
   # Now reorder the t_mat so the taxa are in the same order
-  taxa_order <- attr(site_mat, "Labels")
-  t_ordering_mat <- as.matrix(t_cophenetic_mat)[taxa_order, taxa_order]
+  mldist_taxa <- attr(al_mat, "Labels")
+  t_ordering_mat <- as.matrix(t_cophenetic_mat)[mldist_taxa, mldist_taxa]
   t_mat <- as.dist(t_ordering_mat)
   p_ij <- as.vector(t_mat) # predicted distances between taxa i and j
   

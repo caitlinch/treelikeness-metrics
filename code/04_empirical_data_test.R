@@ -73,7 +73,23 @@ if (mclapply_num_cores < 1){
 
 
 #### 3. Add gaps to the alignments ####
-
+if (control_parameters$edit.replicate.alignments == TRUE){
+  ## Extract list of alignments
+  all_files <- list.files(replicate_alignment_directory, recursive = T)
+  
+  ## For WEA17
+  # Extract the list of alignments using the id (WEA17F)
+  wea17_files <- paste0(replicate_alignment_directory, grep("WEA17_", all_files, value = T))
+  wea17_al <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T, invert = T)]
+  wea17_replicates <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T)]
+  
+  ## For WEA17_filtered
+  # Extract the list of alignments using the id (WEA17F)
+  wea17f_files <- paste0(replicate_alignment_directory, grep("WEA17F_", all_files, value = T))
+  wea17f_al <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T, invert = T)]
+  wea17f_replicates <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T)]
+  
+}
 
 
 

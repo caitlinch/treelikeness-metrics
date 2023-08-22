@@ -45,9 +45,9 @@ if (run_location == "local"){
   num_cores <- 30
 }
 
-alignment_ids <- c("WEA17", "WEA17F")
 control_parameters <- list(edit.replicate.alignments = FALSE,
-                           apply.treelikeness.tests = FALSE)
+                           apply.treelikeness.tests = TRUE)
+
 
 
 #### 2. Prepare analyses ####
@@ -56,7 +56,7 @@ library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
 source(paste0(repo_directory, "code/func_empirical.R"))
-source(paste0(repo_directory, "code/func_parametric_bootstraps.R"))
+source(paste0(repo_directory, "code/func_parametric_bootstrap.R"))
 source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
@@ -72,6 +72,7 @@ if (mclapply_num_cores < 1){
 }
 
 
+
 #### 3. Add gaps to the alignments ####
 if (control_parameters$edit.replicate.alignments == TRUE){
   ## Extract list of alignments
@@ -82,13 +83,16 @@ if (control_parameters$edit.replicate.alignments == TRUE){
   wea17_files <- paste0(replicate_alignment_directory, grep("WEA17_", all_files, value = T))
   wea17_al <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T, invert = T)]
   wea17_replicates <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T)]
+  # Apply the gaps from the empirical alignment to the replicate alignments
+  lapply(wea17_replicates, copy.alignment.gaps, template_alignment_path = wea17_al)
   
   ## For WEA17_filtered
   # Extract the list of alignments using the id (WEA17F)
   wea17f_files <- paste0(replicate_alignment_directory, grep("WEA17F_", all_files, value = T))
   wea17f_al <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T, invert = T)]
   wea17f_replicates <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T)]
-  
+  # Apply the gaps from the empirical alignment to the replicate alignments
+  lapply(wea17f_replicates, copy.alignment.gaps, template_alignment_path = wea17f_al)
 }
 
 
@@ -126,7 +130,6 @@ if (control_parameters$apply.treelikeness.tests == TRUE){
                                 sequence_format = "AA", 
                                 redo = FALSE, 
                                 number_parallel_cores = mclapply_num_cores)
-  
   
   ## For WEA17_filtered
   # Extract the list of alignments using the id (WEA17F)

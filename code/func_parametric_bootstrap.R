@@ -3,6 +3,20 @@
 
 # This file contains functions for generating parametric bootstraps from an empirical alignment
 
+library(ape)
+
+
+
+
+#### Gap adding functions ####
+copy.alignment.gaps <- function(alignment_path, template_alignment_path, sequence.format = "AA"){
+  ## Function to take a template alignment and copy the gaps onto another alignment
+  
+  # Open both the alignment and template alignment
+  al <- ""
+  template_al <- ""
+}
+
 
 
 #### Model extraction functions ####

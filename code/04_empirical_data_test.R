@@ -18,7 +18,7 @@
 ## Run parameters
 # num_cores               <- Number of parallel threads to use at once
 
-run_location = "local"
+run_location = "soma"
 if (run_location == "local"){
   # Directories
   output_directory                <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/"

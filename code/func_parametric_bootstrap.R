@@ -9,12 +9,30 @@ library(ape)
 
 
 #### Gap adding functions ####
-copy.alignment.gaps <- function(alignment_path, template_alignment_path, sequence.format = "AA"){
+copy.alignment.gaps <- function(alignment_path, template_alignment_path){
   ## Function to take a template alignment and copy the gaps onto another alignment
   
   # Open both the alignment and template alignment
-  al <- ""
-  template_al <- ""
+  al <- as.character(read.FASTA(alignment_path, type = "AA"))
+  template_al <- as.character(read.FASTA(template_alignment_path, type = "AA"))
+  # Get the names of all the sequences
+  seq_names <- names(al)
+  # Iterate through each row and add gaps into the simulated alignment path
+  for (seq_name in seq_names){
+    original_seq <- template_al[[seq_name]] # get the original empirical sequence
+    new_seq <- al[[seq_name]] # get the new simulated sequence that has the same name
+    gap_inds <- which(original_seq == "-") # find out which sites are a gap in the original alignment
+    unknown_inds <- which(original_seq == "?") # find out which sites are unknown in the original alignment
+    new_seq[gap_inds] <- "-" # add the gaps into the simulated alignment
+    new_seq[unknown_inds] <- "?" # add the unknowns into the simulated alignment
+    al[[seq_name]] <- new_seq
+  }
+  # Convert alignment back to AAbin class
+  al <- as.AAbin(al)
+  # Save updated alignment to the alignment path
+  write.FASTA(al, file = alignment_path, header = NULL, append = FALSE)
+  # Return alignment path
+  return(alignment_path)
 }
 
 

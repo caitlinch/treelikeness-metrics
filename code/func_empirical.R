@@ -186,8 +186,7 @@ likelihood.mapping.empirical <- function(alignment_path, iqtree2_path, iqtree2_n
     prop_resolved <- resolved_q/total_q
     # Collate results into a vector
     lm_results <- c(resolved_q, partly_resolved_q, unresolved_q, total_q, prop_resolved)
-  }
-  else if (file.exists(iq_file) == FALSE){
+  } else if (file.exists(iq_file) == FALSE){
     # Create a vector noting that the .iqtree file does not exist
     lm_results <- rep("no_iqtree_file", 5)
   }

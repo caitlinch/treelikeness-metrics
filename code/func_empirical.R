@@ -12,8 +12,9 @@ library(ape)
 #### Wrapper functions ####
 bootstrap.wrapper <- function(bs_rep_al_paths, output_directory, 
                               splitstree_path, iqtree2_path, 
-                              num_iqtree2_threads = "AUTO", sequence_format = "AA", 
-                              redo = FALSE){
+                              iqtree_model = "MFP", num_iqtree2_threads = "AUTO",
+                              sequence_format = "AA", redo = FALSE,
+                              number_parallel_cores = 1){
   ### Function to apply treelikeness metrics to a single replicate of a parametric bootstrap and return the output for each metric
   
   ## Copy each alignment into a separate folder in the output_directory
@@ -30,8 +31,9 @@ bootstrap.wrapper <- function(bs_rep_al_paths, output_directory,
   
   ## Run treelikeness tests
   lapply(alignment_paths,  treelikeness.metrics.empirical,
+         splitstree_path = splitstree_path, 
          iqtree2_path = iqtree2_path, 
-         splitstree_path = iqtree2_path, 
+         iqtree_model = iqtree_model,
          num_iqtree2_threads = num_iqtree2_threads, 
          sequence_format = sequence_format, 
          redo = redo,
@@ -59,8 +61,8 @@ bootstrap.wrapper <- function(bs_rep_al_paths, output_directory,
 
 #### Apply all treelikeness metrics ####
 treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtree2_path, 
-                                           num_iqtree2_threads = "AUTO", sequence_format = "AA", 
-                                           redo = FALSE){
+                                           iqtree_model = "MFP", num_iqtree2_threads = "AUTO",
+                                           sequence_format = "AA", redo = FALSE){
   #### Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
   ### Print alignment path
@@ -95,18 +97,31 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     ### Apply all treelikeness test statistics to generate the results csv file
     
     ## Apply Likelihood mapping (Strimmer and von Haeseler 1997)
-    lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = "MFP", 
+    # Check iqtree_model - if NA, run ModelFinder with "MFP"
+    if ( is.na(iqtree_model) == TRUE ){ 
+      lm_model <- "MFP"
+    } else {
+      lm_model <- iqtree_model
+    }
+    # Apply likelihood mapping method
+    lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = lm_model, 
                                        number_of_taxa = number_of_taxa, sequence_format = sequence_format)
     
     ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
-    # Extract the best model from the IQ-Tree run for the likelihood mapping
-    iqtree_file <- paste0(alignment_path, ".iqtree")
-    best_model <- identify.best.model(iqtree_file)
-    # If the best model is NA, change it to MFP (to perform a full model search for the scf calculation)
-    if (is.na(best_model) == TRUE){ best_model <- "MFP" }
+    # Specify model for calculating site concordance factors
+    if ( ( is.na(iqtree_model) == TRUE ) | (iqtree_model == "MFP") ){
+      ## If either the input model is NA or is MFP, extract the best model as identified by the likelihood mapping IQ-Tree run
+      ##      and apply that model to calculate the site concordance factors
+      iqtree_file <- paste0(alignment_path, ".iqtree")
+      # Extract the best model from the IQ-Tree run for the likelihood mapping
+      scfl_model <- identify.best.model(iqtree_file)
+    } else {
+      ## If the model is provided as input, use that model to calculate the site concordance factors
+      scfl_model <- iqtree_model
+    }
     # Calculate the site concordance factors
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = 100, 
-                        substitution_model = best_model)
+                        substitution_model = scfl_model)
     
     ## Apply Network Treelikeness Test (Huson and Bryant 2006)
     ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)

@@ -164,9 +164,12 @@ if (control_parameters$apply.treelikeness.tests == TRUE){
 
 
 
-#### 5. Calculate p-values for each test statistic ####
+#### 5. Collate treelikeness results ####
 
 
+
+
+#### 6. Calculate p-values for each test statistic ####
 
 
 

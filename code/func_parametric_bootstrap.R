@@ -31,8 +31,6 @@ copy.alignment.gaps <- function(alignment_path, template_alignment_path){
   al <- as.AAbin(al)
   # Save updated alignment to the alignment path
   write.FASTA(al, file = alignment_path, header = NULL, append = FALSE)
-  # Return alignment path
-  return(alignment_path)
 }
 
 

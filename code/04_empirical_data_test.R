@@ -33,8 +33,8 @@ if (run_location == "local"){
   num_cores <- 1
 } else if (run_location == "soma"){
   # Directories
-  output_directory                <- "/data/caitlin/treelikeness_metrics/"
-  replicate_alignment_directory   <- ""
+  output_directory                <- "/data/caitlin/treelikeness_metrics/empirical_treelikeness_output/"
+  replicate_alignment_directory   <- "/data/caitlin/treelikeness_metrics/empirical_alignments/"
   repo_directory                  <- "/data/caitlin/treelikeness_metrics/"
   
   # Executable paths

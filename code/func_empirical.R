@@ -401,4 +401,21 @@ calculate.p_value <- function(value_vector, alignment_value){
 }
 
 
+calculate.all.p_values <- function(output_df, test_statistic_names){
+  ## Function to apply p-value to multiple test statistics at once, given a vector of column names
+  
+  # Apply the test to each column one at a time
+  output_vector <- c()
+  for (x in test_statistic_names){
+    temp_p_value <- calculate.p_value(value_vector = output_df[[x]], alignment_value = output_df[[x]][which(output_df$unique_id == "alignment")])
+    output_vector <- c(output_vector, temp_p_value)
+  }
+  # Create a dataframe
+  p_value_df <- data.frame(test_statistic = test_statistic_names,
+                           test_statistic_value = output_vector[c(T,F)],
+                           p_value = output_vector[c(F,T)])
+  # Return the dataframe of p-values
+  return(p_value_df)
+}
+
 

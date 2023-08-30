@@ -395,8 +395,8 @@ calculate.p_value <- function(value_vector, alignment_value){
   }
   
   # return the p-value
-  op_vector <- c(p_value_cdf)
-  names(op_vector) <- c("p_value_ecdf")
+  op_vector <- c(alignment_value, p_value_cdf)
+  names(op_vector) <- c("alignment_value", "p_value_ecdf")
   return(op_vector)
 }
 

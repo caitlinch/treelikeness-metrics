@@ -404,24 +404,21 @@ calculate.p_value <- function(value_vector,id_vector){
       # For left tail probability: want to find the number of observations less than or equal to the alignment value, then divide by the number of bootstrap observations
       # If there are 8 rows and the alignment is the 5th row, then there will be 5 alignments less than or equal to the alignment value
       p_value_left <- random_identical_row/num_rows
-      # For right tail probability: want to find the number of observations greater than or equal to the alignment value, then divide by the number of bootstrap observations
-      # If there are 8 rows and the alignment is the 5th row, then there will be (8-5)=3 alignments greater than or equal to the alignment value
-      p_value_right <- (num_rows - random_identical_row)/num_rows
     } else if (nrow(identical_df) == 1){
       # else, simply calculate the p value using the formula 
       # For left tail probability: want to find the number of observations less than or equal to the alignment value, then divide by the number of bootstrap observations
       # If there are 8 rows and the alignment is the 5th row, then there will be 5/8 alignments less than or equal to the alignment value
       p_value_left <- alignment_row/num_rows
-      # For right tail probability: want to find the number of observations greater than or equal to the alignment value, then divide by the number of bootstrap observations
-      # If there are 8 rows and the alignment is the 5th row, then there will be (8-5)=3 alignments greater than or equal to the alignment value
-      p_value_right <- (num_rows-alignment_row)/num_rows
     }
-    # To find two tailed probability, multiply the lower of those values by 2
-    p_value_2tail <- 2*min(p_value_left,p_value_right) 
+    # An alternative way to calculate this is to use the CDF:
+    cdf <- ecdf(value_vector)
+    p_value_cdf <- cdf(alignment_value)
   }
   
   # return the p-value
-  return(p_value_2tail)
+  op_vector <- c(p_value_left, p_value_cdf)
+  names(op_vector) <- c("left_tail", "ecdf")
+  return(op_vector)
 }
 
 

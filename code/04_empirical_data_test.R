@@ -18,7 +18,7 @@
 ## Run parameters
 # num_cores               <- Number of parallel threads to use at once
 
-run_location = "soma"
+run_location = "local"
 if (run_location == "local"){
   # Directories
   output_directory                <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/"
@@ -46,7 +46,7 @@ if (run_location == "local"){
 }
 
 control_parameters <- list(edit.replicate.alignments = FALSE,
-                           apply.treelikeness.tests = TRUE)
+                           apply.treelikeness.tests = FALSE)
 
 
 
@@ -164,12 +164,19 @@ if (control_parameters$apply.treelikeness.tests == TRUE){
 
 
 
-#### 5. Collate treelikeness results ####
+#### 5. Calculate p-values for each test statistic ####
+## Find file with parametric bootstrap results
+all_output <- list.files(output_directory, recursive = TRUE)
+all_csv <- grep("csv", all_output, value = T)
+bs_csv_file <- paste0(output_directory, grep("empirical", grep("collated", grep("treelikeness_metrics", all_csv, value = T), value = T), value = T))
+# Open csv file
+bs_df <- read.csv(bs_csv_file, stringsAsFactors = F)
+
+## Calculate bootstraps for "WEA17" alignment
+wea17_df <- bs_df[grep("WEA17F", bs_df$unique_id, invert = T), ]
 
 
-
-
-#### 6. Calculate p-values for each test statistic ####
-
+## Calculate bootstraps for "WEA17F" alignment
+wea17f_df <- bs_df[grep("WEA17F", bs_df$unique_id), ]
 
 

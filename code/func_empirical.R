@@ -376,6 +376,9 @@ generate.mimic.alignment <- function(output_prefix, alignment_path, iqtree_path,
 #### Statistics ####
 calculate.p_value <- function(value_vector, id_vector){
   ## Function that given two vectors (one of test statistic values, and one of ids), calculates the p-value for that alignment
+  ##    We are interested in whether the alignment value is LOWER than the bootstrap replicate values - which would indicate
+  ##    that the parametric bootstrap replicates are MORE treelike then the alignment
+  
   # Create dataframe of id and values to extract the alignment test statistic value
   p_value_df <- data.frame(value_vector, id_vector, stringsAsFactors = FALSE)
   names(p_value_df) <- c("value","id")
@@ -389,6 +392,8 @@ calculate.p_value <- function(value_vector, id_vector){
     # Compute an empirical cumulative distribution function (ecdf)
     cdf <- ecdf(value_vector)
     # Calculate the p-value by feeding the alignment test statistic value into the ecdf
+    #     The probability that a randomly selected test statistic value has a value less than or equal 
+    #     to the alignment value is the CDF at the alignment value
     p_value_cdf <- cdf(alignment_value)
   }
   

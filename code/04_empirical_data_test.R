@@ -183,13 +183,13 @@ if (control_parameters$calculate.empirical.p_values == TRUE){
   # Open csv file
   bs_df <- read.csv(bs_csv_file, stringsAsFactors = F)
   
-  ## Calculate bootstraps for "WEA17" alignment
+  ## Calculate p-values for "WEA17" alignment
   wea17_df <- bs_df[grep("WEA17F", bs_df$unique_id, invert = T), ]
   wea17_df$unique_id[grep("rep", wea17_df$unique_id, invert = T)] <- "alignment"
   wea17_p_value_df <- calculate.all.p_values(output_df = wea17_df, test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
   wea17_p_value_df$dataset <- "WEA17"
   
-  ## Calculate bootstraps for "WEA17F" alignment
+  ## Calculate p-values for "WEA17F" alignment
   wea17f_df <- bs_df[grep("WEA17F", bs_df$unique_id), ]
   wea17f_df$unique_id[grep("rep", wea17f_df$unique_id, invert = T)] <- "alignment"
   wea17f_p_value_df <- calculate.all.p_values(output_df = wea17f_df, test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))

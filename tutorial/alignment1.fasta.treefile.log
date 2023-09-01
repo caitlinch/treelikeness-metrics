@@ -4,8 +4,8 @@ Olga Chernomor, Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan
 
 Host:    Caitlins-MacBook-Pro.local (AVX2, FMA3, 8 GB RAM)
 Command: iqtree2 --alisim /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al -m JC -t /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1.fasta.treefile --out-format fasta --num-alignments 100
-Seed:    803514 (Using SPRNG - Scalable Parallel Random Number Generator)
-Time:    Fri Sep  1 12:50:41 2023
+Seed:    939886 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Fri Sep  1 13:14:31 2023
 Kernel:  AVX+FMA - 1 threads (4 CPU cores detected)
 
 [Alignment Simulator] Executing
@@ -2614,5 +2614,5 @@ Rate matrix Q:
 Model of rate heterogeneity: Uniform
 
 [Alignment Simulator] Done
-Simulation time: 0.099s
-Date and Time: Fri Sep  1 12:50:41 2023
+Simulation time: 0.172s
+Date and Time: Fri Sep  1 13:14:32 2023

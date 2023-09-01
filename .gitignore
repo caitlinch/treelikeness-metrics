@@ -23,10 +23,9 @@
 *.utf8.md
 *.knit.md
 
-# Previews/pdfs of README.md and tree proportion tutorial file
+# Previews/pdfs of README.md
 README.html
 README.pdf
-tree_proportion_tutorial.nb.html
 
 # R Environment Variables
 .Renviron

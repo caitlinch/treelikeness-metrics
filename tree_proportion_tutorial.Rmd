@@ -14,7 +14,7 @@ To calculate the tree proportion, firstly we estimate a phylogenetic network fro
 A tree proportion value of 1 indicates each split in the network is also in the greedy tree. Here, there is no conflicting signal and the dataset is perfectly treelike. Alternatively, a tree proportion of 0.5 indicates that half of the splits in the alignment are conflicting splits. This indicates the level of conflicting signal within the dataset.
 
 ## 1. Clone the Github Repository
-**1.a.** Clone the caitlinch/treelikeness-metrics repository from GitHub [here](https://github.com/caitlinch/treelikeness-metrics) 
+**1.a.** Clone the `caitlinch/treelikeness-metrics` repository from GitHub [here](https://github.com/caitlinch/treelikeness-metrics) 
 
 **1.b**. First, source the functions from the `code/func_tree_proportion.R` file
 
@@ -25,51 +25,65 @@ repo_path <- "/Users/caitlin/Repositories/treelikeness-metrics/"
 source(paste0(repo_path, "code/func_tree_proportion.R"))
 ```
 
-## 2. Generate the sequence alignment
-For this tutorial, we will generate two toy sequence alignments.
+## 2. Generate the sequence alignments
+For this tutorial, we will use three toy sequence alignments. These alignments are in the `caitlinch/treelikeness-metrics` repository, at `caitlinch/treelikeness-metrics/tutorial/`.
+
+* `alignment1.fasta` is 2000 bp long with 5 taxa. Each site in the sequence alignment shares an identical evolutionary history
+* `alignment2.fasta` is 1000 bp long with 5 taxa. This alignment was constructed by concatenating 2 simulated DNA alignments, each generated along a separate random phylogenetic tree.
+* `alignment3.fasta` is 1000 bp long with 10 taxa. This alignment was constructed by concatenating 10 simulated DNA alignments,  each generated along a separate random phylogenetic tree.
+
+The code below is to generate these alignments. If you want to generate these alignments, set the flag below to `generate.alignments = TRUE`
+
+```{r}
+# Flag to generate alignments
+generate.alignments = FALSE
+```
+
 
 **2.a.** Generate a sequence alignment with one underlying evolutionary history
 ```{r}
-# Generate a random phylogenetic tree with 10 tips
-al1_t <- rtree(5)
-# Simulate DNA along the tree
-al1 <- simSeq(al1_t, l = 2000, type = "DNA")
-# Save the alignment
-write.phyDat(al1, file = paste0(repo_path, "tutorial/alignment1.fasta"), 
-             format = "fasta", colsep = "")
-
+if (generate.alignments == TRUE){
+  # Generate a random phylogenetic tree
+  al1_t <- rtree(5)
+  # Simulate DNA along the tree
+  al1 <- simSeq(al1_t, l = 2000, type = "DNA")
+  # Save the alignment
+  write.phyDat(al1, file = paste0(repo_path, "tutorial/alignment1.fasta"), 
+               format = "fasta", colsep = "")
+}
 ```
 
 
 **2.b.** Generate a sequence alignment with two underlying evolutionary histories
 ```{r}
-# Generate a random phylogenetic tree with 10 tips
-al2_ts <- rmtree(2, 5)
-# Simulate DNA along the trees
-al2_als <- lapply(1:2, function(i){simSeq(al2_ts[[i]], l = 500, type = "DNA")})
-# Collate the 10 alignments into one
-al2_collated <- c(al2_als[[1]], al2_als[[2]])
-# Save the alignment
-write.phyDat(al2_collated, file = paste0(repo_path, "tutorial/alignment2.fasta"), 
-             format = "fasta", colsep = "")
-
+if (generate.alignments == TRUE){
+  # Generate random phylogenetic trees
+  al2_ts <- rmtree(2, 5)
+  # Simulate DNA along the trees
+  al2_als <- lapply(1:2, function(i){simSeq(al2_ts[[i]], l = 500, type = "DNA")})
+  # Collate the 10 alignments into one
+  al2_collated <- c(al2_als[[1]], al2_als[[2]])
+  # Save the alignment
+  write.phyDat(al2_collated, file = paste0(repo_path, "tutorial/alignment2.fasta"), 
+               format = "fasta", colsep = "")
+}
 ```
-
 
 
 **2.c.** Generate a sequence alignment with multiple underlying evolutionary histories
 ```{r}
-# Generate a random phylogenetic tree with 10 tips
-al3_ts <- rmtree(10, 10)
-# Simulate DNA along the trees
-al3_als <- lapply(1:10, function(i){simSeq(al3_ts[[i]], l = 100, type = "DNA")})
-# Collate the 10 alignments into one
-al3_collated <- c(al3_als[[1]], al3_als[[2]], al3_als[[3]], al3_als[[4]], al3_als[[5]],
-                  al3_als[[6]], al3_als[[7]], al3_als[[8]], al3_als[[9]], al3_als[[10]])
-# Save the alignment
-write.phyDat(al3_collated, file = paste0(repo_path, "tutorial/alignment3.fasta"), 
-             format = "fasta", colsep = "")
-
+if (generate.alignments == TRUE){
+  # Generate random phylogenetic trees
+  al3_ts <- rmtree(10, 10)
+  # Simulate DNA along the trees
+  al3_als <- lapply(1:10, function(i){simSeq(al3_ts[[i]], l = 100, type = "DNA")})
+  # Collate the 10 alignments into one
+  al3_collated <- c(al3_als[[1]], al3_als[[2]], al3_als[[3]], al3_als[[4]], al3_als[[5]],
+                    al3_als[[6]], al3_als[[7]], al3_als[[8]], al3_als[[9]], al3_als[[10]])
+  # Save the alignment
+  write.phyDat(al3_collated, file = paste0(repo_path, "tutorial/alignment3.fasta"), 
+               format = "fasta", colsep = "")
+}
 ```
 
 ## 3. Preparation
@@ -81,9 +95,9 @@ There are two ways to calculate the tree proportion: with or without trivial spl
 The tree proportion of any alignment can be calculated using the function `tree.proportion`, which is available in the script `code/tree_proportion.R`.
 
 To call the tree proportion function:
-```
+```{r}
 tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
-network.method = "SPLITSTREE" , splitstree_path = NA, dist.ml.model = NA)
+                network.method = "SPLITSTREE" , splitstree_path = NA, dist.ml.model = NA)
 ```
 
 Function arguments:
@@ -105,22 +119,22 @@ Function arguments:
 The tree proportion method estimates a phylogenetic network from an alignment. There are two ways to estimate this tree: either in R using the `phangorn::neighbotNet` function or using the SplitsTree software program
 
 For example, to apply the tree proportion using SplitsTree4 to estimate the network:
-```
+```{r}
 tree.proportion("test_alignment.nexus", 
-sequence_format = "DNA", 
-remove_trivial_splits = TRUE, 
-network.method = "SPLITSTREE", 
-splitstree_path = "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub")
+                sequence_format = "DNA", 
+                remove_trivial_splits = TRUE, 
+                network.method = "SPLITSTREE", 
+                splitstree_path = "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub")
 ```
 Alternatively, to apply the tree proportion using phangorn::dist.ml with the F81 model to estimate the network:
-```
+```{r}
 tree.proportion("test_alignment.nexus", 
-sequence_format = "DNA", 
-remove_trivial_splits = TRUE, 
-network.method = "PHANGORN", 
-dist.ml.model = "F81")
+                sequence_format = "DNA", 
+                remove_trivial_splits = TRUE, 
+                network.method = "PHANGORN", 
+                dist.ml.model = "F81")
 ```
-We included the "PHANGORN" method of phylogenetic network estimation for users who wanted to apply the tree proportion method without installing and calling a separate software program. However, all simulations for this project used SplitsTree4 to calculate the phylogenetic network. SplitsTree4 is able to estimate phylogenetic networks quickly even for large numbers of taxa (such as our 100 taxa simulations). In our preliminary tests, we found the "PHANGORN" method computationally intractable for large networks, and slower in general than SplitsTree4.
+We included the `"PHANGORN"` method of phylogenetic network estimation for users who wanted to apply the tree proportion method without installing and calling a separate software program. However, all simulations for this project used SplitsTree4 to calculate the phylogenetic network. SplitsTree4 is able to estimate phylogenetic networks quickly even for large numbers of taxa (such as our 100 taxa simulations). In our preliminary tests, we found the `"PHANGORN"` method computationally intractable for large networks, and slower in general than SplitsTree4.
 
 
 ## 4. Calculate the tree proportion
@@ -128,7 +142,7 @@ Calculate the tree proportion of each alignment.
 
 For this tutorial, we will use the `"PHANGORN"` method of phylogenetic network estimation, to avoid installing and calling another program. When applying the tree proportion to empirical datasets, we recommend using the `"SPLITSTREE"` network method
 
-**4.a.** Calculate the tree proportion for alignment 1, the alignment with one underlying evolutionary history
+**4.a.** Calculate the tree proportion for alignment 1
 ```{r}
 tree.proportion(paste0(repo_path, "tutorial/alignment1.fasta"), 
                 sequence_format = "DNA", 
@@ -137,7 +151,7 @@ tree.proportion(paste0(repo_path, "tutorial/alignment1.fasta"),
                 dist.ml.model = "JC69")
 ```
 
-**4.b.** Calculate the tree proportion for alignment 2, the alignment with two underlying evolutionary histories
+**4.b.** Calculate the tree proportion for alignment 2
 ```{r}
 tree.proportion(paste0(repo_path, "tutorial/alignment2.fasta"), 
                 sequence_format = "DNA", 
@@ -146,7 +160,7 @@ tree.proportion(paste0(repo_path, "tutorial/alignment2.fasta"),
                 dist.ml.model = "JC69")
 ```
 
-**4.b.** Calculate the tree proportion for alignment 3, the alignment with multiple underlying evolutionary histories
+**4.c.** Calculate the tree proportion for alignment 3
 ```{r}
 tree.proportion(paste0(repo_path, "tutorial/alignment3.fasta"), 
                 sequence_format = "DNA", 
@@ -156,3 +170,28 @@ tree.proportion(paste0(repo_path, "tutorial/alignment3.fasta"),
 ```
 
 ## 5. Apply the parametric bootstrap
+
+To run a parametric bootstrap, we need to simulate replicate alignments with the same underlying model and tree as the test alignment. We estimated the phylogenetic model parameters and inferred the tree in IQ-Tree. We ran IQ-Tree on each of the three test alignments. The output `.log`, `.iqtree` and `.treefile` for each alignment are in the directory `caitlinch/treelikeness-metrics/tutorial/`.
+
+To run IQ-Tree, we used IQ-Tree version 2.2.0 and the command line
+``` 
+iqtree2 -s alignment.fasta -m MFP
+```
+
+Running the parametric bootstrap also requires IQ-Tree, because we use AliSim to generate the replicate sequences.
+
+**4.a.** Applying the parametric bootstrap to alignment 1
+```{r}
+# Create a new directory for outputting parametric bootstrap replicates
+al1_dir <- paste0(repo_path, "tutorial/alignment1/")
+dir.create(al1_dir)
+
+# Apply the parametric bootstrap
+tree.proportion.parametric.bootstrap(alignment, paste0(repo_path, "tutorial/alignment1.fasta"),
+                                     output_directory = al1_dir, treefile, 
+                                     iqtree_model, iqtree_path, sequence_format = "DNA", 
+                                     remove_trivial_splits = TRUE, network.method = "SPLITSTREE",
+                                     splitstree_path = NA, dist.ml.model = NA)
+```
+
+

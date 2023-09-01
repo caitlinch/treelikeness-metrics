@@ -30,3 +30,8 @@ tree_proportion_tutorial.nb.html
 
 # R Environment Variables
 .Renviron
+
+# Ignore directories for bootstrap replicates
+/tutorial/alignment1/
+/tutorial/alignment2/
+/tutorial/alignment3/

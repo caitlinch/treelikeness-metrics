@@ -48,14 +48,14 @@ if (run_location == "local"){
 control_parameters <- list(edit.replicate.alignments = FALSE,
                            apply.treelikeness.tests = FALSE,
                            calculate.empirical.p_values = TRUE,
-                           plot.test.statistic.histograms = TRUE)
+                           plots = TRUE)
 
 
 
 #### 2. Prepare analyses ####
 # Open packages
 library(parallel)
-if (control_parameters$plot.test.statistic.histograms == TRUE){
+if (control_parameters$plots == TRUE){
   # Open libraries for plotting, if plotting will be performed
   library(reshape2)
   library(ggplot2)
@@ -68,15 +68,17 @@ source(paste0(repo_directory, "code/func_parametric_bootstrap.R"))
 source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
-# Calculate the number of parallel processes to run using mc.apply
-mclapply_num_cores <- num_cores/10
-if (mclapply_num_cores < 1){
-  # Minimum of one process running at once
-  mclapply_num_cores <- 1
-} else {
-  # Take floor of the decimal to run a conservative number of processes 
-  #     (e.g. if 31 cores and each IQ-Tree run uses 10, you can run 3 alignments at once)
-  mclapply_num_cores <- floor(mclapply_num_cores)
+if (control_parameters$apply.treelikeness.tests == TRUE){
+  # Calculate the number of parallel processes to run using mc.apply
+  mclapply_num_cores <- num_cores/10
+  if (mclapply_num_cores < 1){
+    # Minimum of one process running at once
+    mclapply_num_cores <- 1
+  } else {
+    # Take floor of the decimal to run a conservative number of processes 
+    #     (e.g. if 31 cores and each IQ-Tree run uses 10, you can run 3 alignments at once)
+    mclapply_num_cores <- floor(mclapply_num_cores)
+  }
 }
 
 
@@ -203,7 +205,7 @@ if (control_parameters$calculate.empirical.p_values == TRUE){
 
 
 #### 6. Plot histograms of empirical bootstrap test statistic values ####
-if (control_parameters$plot.test.statistic.histograms == TRUE){
+if (control_parameters$plots == TRUE){
   ## Find file with parametric bootstrap results
   all_output <- list.files(output_directory, recursive = TRUE)
   all_csv <- grep("csv", all_output, value = T)

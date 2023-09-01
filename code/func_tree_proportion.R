@@ -374,3 +374,13 @@ trivial.splits.present <- function(s){
   return(op)
 }
 
+
+
+#### Tree proportion parametric bootstrap function ####
+tree.proportion.parametric.bootstrap <- function(alignment, output_directory, treefile, 
+                                                 iqtree_model, iqtree_path, sequence_format = "DNA", 
+                                                 remove_trivial_splits = TRUE, network.method = "SPLITSTREE",
+                                                 splitstree_path = NA, dist.ml.model = NA){
+  # This function will apply a parametric bootstrap to any 
+}
+

@@ -1,0 +1,158 @@
+---
+title: "Tree proportion tutorial"
+output: html_notebook
+---
+
+This is a tutorial for applying the tree proportion test for treelikeness, plus a parametric bootstrap to perform a test of statistical significance, for any alignment.
+
+### Background
+The tree proportion metric works by identifying splits within a phylogenetic sequence alignment. A split is a bipartition of the taxa, which indicates there is signal within the alignment (biological or otherwise) supporting separating the set of taxa into two different groups. The presence of incompatible splits means that there is conflicting signal within that data. The tree proportion metric aims to quantify the proportion of information lost in transforming an alignment into a tree by calculating the maximum possible proportion of compatible splits. We find the tree proportion performs well at detecting alignments with multiple distinct topologies, but struggles to detect decreasing treelikeness when alignments contain a single introgression event. However, the tree proportion is a proxy for treelikeness - it does not determine the biological or technical reason for conflict within the alignment.
+
+### Calculating the tree proportion
+To calculate the tree proportion, firstly we estimate a phylogenetic network from the input sequence alignment. We then apply a modified version of Kruskal's algorithm to build a greedy tree with the maximum possible sum of split weights. Finally, we find the tree proportion by dividing the sum of split weights in the tree by the sum of split weights in the network.
+
+A tree proportion value of 1 indicates each split in the network is also in the greedy tree. Here, there is no conflicting signal and the dataset is perfectly treelike. Alternatively, a tree proportion of 0.5 indicates that half of the splits in the alignment are conflicting splits. This indicates the level of conflicting signal within the dataset.
+
+## 1. Clone the Github Repository
+**1.a.** Clone the caitlinch/treelikeness-metrics repository from GitHub [here](https://github.com/caitlinch/treelikeness-metrics) 
+
+**1.b**. First, source the functions from the `code/func_tree_proportion.R` file
+
+```{r}
+# Update the repository path for your computer
+repo_path <- "/Users/caitlin/Repositories/treelikeness-metrics/"
+# Source the functions
+source(paste0(repo_path, "code/func_tree_proportion.R"))
+```
+
+## 2. Generate the sequence alignment
+For this tutorial, we will generate two toy sequence alignments.
+
+**2.a.** Generate a sequence alignment with one underlying evolutionary history
+```{r}
+# Generate a random phylogenetic tree with 10 tips
+al1_t <- rtree(5)
+# Simulate DNA along the tree
+al1 <- simSeq(al1_t, l = 2000, type = "DNA")
+# Save the alignment
+write.phyDat(al1, file = paste0(repo_path, "tutorial/alignment1.fasta"), 
+             format = "fasta", colsep = "")
+
+```
+
+
+**2.b.** Generate a sequence alignment with two underlying evolutionary histories
+```{r}
+# Generate a random phylogenetic tree with 10 tips
+al2_ts <- rmtree(2, 5)
+# Simulate DNA along the trees
+al2_als <- lapply(1:2, function(i){simSeq(al2_ts[[i]], l = 500, type = "DNA")})
+# Collate the 10 alignments into one
+al2_collated <- c(al2_als[[1]], al2_als[[2]])
+# Save the alignment
+write.phyDat(al2_collated, file = paste0(repo_path, "tutorial/alignment2.fasta"), 
+             format = "fasta", colsep = "")
+
+```
+
+
+
+**2.c.** Generate a sequence alignment with multiple underlying evolutionary histories
+```{r}
+# Generate a random phylogenetic tree with 10 tips
+al3_ts <- rmtree(10, 10)
+# Simulate DNA along the trees
+al3_als <- lapply(1:10, function(i){simSeq(al3_ts[[i]], l = 100, type = "DNA")})
+# Collate the 10 alignments into one
+al3_collated <- c(al3_als[[1]], al3_als[[2]], al3_als[[3]], al3_als[[4]], al3_als[[5]],
+                  al3_als[[6]], al3_als[[7]], al3_als[[8]], al3_als[[9]], al3_als[[10]])
+# Save the alignment
+write.phyDat(al3_collated, file = paste0(repo_path, "tutorial/alignment3.fasta"), 
+             format = "fasta", colsep = "")
+
+```
+
+## 3. Preparation
+
+### Trivial splits
+There are two ways to calculate the tree proportion: with or without trivial splits. A trivial split is a terminal branch, and terminal branches are present within both the phylogenetic network and the greedy tree. We recommend using the setting `remove_trivial_splits = TRUE` to remove trivial splits, which provides a better picture of the conflicting signal within the alignment of interest.
+
+### Tree proportion function
+The tree proportion of any alignment can be calculated using the function `tree.proportion`, which is available in the script `code/tree_proportion.R`.
+
+To call the tree proportion function:
+```
+tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
+network.method = "SPLITSTREE" , splitstree_path = NA, dist.ml.model = NA)
+```
+
+Function arguments:
+
+- `alignment_path`: valid file path to a sequence alignment (Nexus, Fasta or Phylip formats)
+- `sequence_format`: either "DNA" or "AA", depending on your data. Tree proportion has been tested exclusively with DNA data.
+- `remove_trivial_splits`: `TRUE` to remove trivial splits (i.e. terminal branches) or FALSE to keep trivial splits. 
++ We recommend the option `remove_trivial_splits = TRUE`
++ All tree proportion values in both sets of simulations were calculated using `remove_trivial_splits = TRUE`
+- `network.method`: approach for estimating the phylogenetic network from the provided sequence alignment - either "SPLITSTREE" or "PHANGORN"
++ Options are "SPLITSTREE" (to estimate the phylogenetic network in SplitsTree4) or "PHANGORN" (to estimate the phylogenetic network using the functions `phangorn::dist.ml` and `phangorn::neighborNet`)
++ When `network.method = "SPLITSTREE"`, you must provide the path to the SplitsTree4 java executable (e.g. on my computer this is `/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub`)
++ When `network.method = "PHANGORN"`, a pairwise distance matrix is computed for the input alignment (using `phangorn::dist.ml`), and used as input to estimate a phylogenetic network (using `phangorn::neighbotNet`)
++ You must provide the model used to compute the pairwise distance matrix. Allowed options include "JC69", "F81", and 17 amino acid models
++ See the help page at `?phangorn::dist.ml` for more details about allowable models for this function
++ Extra model parameters (base frequencies, a Q matrix, or the number of rate categories) can be added using the function `calculate.dna.pairwise.distance.matrix()` (located in the `code/tree_proportion.R` script)
+
+### Network Estimation Methods
+The tree proportion method estimates a phylogenetic network from an alignment. There are two ways to estimate this tree: either in R using the `phangorn::neighbotNet` function or using the SplitsTree software program
+
+For example, to apply the tree proportion using SplitsTree4 to estimate the network:
+```
+tree.proportion("test_alignment.nexus", 
+sequence_format = "DNA", 
+remove_trivial_splits = TRUE, 
+network.method = "SPLITSTREE", 
+splitstree_path = "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub")
+```
+Alternatively, to apply the tree proportion using phangorn::dist.ml with the F81 model to estimate the network:
+```
+tree.proportion("test_alignment.nexus", 
+sequence_format = "DNA", 
+remove_trivial_splits = TRUE, 
+network.method = "PHANGORN", 
+dist.ml.model = "F81")
+```
+We included the "PHANGORN" method of phylogenetic network estimation for users who wanted to apply the tree proportion method without installing and calling a separate software program. However, all simulations for this project used SplitsTree4 to calculate the phylogenetic network. SplitsTree4 is able to estimate phylogenetic networks quickly even for large numbers of taxa (such as our 100 taxa simulations). In our preliminary tests, we found the "PHANGORN" method computationally intractable for large networks, and slower in general than SplitsTree4.
+
+
+## 4. Calculate the tree proportion
+Calculate the tree proportion of each alignment.
+
+For this tutorial, we will use the `"PHANGORN"` method of phylogenetic network estimation, to avoid installing and calling another program. When applying the tree proportion to empirical datasets, we recommend using the `"SPLITSTREE"` network method
+
+**4.a.** Calculate the tree proportion for alignment 1, the alignment with one underlying evolutionary history
+```{r}
+tree.proportion(paste0(repo_path, "tutorial/alignment1.fasta"), 
+                sequence_format = "DNA", 
+                remove_trivial_splits = TRUE, 
+                network.method = "PHANGORN", 
+                dist.ml.model = "JC69")
+```
+
+**4.b.** Calculate the tree proportion for alignment 2, the alignment with two underlying evolutionary histories
+```{r}
+tree.proportion(paste0(repo_path, "tutorial/alignment2.fasta"), 
+                sequence_format = "DNA", 
+                remove_trivial_splits = TRUE, 
+                network.method = "PHANGORN", 
+                dist.ml.model = "JC69")
+```
+
+**4.b.** Calculate the tree proportion for alignment 3, the alignment with multiple underlying evolutionary histories
+```{r}
+tree.proportion(paste0(repo_path, "tutorial/alignment3.fasta"), 
+                sequence_format = "DNA", 
+                remove_trivial_splits = TRUE, 
+                network.method = "PHANGORN", 
+                dist.ml.model = "JC69")
+```
+
+## 5. Apply the parametric bootstrap

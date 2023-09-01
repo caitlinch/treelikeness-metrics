@@ -1,0 +1,2618 @@
+IQ-TREE multicore version 2.2.0 COVID-edition for Mac OS X 64-bit built Jun  1 2022
+Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung,
+Olga Chernomor, Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan.
+
+Host:    Caitlins-MacBook-Pro.local (AVX2, FMA3, 8 GB RAM)
+Command: iqtree2 --alisim /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al -m JC -t /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1.fasta.treefile --out-format fasta --num-alignments 100
+Seed:    803514 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Fri Sep  1 12:50:41 2023
+Kernel:  AVX+FMA - 1 threads (4 CPU cores detected)
+
+[Alignment Simulator] Executing
+ - Tree filepath: /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1.fasta.treefile
+ - Length of output sequences: 1000
+ - Model: JC
+ - Number of output datasets: 100
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_1.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1.000
+  A-G: 1.000
+  A-T: 1.000
+  C-G: 1.000
+  C-T: 1.000
+  G-T: 1.000
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_2.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_3.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_4.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_5.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_6.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_7.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_8.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_9.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_10.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_11.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_12.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_13.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_14.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_15.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_16.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_17.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_18.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_19.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_20.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_21.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_22.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_23.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_24.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_25.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_26.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_27.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_28.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_29.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_30.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_31.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_32.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_33.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_34.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_35.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_36.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_37.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_38.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_39.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_40.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_41.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_42.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_43.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_44.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_45.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_46.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_47.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_48.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_49.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_50.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_51.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_52.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_53.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_54.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_55.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_56.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_57.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_58.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_59.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_60.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_61.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_62.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_63.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_64.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_65.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_66.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_67.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_68.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_69.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_70.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_71.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_72.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_73.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_74.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_75.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_76.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_77.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_78.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_79.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_80.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_81.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_82.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_83.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_84.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_85.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_86.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_87.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_88.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_89.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_90.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_91.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_92.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_93.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_94.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_95.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_96.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_97.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_98.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_99.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+An alignment has just been exported to /Users/caitlin/Repositories/treelikeness-metrics/tutorial/alignment1/rep_al_100.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Model of substitution: JC
+
+Rate parameter R:
+
+  A-C: 1
+  A-G: 1
+  A-T: 1
+  C-G: 1
+  C-T: 1
+  G-T: 1
+
+State frequencies: (equal frequencies)
+
+Rate matrix Q:
+
+  A        -1     0.333     0.333     0.333
+  C     0.333        -1     0.333     0.333
+  G     0.333     0.333        -1     0.333
+  T     0.333     0.333     0.333        -1
+
+Model of rate heterogeneity: Uniform
+
+[Alignment Simulator] Done
+Simulation time: 0.099s
+Date and Time: Fri Sep  1 12:50:41 2023

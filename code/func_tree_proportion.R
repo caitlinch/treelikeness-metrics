@@ -85,7 +85,7 @@ tree.proportion <- function(alignment_path, sequence_format = "DNA", remove_triv
         # If the matrix values sum to 0, then the set of splits are compatible
         check_compatibility = TRUE
       } else if (check_sum > 0){
-         check_compatibility = FALSE
+        check_compatibility = FALSE
       }
       # print(check_compatibility)
       # If the split is compatible, add it to the list of compatible splits
@@ -178,7 +178,7 @@ tree.proportion.output.csv <- function(alignment_path, sequence_format = "DNA", 
   } else if (file.exists(df_name) == FALSE){
     # Apply tree proportion functuion
     tp_value <- tree.proportion(alignment_path, sequence_format = "DNA", remove_trivial_splits = TRUE, 
-                                        network.method = "SplitsTree4" , splitstree_path = splitstree_path, dist.ml.model = NA)
+                                network.method = "SplitsTree4" , splitstree_path = splitstree_path, dist.ml.model = NA)
     
     # Assemble results into a dataframe and save
     results_vec <- c(unique_id, tp_value)
@@ -218,35 +218,35 @@ calculate.dna.pairwise.distance.matrix <- function(alignment_path, sequence_form
   # Can also use number of rate categories, Q matrix, and base frequencies (or any combination of the above) by specifying in the function call
   if ((is.na(number_of_rate_categories) == TRUE) & ((NA %in% Q_matrix) == TRUE) & ((NA %in% base_frequencies) == TRUE)){
     # If none of the number_of_rate_categories, Q_matrix or base frequencies are provided, simply estimate distance matrix using model of substitution
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, " only"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, " only"))
     pdm <- dist.ml(alignment, model = substitution_model)
   } else if ((is.na(number_of_rate_categories) == FALSE) & ((NA %in% Q_matrix) == TRUE) & ((NA %in% base_frequencies) == TRUE)){
     # Use number of rate categories only
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", number of rate categories"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", number of rate categories"))
     pdm <- dist.ml(alignment, model = substitution_model, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & ((NA %in% Q_matrix) == FALSE) & ((NA %in% base_frequencies) == TRUE)){
     # Use Q matrix only
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", Q matrix"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", Q matrix"))
     pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == TRUE) & ((NA %in% Q_matrix) == TRUE) & ((NA %in% base_frequencies) == FALSE)){
     # Use base frequencies only
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies"))
     pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies)
   } else if ((is.na(number_of_rate_categories) == FALSE) & ((NA %in% Q_matrix) == FALSE) & ((NA %in% base_frequencies) == TRUE)){
     # Use number of rate categories and Q matrix
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", Q matrix, number of rate categories"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", Q matrix, number of rate categories"))
     pdm <- dist.ml(alignment, model = substitution_model, Q = Q_matrix, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == FALSE) & ((NA %in% Q_matrix) == TRUE) & ((NA %in% base_frequencies) == FALSE)){
     # Use number of rate categories and base frequencies
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, number of rate categories"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, number of rate categories"))
     pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, k = number_of_rate_categories)
   } else if ((is.na(number_of_rate_categories) == TRUE) & ((NA %in% Q_matrix) == FALSE) & ((NA %in% base_frequencies) == FALSE)){
     # Use Q matrix and base frequencies
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, Q matrix"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, Q matrix"))
     pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix)
   } else if ((is.na(number_of_rate_categories) == FALSE) & ((NA %in% Q_matrix) == FALSE) & ((NA %in% base_frequencies) == FALSE)){
     # Use number of rate categories, Q matrix, and base frequencies
-    print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, Q matrix, and number of rate categories"))
+    #print(paste0("Estimating pairwise distance matrix with model of sequence evolution ", substitution_model, ", base frequencies, Q matrix, and number of rate categories"))
     pdm <- dist.ml(alignment, model = substitution_model, bf = base_frequencies, Q = Q_matrix, k = number_of_rate_categories)
   }
   
@@ -377,10 +377,53 @@ trivial.splits.present <- function(s){
 
 
 #### Tree proportion parametric bootstrap function ####
-tree.proportion.parametric.bootstrap <- function(alignment, output_directory, treefile, 
-                                                 iqtree_model, iqtree_path, sequence_format = "DNA", 
+tree.proportion.parametric.bootstrap <- function(alignment_path, output_directory, 
+                                                 treefile, best_model, sequence_format = "DNA", 
                                                  remove_trivial_splits = TRUE, network.method = "SPLITSTREE",
-                                                 splitstree_path = NA, dist.ml.model = NA){
-  # This function will apply a parametric bootstrap to any 
+                                                 splitstree_path = NA, dist.ml.model = NA, iqtree_path){
+  ## This function will apply a parametric bootstrap to any sequence alignment
+  ##    The parametric bootstrap replicates are generated by AliSim
+  
+  # Ensure output directory is formatted correctly
+  output_directory <- paste0(dirname(output_directory), "/", basename(output_directory), "/")
+  
+  # Set the alignment prefix for output files
+  al_prefix <- "rep_al"
+  
+  # Generate 100 bootstrap replicates using Alisim
+  alisim_call <- paste0(iqtree_path, " --alisim ", output_directory, al_prefix, 
+                        " -m ", best_model, " -t ", treefile, " --out-format fasta", 
+                        " --num-alignments 100")
+  system_output <- system(alisim_call, intern = TRUE)
+  
+  # Extract the simulated alignments 
+  dir_files <- list.files(output_directory)
+  rep_files <- paste0(output_directory, grep(al_prefix, dir_files, value = T))
+  
+  # Calculate the tree proportion for the bootstrap replicates
+  rep_tp <- unlist(lapply(rep_files,
+                   tree.proportion,
+                   sequence_format = sequence_format, 
+                   remove_trivial_splits = remove_trivial_splits, 
+                   network.method = network.method, 
+                   splitstree_path = splitstree_path,
+                   dist.ml.model = dist.ml.model))
+  
+  # Calculate the tree proportion for the alignment
+  tp <- tree.proportion(alignment_path, 
+                        sequence_format = sequence_format, 
+                        remove_trivial_splits = remove_trivial_splits, 
+                        network.method = network.method, 
+                        splitstree_path = splitstree_path, 
+                        dist.ml.model = dist.ml.model)
+  
+  # Calculate the P-value using the empirical cumulative distribution function (ecdf)
+  cdf <- ecdf(rep_tp)
+  p_value <- cdf(tp)
+  
+  # Return the results
+  op_vector <- c(tp, p_value)
+  names(op_vector) <- c("tree_proportion", "p_value")
+  return(op_vector)
 }
 

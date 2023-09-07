@@ -182,22 +182,59 @@ if (control_parameters$calculate.empirical.p_values == TRUE){
   bs_csv_file <- paste0(output_directory, grep("empirical", grep("collated", grep("treelikeness_metrics", all_csv, value = T), value = T), value = T))
   # Open csv file
   bs_df <- read.csv(bs_csv_file, stringsAsFactors = F)
+  # Add identification columns for faceting and filtering
+  bs_df$rep_type <- factor(bs_df$unique_id,
+                           levels = bs_df$unique_id,
+                           labels = rep(c(rep("Bootstrap replicate", 100), "Alignment"), 2),
+                           ordered = TRUE)
+  # Add a column specifying which alignment the row is
+  bs_df$alignment_id <- factor(bs_df$unique_id,
+                               levels = bs_df$unique_id,
+                               labels = rep(c("WEA17", "WEA17F"), each = 101),
+                               ordered = TRUE)
   
   ## Calculate p-values for "WEA17" alignment
   wea17_df <- bs_df[grep("WEA17F", bs_df$unique_id, invert = T), ]
   wea17_df$unique_id[grep("rep", wea17_df$unique_id, invert = T)] <- "alignment"
-  wea17_p_value_df <- calculate.all.p_values(output_df = wea17_df, test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
+  wea17_p_value_df <- calculate.all.p_values(output_df = wea17_df, 
+                                             test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
   wea17_p_value_df$dataset <- "WEA17"
+  wea17_p_value_df$statistic_type  <- "p-value"
+  wea17_p_value_df <- wea17_p_value_df[c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "p_value")]
+  names(wea17_p_value_df) <- c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "statistic_value")
+  # Extract Network Treelikeness Test values
+  wea17_ntlt <- bs_df[which(bs_df$rep_type == "Alignment" & bs_df$alignment_id == "WEA17"),]$NetworkTreelikenessTest
+  wea17_ntlt_stat_value <- length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17" & bs_df$NetworkTreelikenessTest == "Treelike"))/
+    length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17"))
+  wea17_ntlt_vector <- c("dataset" = "WEA17", "test_statistic" = "NetworkTreelikenessTest", 
+                         "test_statistic_value" = wea17_ntlt, "statistic_type" = "proportion_treelike_alignments", 
+                         "statistic_value" = wea17_ntlt_stat_value) 
+  # Bind the tree proportion results
+  wea17_p_value_df <- rbind(wea17_p_value_df, wea17_ntlt_vector)
+  
+  
   
   ## Calculate p-values for "WEA17F" alignment
   wea17f_df <- bs_df[grep("WEA17F", bs_df$unique_id), ]
   wea17f_df$unique_id[grep("rep", wea17f_df$unique_id, invert = T)] <- "alignment"
-  wea17f_p_value_df <- calculate.all.p_values(output_df = wea17f_df, test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
+  wea17f_p_value_df <- calculate.all.p_values(output_df = wea17f_df, 
+                                              test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
   wea17f_p_value_df$dataset <- "WEA17F"
+  wea17f_p_value_df$statistic_type  <- "p-value"
+  wea17f_p_value_df <- wea17f_p_value_df[c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "p_value")]
+  names(wea17f_p_value_df) <- c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "statistic_value")
+  # Extract Network Treelikeness Test values
+  wea17f_ntlt <- bs_df[which(bs_df$rep_type == "Alignment" & bs_df$alignment_id == "WEA17F"),]$NetworkTreelikenessTest
+  wea17f_ntlt_stat_value <- length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17F" & bs_df$NetworkTreelikenessTest == "Treelike"))/
+    length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17F"))
+  wea17f_ntlt_vector <- c("dataset" = "WEA17F", "test_statistic" = "NetworkTreelikenessTest", 
+                          "test_statistic_value" = wea17f_ntlt, "statistic_type" = "proportion_treelike_alignments", 
+                          "statistic_value" = wea17f_ntlt_stat_value) 
+  # Bind the tree proportion results
+  wea17f_p_value_df <- rbind(wea17f_p_value_df, wea17f_ntlt_vector)
   
   ## Combine and save dataframes
   collated_p_value_df <- rbind(wea17_p_value_df, wea17f_p_value_df)
-  collated_p_value_df <- collated_p_value_df[, c("dataset", "test_statistic", "test_statistic_value", "p_value")]
   collated_p_value_file <- paste0(output_directory, "empirical_collated_p_values.csv")
   write.csv(collated_p_value_df, file = collated_p_value_file, row.names = F)
 }
@@ -216,19 +253,33 @@ if (control_parameters$plots == TRUE){
   #### Plot 1: histogram of test statistic values ####
   ## Reformat dataframe for plotting
   # Add a column specifying whether the row is for an alignment or a bootstrap replicate
-  bs_df$rep_type <- bs_df$unique_id
-  bs_df$rep_type[grep("BS_rep", bs_df$unique_id)] <- "Bootstrap replicate"
-  bs_df$rep_type[grep("BS_rep", bs_df$unique_id, invert = T)] <- "Alignment"
+  bs_df$rep_type <- factor(bs_df$unique_id,
+                           levels = bs_df$unique_id,
+                           labels = rep(c(rep("Bootstrap replicate", 100), "Alignment"), 2),
+                           ordered = TRUE)
   # Add a column specifying which alignment the row is
-  bs_df$alignment_id <- bs_df$unique_id
-  bs_df$alignment_id[grep("WEA17F", bs_df$unique_id)] <- "WEA17F"
-  bs_df$alignment_id[grep("WEA17F", bs_df$unique_id, invert = T)] <- "WEA17"
+  bs_df$alignment_id <- factor(bs_df$unique_id,
+                               levels = bs_df$unique_id,
+                               labels = rep(c("WEA17", "WEA17F"), each = 101),
+                               ordered = TRUE)
   # Divide scf_mean by 100 to make it a proportion
   bs_df$sCF_mean <- bs_df$sCF_mean/100
+  
+  # # Copy dataframe and remove alignment rows
+  # bs_only_df <- bs_df[which(bs_df$rep_type == "Bootstrap replicate"), ]
+  # 
+  # # Reformat dataframe into long format
+  # long_df <- melt(bs_only_df,
+  #                 id.vars = c("alignment_id", "rep_type", "unique_id"),
+  #                 measure.vars = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
+  
   # Reformat dataframe into long format
   long_df <- melt(bs_df,
                   id.vars = c("alignment_id", "rep_type", "unique_id"),
                   measure.vars = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
+  # Replace all Alignment values with NA to avoid plotting them in histogram - want to plot them as vertical line instead
+  long_df$value[which(long_df$rep_type == "Alignment")] <- NA
+  
   ## Add variables for facetting labels nicely
   long_df$var_label = factor(long_df$variable,
                              levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", "LM_proportion_resolved_quartets", "sCF_mean"),
@@ -242,14 +293,53 @@ if (control_parameters$plots == TRUE){
                                     levels = c("WEA17", "WEA17F"),
                                     ordered = TRUE,
                                     labels = c("Whelan 2017\nOriginal dataset", "Filtered by\nMcCarthy 2023") )
+  ## Add variable detailing each test and the empirical value for each test
+  # Add new row for combination of alignment and test
+  xinterval_df <- data.frame(alignment_id = c(rep(c("WEA17",  "WEA17F"), each = 5)),
+                             rep_type = rep("Alignment", 10),
+                             unique_id = c(rep(c("WEA17",  "WEA17F"), each = 5)),
+                             variable = rep(c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", "LM_proportion_resolved_quartets", "sCF_mean"), 2),
+                             value = c(bs_df[bs_df$alignment_id == "WEA17" & bs_df$rep_type == "Alignment",]$tree_proportion,
+                                       bs_df[bs_df$alignment_id == "WEA17" & bs_df$rep_type == "Alignment",]$Cunningham_test,
+                                       bs_df[bs_df$alignment_id == "WEA17" & bs_df$rep_type == "Alignment",]$mean_delta_plot_value,
+                                       bs_df[bs_df$alignment_id == "WEA17" & bs_df$rep_type == "Alignment",]$LM_proportion_resolved_quartets,
+                                       bs_df[bs_df$alignment_id == "WEA17" & bs_df$rep_type == "Alignment",]$sCF_mean,
+                                       bs_df[bs_df$alignment_id == "WEA17F" & bs_df$rep_type == "Alignment",]$tree_proportion,
+                                       bs_df[bs_df$alignment_id == "WEA17F" & bs_df$rep_type == "Alignment",]$Cunningham_test,
+                                       bs_df[bs_df$alignment_id == "WEA17F" & bs_df$rep_type == "Alignment",]$mean_delta_plot_value,
+                                       bs_df[bs_df$alignment_id == "WEA17F" & bs_df$rep_type == "Alignment",]$LM_proportion_resolved_quartets,
+                                       bs_df[bs_df$alignment_id == "WEA17F" & bs_df$rep_type == "Alignment",]$sCF_mean))
+  xinterval_df$var_label = factor(xinterval_df$variable,
+                                  levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value", "LM_proportion_resolved_quartets", "sCF_mean"),
+                                  ordered = TRUE,
+                                  labels = c(expression(atop("Tree","proportion")), 
+                                             expression(atop("Cunningham","metric")),
+                                             expression(paste('Mean ', delta["q"])), 
+                                             expression(atop(textstyle("Proportion"),atop(textstyle("resolved"),atop(scriptscriptstyle(""),textstyle("quartets"))))),
+                                             expression(atop("Mean", "sCFL value"))) )
+  xinterval_df$alignment_label <- factor(xinterval_df$alignment_id,
+                                         levels = c("WEA17", "WEA17F"),
+                                         ordered = TRUE,
+                                         labels = c("Whelan 2017\nOriginal dataset", "Filtered by\nMcCarthy 2023") )
+  
+  ## Set colour palette 
+  #   To use scale_fill_manual:     scale_fill_manual(labels = c("Bootstrap replicate", "Alignment"), values = c(col_pal[2], col_pal[1]))
+  col_pal <- cividis(2, begin = 0, end = 1, direction = 1) # Note: col_pal = c("#00204DFF", "#FFEA46FF") = c("dark blue", "bright yellow")
+  
   ## Add the expression for the plot title
   hist_title_expression <- expression(atop("Test statistic values for Whelan et al 2017","alignments and parametric bootstrap replicates"))
   ## Plot a nice histogram of the output values
-  h <- ggplot(long_df, aes(x = value, fill = rep_type)) +
+  h <- ggplot(long_df, aes(x = value, fill = rep_type, colour=rep_type)) +
     geom_histogram(bins = 20) +
+    geom_vline(data = xinterval_df, aes(xintercept = value, color = rep_type), show.legend = TRUE, linetype = "dashed") + 
     facet_grid(alignment_label~var_label, labeller = labeller(var_label = label_parsed)) +
-    scale_fill_viridis_d(option = "E") +
-    guides(fill=guide_legend(title="Alignment type")) +
+    scale_fill_manual(labels = c("Bootstrap replicate", "Alignment"),
+                      values = c(col_pal[2], col_pal[1]),
+                      na.value = "white",
+                      name = "Alignment type") +
+    scale_colour_manual(labels = c("Bootstrap replicate", "Alignment"),
+                        values = c(col_pal[2], col_pal[1]),
+                        name = "Alignment type") +  
     ggtitle(parse(text = hist_title_expression)) +
     scale_x_continuous(name = "Test statistic value") +
     scale_y_continuous(name = "Count") +
@@ -297,7 +387,7 @@ if (control_parameters$plots == TRUE){
     scale_x_discrete(name = "Value") +
     scale_y_continuous(name = "Count") +
     theme_bw() +
-    theme(plot.title = element_text(hjust = 0.5, size = 20),
+    theme(plot.title = element_text(hjust = 0.5, size = 18),
           axis.title.x = element_text(size = 18, margin = margin(t = 15, r = 0, b = 10, l = 0)),
           axis.title.y = element_text(size = 18, margin = margin(t = 0, r = 15, b = 0, l = 10)), 
           axis.text.x = element_text(size = 12, angle = 45, hjust = 1, vjust = 1),

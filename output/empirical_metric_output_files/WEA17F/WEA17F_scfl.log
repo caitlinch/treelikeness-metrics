@@ -1,0 +1,131 @@
+IQ-TREE multicore version 2.2.2 COVID-edition for Linux 64-bit built Sep 20 2022
+Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung,
+Olga Chernomor, Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan.
+
+Host:    soma.rsb.anu.edu.au (AVX2, FMA3, 503 GB RAM)
+Command: /data/caitlin/executables/iqtree-2.2.2-Linux/bin/iqtree2 -te /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/WEA17F.fasta.treefile -s /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/WEA17F.fasta -m Q.insect+I{0.0659}+R6{0.2004,0.1133,0.1734,0.3827,0.1439,0.6654,0.2108,1.1677,0.1549,2.2361,0.0508,4.3870} --scfl 100 -nt 20 -safe -pre /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl
+Seed:    301700 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Wed Aug 23 12:06:58 2023
+Kernel:  Safe AVX+FMA - 20 threads (56 CPU cores detected)
+
+Reading alignment file /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/WEA17F.fasta ... Fasta format detected
+Reading fasta file: done in 0.0202031 secs using 99.99% CPU
+Alignment most likely contains protein sequences
+Constructing alignment: done in 0.087436 secs using 1803% CPU
+Alignment has 76 sequences with 22820 columns, 21708 distinct patterns
+16521 parsimony-informative, 2664 singleton sites, 3635 constant sites
+                                     Gap/Ambiguity  Composition  p-value
+Analyzing sequences: done in 0.000874043 secs using 2002% CPU
+   1  Abylopsis_tetragona                   42.94%    failed      0.07%
+   2  Acanthoeca_sp                         14.09%    failed      0.00%
+   3  Acropora_digitifera                   63.23%    passed     21.13%
+   4  Agalma_elegans                        32.35%    failed      0.03%
+   5  Aiptasia_pallida                       6.56%    passed     91.34%
+   6  Amphimedon_queenslandica              13.33%    failed      0.21%
+   7  Aphrocallistes_vastus                  7.16%    failed      0.00%
+   8  Beroe_abyssicola                      66.65%    passed     16.46%
+   9  Beroe_forskalii                       82.26%    passed     13.60%
+  10  Beroe_ovata                           96.49%    passed     85.16%
+  11  Beroe_sp_Antarctica                   91.12%    passed     34.08%
+  12  Beroe_sp_Queensland_Australia         82.48%    passed      9.40%
+  13  Bolinopsis_ashleyi                    90.99%    failed      0.00%
+  14  Bolinopsis_infundibulum               96.48%    passed     37.47%
+  15  Bolocera_tuediae                      81.23%    failed      0.00%
+  16  Callianira_Antarctica                 87.79%    passed     31.66%
+  17  Capitella_teleta                       5.88%    passed     88.72%
+  18  Cestum_veneris                        90.28%    failed      3.53%
+  19  Chondrilla_nucula                     58.76%    passed     49.27%
+  20  Cliona_varians                        37.01%    failed      0.73%
+  21  Coeloplana_astericola                 63.63%    failed      0.15%
+  22  Corticium_candelabrum                 65.48%    passed      7.70%
+  23  Craseo_lathetica                      48.03%    failed      1.30%
+  24  Crella_elegans                        65.11%    failed      0.39%
+  25  Ctenophora_sp_Florida_USA             95.60%    failed      2.77%
+  26  Cydippida_sp                          83.10%    passed     41.01%
+  27  Cydippida_sp_Maryland_USA             48.50%    passed      5.09%
+  28  Daphnia_pulex                          5.23%    passed     13.24%
+  29  Drosophila_melanogaster                4.11%    passed     12.65%
+  30  Dryodora_glandiformis                 68.88%    passed     84.32%
+  31  Eunicella_verrucosa                   23.70%    failed      0.02%
+  32  Euplokamis_dunlapae                   82.14%    failed      0.00%
+  33  Eurhamphaea_vexilligera               84.36%    passed     64.88%
+  34  Hemithris_psittacea                   37.13%    passed     15.14%
+  35  Homo_sapiens                           3.29%    failed      0.18%
+  36  Hormathia_digitata                    74.97%    passed     15.82%
+  37  Hormiphora_californica                36.80%    failed      0.00%
+  38  Hormiphora_palmata                    85.85%    failed      0.20%
+  39  Hyalonema_populiferum                 72.80%    failed      0.00%
+  40  Hydra_oligactis                       76.53%    failed      0.00%
+  41  Hydra_viridissima                     71.60%    failed      0.00%
+  42  Hydra_vulgaris                        13.88%    failed      0.00%
+  43  Ircinia_fasciculata                   76.67%    failed      0.14%
+  44  Kirkpatrickia_variolosa               27.58%    passed     24.99%
+  45  Latrunculia_apicalis                  24.43%    passed      6.03%
+  46  Lobata_sp_Punta_Arenas_Argentina      94.35%    passed     63.35%
+  47  Lobatolampea_tetragona                94.66%    passed     26.83%
+  48  Mertensiidae_sp_Antarctica            81.36%    failed      0.13%
+  49  Mertensiidae_sp_Washington_USA        79.48%    passed      7.46%
+  50  Mnemiopsis_leidyi                     65.99%    failed      0.00%
+  51  Monosiga_brevicolis                   12.14%    failed      0.00%
+  52  Monosiga_ovata                        80.88%    failed      0.03%
+  53  Mycale_phylophylla                    34.84%    passed     19.10%
+  54  Nanomia_bijuga                        52.60%    failed      0.00%
+  55  Nematostella_vectensis                14.93%    passed     60.60%
+  56  Ocyropsis_crystallina                 69.66%    failed      1.70%
+  57  Ocyropsis_sp_Bimini_Bahamas           80.50%    passed      9.28%
+  58  Ocyropsis_sp_Florida_USA              90.09%    failed      3.09%
+  59  Oscarella_carmela                      5.20%    failed      4.17%
+  60  Periphyla_periphyla                   70.21%    failed      0.00%
+  61  Petrosia_ficiformis                   52.43%    failed      1.02%
+  62  Physalia_physalia                     60.82%    failed      1.51%
+  63  Pleurobrachia_bachei                  68.05%    failed      0.41%
+  64  Pleurobrachia_pileus                  52.91%    passed      6.90%
+  65  Pleurobrachia_sp_South_Carolina_USA   91.68%    failed      0.27%
+  66  Pseudospongosorites_suberitoides      86.43%    failed      0.63%
+  67  Rossella_fibulata                     24.75%    failed      0.00%
+  68  Salpingoeca_pyxidium                  83.04%    failed      0.00%
+  69  Salpingoeca_rosetta                    8.51%    failed      0.00%
+  70  Spongilla_lacustris                   62.04%    passed      7.52%
+  71  Strongylocentrotus_purpatus           28.98%    passed     39.86%
+  72  Sycon_ciliatum                         4.48%    failed      0.00%
+  73  Sycon_coactum                         22.55%    failed      0.00%
+  74  Sympagella_nux                        17.66%    failed      0.00%
+  75  Trichoplax_adhaerens                  14.18%    failed      0.00%
+  76  Vallicula_sp                          73.30%    failed      0.06%
+WARNING: 46 sequences contain more than 50% gaps/ambiguity
+****  TOTAL                                 54.81%  45 sequences failed composition chi2 test (p-value<5%; df=19)
+Checking for duplicate sequences: done in 0.00987601 secs using 1949% CPU
+Reading input tree file /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/WEA17F.fasta.treefile ...
+WARNING: Normalizing category proportions so that sum of them equals to 1
+
+NOTE: 1530 MB RAM (1 GB) is required!
+Estimate model parameters (epsilon = 0.010)
+1. Initial log-likelihood: -788831.235
+Optimal log-likelihood: -788831.234
+Proportion of invariable sites: 0.066
+Site proportion and rates:  (0.200,0.113) (0.173,0.383) (0.144,0.665) (0.211,1.168) (0.155,2.236) (0.051,4.387)
+Parameters optimization took 1 rounds (1.068 sec)
+Wrote distance file to... 
+BEST SCORE FOUND : -788831.234
+Total tree length: 16.637
+
+Total number of iterations: 0
+CPU time used for tree search: 0.000 sec (0h:0m:0s)
+Wall-clock time used for tree search: 0.000 sec (0h:0m:0s)
+Total CPU time used: 20.512 sec (0h:0m:20s)
+Total wall-clock time used: 1.093 sec (0h:0m:1s)
+Computing site concordance factor using likelihood...
+18.364 sec
+Tree with site concordance factors written to /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.cf.tree
+Annotated tree (best viewed in FigTree) written to /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.cf.tree.nex
+
+Analysis results written to: 
+  IQ-TREE report:                /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.iqtree
+  Maximum-likelihood tree:       /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.treefile
+  Screen log file:               /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.log
+
+ALISIM COMMAND
+--------------
+--alisim simulated_MSA -t /data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/scfl.treefile -m "Q.insect+I{0.0659}+R6{0.200379,0.11329,0.173381,0.382665,0.143885,0.665339,0.210777,1.16759,0.154883,2.23589,0.0507946,4.3866}" --length 22820
+
+Date and Time: Wed Aug 23 12:07:18 2023

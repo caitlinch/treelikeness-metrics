@@ -409,7 +409,7 @@ if (plot_exp3 == TRUE){
     plot_df <- s_df
     plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
     # Set plot title
-    plot_title <- paste0("Ancient introgression; speciation rate = ", s)
+    plot_title <- paste0("Recent introgression; speciation rate = ", s)
     # Construct plot
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
       geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,

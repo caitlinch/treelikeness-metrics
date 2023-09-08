@@ -112,14 +112,16 @@ if (plot_exp1 == TRUE){
     scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
     scale_color_viridis_d(direction = -1) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree depth (substitutions per site)", 
+    labs(title = "Random Tree Simulations",
+         subtitle = "Tree depth (substitutions per site)", 
          x = expression("Number of trees ("*log[10]*" scale)")) +
     theme_bw() +
     theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
           axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
           legend.title = element_text(size = 18), legend.text = element_text(size = 16),
           strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
+          plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
+          plot.subtitle = element_text(hjust = 0.5, size = 18))
   # Save plot
   plot_prefix <- "mainFig_exp1_plot1_tree_depth."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
@@ -334,6 +336,8 @@ if (plot_exp3 == TRUE){
     # Set dataset for plot
     plot_df <- s_df
     plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
+    # Set plot title
+    plot_title <- paste0("Ancient introgression; speciation rate = ", s)
     # Construct plot with fixed y axis
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
       geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75, 
@@ -344,13 +348,15 @@ if (plot_exp3 == TRUE){
       scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
       scale_color_manual(values = viridis_picks[2:5]) +
       guides(color = guide_legend(title = "Number of\ntaxa")) +
-      labs(title = "Tree age (Million years)") +
+      labs(title = plot_title,
+           subtitle = "Tree age (Million years)") +
       theme_bw() +
       theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
             axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
             legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
             strip.text = element_text(size = 11),
-            plot.title = element_text(size = 18, hjust = 0.5))
+            plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
+            plot.subtitle = element_text(size = 18, hjust = 0.5))
     # Save plot
     plot_prefix <- "mainFig_exp3_plot1_tree_depth_Ancient_s"
     ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")
@@ -402,6 +408,8 @@ if (plot_exp3 == TRUE){
     # Set dataset for plot
     plot_df <- s_df
     plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
+    # Set plot title
+    plot_title <- paste0("Ancient introgression; speciation rate = ", s)
     # Construct plot
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) + 
       geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
@@ -412,13 +420,15 @@ if (plot_exp3 == TRUE){
       scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
       scale_color_manual(values = viridis_picks[1:5]) +
       guides(color = guide_legend(title = "Number of\ntaxa")) +
-      labs(title = "Tree age (Million years)") +
+      labs(title = plot_title,
+           subtitle = "Tree age (Million years)") +
       theme_bw() +
       theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
             axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
             legend.title = element_text(size = 18, hjust = 0.5), legend.text = element_text(size = 16),
             strip.text = element_text(size = 11),
-            plot.title = element_text(size = 18, hjust = 0.5))
+            plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
+            plot.subtitle = element_text(size = 18, hjust = 0.5))
     # Save plot
     plot_prefix <- "mainFig_exp3_plot2_tree_depth_Recent_s"
     ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, s, ".pdf"), width = 10, height = 12.5, units = "in")

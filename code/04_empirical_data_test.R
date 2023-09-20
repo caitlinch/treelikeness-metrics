@@ -294,6 +294,7 @@ if (control_parameters$plots == TRUE){
                                     levels = c("WEA17", "WEA17F"),
                                     ordered = TRUE,
                                     labels = c("Whelan 2017\nOriginal dataset", "Filtered by\nMcCarthy 2023") )
+  
   ## Add variable detailing each test and the empirical value for each test
   # Add new row for combination of alignment and test
   xinterval_df <- data.frame(alignment_id = c(rep(c("WEA17",  "WEA17F"), each = 5)),
@@ -332,15 +333,14 @@ if (control_parameters$plots == TRUE){
   ## Plot a nice histogram of the output values
   h <- ggplot(long_df, aes(x = value, fill = rep_type, colour=rep_type)) +
     geom_histogram(bins = 20) +
-    geom_vline(data = xinterval_df, aes(xintercept = value, color = rep_type), show.legend = TRUE, linetype = "dashed") + 
+    geom_vline(data = xinterval_df, aes(xintercept = value), colour = "#00204DFF", show.legend = F, linetype = "dashed") + 
     facet_grid(alignment_label~var_label, labeller = labeller(var_label = label_parsed)) +
     scale_fill_manual(labels = c("Bootstrap replicate", "Alignment"),
                       values = c(col_pal[2], col_pal[1]),
-                      na.value = "white",
-                      name = "Alignment type") +
+                      name = "Legend") +
     scale_colour_manual(labels = c("Bootstrap replicate", "Alignment"),
                         values = c(col_pal[2], col_pal[1]),
-                        name = "Alignment type") +  
+                        name = "Legend") +  
     ggtitle(parse(text = hist_title_expression)) +
     scale_x_continuous(name = "Test statistic value") +
     scale_y_continuous(name = "Count") +
@@ -353,7 +353,7 @@ if (control_parameters$plots == TRUE){
           strip.text.x = element_text(size = 12),
           strip.text.y = element_text(size = 12),
           legend.title = element_text(size = 18),
-          legend.text = element_text(size = 12))
+          legend.text = element_text(size = 12)) 
   ## Save the histogram
   h_path <- paste0(output_directory, "empirical_test_statistic_value_histogram")
   ggsave(filename = paste0(h_path, ".png"), plot = h)

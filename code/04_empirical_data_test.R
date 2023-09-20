@@ -60,6 +60,7 @@ if (control_parameters$plots == TRUE){
   library(reshape2)
   library(ggplot2)
   library(patchwork)
+  library(viridisLite)
 }
 
 # Source functions from caitlinch/treelikeness_metrics
@@ -375,14 +376,17 @@ if (control_parameters$plots == TRUE){
                                   levels = c("WEA17", "WEA17F"),
                                   ordered = TRUE,
                                   labels = c("Whelan 2017\nOriginal dataset", "Filtered by\nMcCarthy 2023") )
+  # Remove alignment rows
+  tl_df <- tl_df[tl_df$rep_type == "Bootstrap replicate", ]
+  
   ## Add the expression for the plot title
   bar_title_expression <- expression(atop("Network Treelikeness Test values for Whelan et al 2017","alignments and parametric bootstrap replicates"))
   ## Plot a nice histogram of the output values
   b <- ggplot(tl_df, aes(x = test_value, fill = rep_type)) +
     geom_bar() +
     facet_grid(~alignment_label) +
-    scale_fill_viridis_d(option = "E") +
-    guides(fill=guide_legend(title="Alignment type")) +
+    scale_fill_viridis_d(option = "E", direction = -1) +
+    guides(fill=guide_legend(title="Legend")) +
     ggtitle(parse(text = bar_title_expression)) +
     scale_x_discrete(name = "Value") +
     scale_y_continuous(name = "Count") +

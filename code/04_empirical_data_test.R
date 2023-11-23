@@ -425,14 +425,18 @@ if (control_parameters$per.gene.analysis == TRUE){
   # List all files in the empirical data directory
   data_files <- paste0(empirical_data_directory, list.files(empirical_data_directory, recursive = TRUE))
   data_files <- grep("genes", data_files, value = T)
+  # Split Whelan 2017 alignment into separate genes
+  wea17_alignment_file <- grep("alignment", grep("filtered", grep("fa", grep("WEA17.", data_files, value = T), value = T), value = T, invert = TRUE), value = T, invert = TRUE)
+  wea17_partition_file <- grep("filtered", grep("partitions", grep("Whelan2017", data_files, value = T), value = T), value = T, invert = T)
+  wea17_gene_directory <- paste0(dirname(wea17_alignment_file), "/")
+  split.partitions(alignment_file = wea17_alignment_file, partition_file = wea17_partition_file, gene_output_directory = wea17_gene_directory)
+  # Split Whelan 2017 filtered alignment into separate genes
+  wea17f_alignment_file <- grep("fa", grep("WEA17F", data_files, value = T), value = T)
+  wea17f_partition_file <- grep("partitions", grep("Whelan2017_filtered", data_files, value = T), value = T)
+  wea17f_gene_directory <- paste0(dirname(wea17f_alignment_file), "/")
+  split.partitions(alignment_file = wea17f_alignment_file, partition_file = wea17f_partition_file, gene_output_directory = wea17f_gene_directory)
   
-  alignment_file <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_tree_estimation/WEA17_filtered_genes/WEA17F.fasta"
-  partition_file <-  "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_tree_estimation/WEA17_filtered_genes/Whelan2017_filtered_partitions_formatted.nex"   
-  gene_output_directory <- dirname(alignment_file)
-  
-    
-  ## Extract list of alignments
-  all_files <- list.files(replicate_alignment_directory, recursive = T)
+  ## For each gene: estimate tree, then apply metrics: tree proportion, sCF, and delta plots
   
   ## For WEA17
   # Extract the list of alignments using the id (WEA17F)

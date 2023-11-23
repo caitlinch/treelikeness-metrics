@@ -63,7 +63,7 @@ bootstrap.wrapper <- function(bs_rep_al_paths, output_directory,
 #### Apply all treelikeness metrics ####
 treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtree2_path, 
                                            iqtree_model = "MFP", num_iqtree2_threads = "AUTO",
-                                           sequence_format = "AA", redo = FALSE){
+                                           sequence_format = "AA", redo = FALSE, best.tests.only = TRUE){
   #### Function to take one simulated alignment, apply all treelikeness metrics and return results in a dataframe
   
   ### Print alignment path
@@ -97,17 +97,6 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
   } else if (file.exists(df_name) == FALSE | redo == TRUE){
     ### Apply all treelikeness test statistics to generate the results csv file
     
-    ## Apply Likelihood mapping (Strimmer and von Haeseler 1997)
-    # Check iqtree_model - if NA, run ModelFinder with "MFP"
-    if ( is.na(iqtree_model) == TRUE ){ 
-      lm_model <- "MFP"
-    } else {
-      lm_model <- iqtree_model
-    }
-    # Apply likelihood mapping method
-    lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = lm_model, 
-                                       number_of_taxa = number_of_taxa, sequence_format = sequence_format)
-    
     ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
     # Specify model for calculating site concordance factors
     if ( ( is.na(iqtree_model) == TRUE ) | (iqtree_model == "MFP") ){
@@ -124,33 +113,58 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = 100, 
                         substitution_model = scfl_model)
     
-    ## Apply Network Treelikeness Test (Huson and Bryant 2006)
-    ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
-    
     ## Apply Delta plots (Holland et. al. 2002)
     mldist_file <- paste0(alignment_path, ".mldist")
     mean_delta_plot_value <- delta.plot.empirical( dist_matrix = mldist.matrix(mldist_file) )
-    
-    ## Apply Cunningham test (Cunningham 1975)
-    # Find the .mldist and .treefile output paths from IQ-Tree
-    mldist_file <- paste0(alignment_path, ".mldist")
-    tree_file <- paste0(alignment_path, ".treefile")
-    # Calculate Cunningham metric
-    cunningham_metric <- cunningham.test.empirical(mldist_file, tree_file)
+
     
     ## Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = NA, 
                                             remove_trivial_splits = TRUE, check_iqtree_log_for_identical_sequences = FALSE, 
                                             run_splitstree = TRUE, splitstree_path = splitstree_path)
     
-    ## Assemble results into a dataframe and save
-    results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
-                     ntlt, mean_delta_plot_value, cunningham_metric, tree_proportion, alignment_path)
-    results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
-    names_vec <- c("unique_id", "LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets",
-                   "LM_total_num_quartets", "LM_proportion_resolved_quartets", "sCF_mean", "sCF_median", "sCF_min", "sCF_max",
-                   "NetworkTreelikenessTest", "mean_delta_plot_value", "Cunningham_test", "tree_proportion", "input_alignment_path")
-    names(results_df) <- names_vec
+    ## If desired, calculate the tests that didn't work well in simulation study
+    if (best.tests.only == FALSE){
+      ## Apply Likelihood mapping (Strimmer and von Haeseler 1997)
+      # Check iqtree_model - if NA, run ModelFinder with "MFP"
+      if ( is.na(iqtree_model) == TRUE ){ 
+        lm_model <- "MFP"
+      } else {
+        lm_model <- iqtree_model
+      }
+      # Apply likelihood mapping method
+      lm <- likelihood.mapping.empirical(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, substitution_model = lm_model, 
+                                         number_of_taxa = number_of_taxa, sequence_format = sequence_format)
+      
+      ## Apply Network Treelikeness Test (Huson and Bryant 2006)
+      ntlt <- network.treelikeness.test(nexus_alignment_path, splitstree_path, sequence_format = sequence_format, nexus.file.format = TRUE)
+      
+      ## Apply Cunningham test (Cunningham 1975)
+      # Find the .mldist and .treefile output paths from IQ-Tree
+      mldist_file <- paste0(alignment_path, ".mldist")
+      tree_file <- paste0(alignment_path, ".treefile")
+      # Calculate Cunningham metric
+      cunningham_metric <- cunningham.test.empirical(mldist_file, tree_file)
+      
+      ## Assemble results into a dataframe and save
+      results_vec <- c(unique_id, lm, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
+                       ntlt, mean_delta_plot_value, cunningham_metric, tree_proportion, alignment_path)
+      results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+      names_vec <- c("unique_id", "LM_num_resolved_quartets", "LM_num_partly_resolved_quartets", "LM_num_unresolved_quartets",
+                     "LM_total_num_quartets", "LM_proportion_resolved_quartets", "sCF_mean", "sCF_median", "sCF_min", "sCF_max",
+                     "NetworkTreelikenessTest", "mean_delta_plot_value", "Cunningham_test", "tree_proportion", "input_alignment_path")
+      names(results_df) <- names_vec
+    } else {
+      ## Assemble results into a dataframe and save
+      results_vec <- c(unique_id, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
+                      mean_delta_plot_value, tree_proportion, alignment_path)
+      results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
+      names_vec <- c("unique_id", "sCF_mean", "sCF_median", "sCF_min", "sCF_max", 
+                     "mean_delta_plot_value", "tree_proportion", "input_alignment_path")
+      names(results_df) <- names_vec
+    }
+
+    ## Save the csv 
     write.csv(results_df, file = df_name, row.names = FALSE)
   } # end run treelikeness tests
   

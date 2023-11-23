@@ -6,6 +6,7 @@
 
 #### Required packages ####
 library(ape)
+library(seqinr)
 
 
 
@@ -417,5 +418,69 @@ calculate.all.p_values <- function(output_df, test_statistic_names){
   # Return the dataframe of p-values
   return(p_value_df)
 }
+
+
+### Partition and file management
+split.partitions <- function(alignment_file, partition_file, gene_output_directory){
+  ## Open the dataset, split into individual genes and save each gene
+  
+  # Open partition file
+  lines <- readLines(partition_file)
+  # Extract all lines with a charset
+  charset_lines <- grep("charset", lines, ignore.case = TRUE, value = TRUE)
+  # Split the charset lines at the "="
+  gene_name_chunks <- unlist(lapply(strsplit(charset_lines, "="), function(x){x[1]}))
+  gene_lines <- unlist(lapply(strsplit(charset_lines, "="), function(x){x[2]}))
+  # Split the genes into chunks by breaking at the commas ","
+  gene_chunks <- unlist(strsplit(gene_lines, ","))
+  # Format the gene chunks nicely
+  gene_chunks_nospace <- gsub(" ", "", gene_chunks)
+  gene_chunks_noend <- gsub(";", "", gene_chunks_nospace)
+  # Get start and end of each gene
+  gene_start <- as.numeric(unlist(lapply(strsplit(gene_chunks_noend, "-"), function(x){x[1]})))
+  gene_end <- as.numeric(unlist(lapply(strsplit(gene_chunks_noend, "-"), function(x){x[2]})))
+  # Format the names
+  gene_names <- unlist(lapply(strsplit(gene_name_chunks, " "), function(x){x[[2]]}))
+  # Make a table of gene name, start, and end position
+  gene_table <- data.frame(name = gene_names, start = gene_start, end = gene_end)
+  # Open alignment
+  al <- read.FASTA(alignment_file, type = "AA")
+  al <- as.matrix(al)
+  alignment_taxa <- attr(al, "dimnames")[[1]]
+  # Iterate through each row of the table and save the genes
+  for (i in 1:nrow(gene_table)){
+    # Extract row using the iterator
+    gene_row <- gene_table[i,]
+    # Extract that section of the alignment
+    gene_al <- al[, gene_row$start:gene_row$end]
+    # Remove any empty taxa
+    taxa_to_remove <- c()
+    chars_to_check <- c("-", "?")
+    for (j in 1:length(alignment_taxa)){
+      unique_chars <- unique(as.character(as.list(gene_al[j, ]))[[1]])
+      # If the unique_chars is only either or both these characters: "-", "?"
+      #     then don't add keep this tip in the output alignment
+      #     No sites for tree estimation!
+      if (length(unique_chars) == 1){
+        if (unique_chars == "?" | unique_chars == "-"){
+          taxa_to_remove <- c(taxa_to_remove, j)
+        }
+      } else if (length(unique_chars) == 2){
+        if (setequal(unique_chars, c("?", "-")) == TRUE){
+          taxa_to_remove <- c(taxa_to_remove, j)
+        }
+      }
+    }
+    # Identify taxa to keep
+    taxa_to_keep <- setdiff(1:length(alignment_taxa), taxa_to_remove)
+    # Remove the tips with only gaps/unknown characters
+    gene_al_complete <- gene_al[taxa_to_keep,]
+    # Save gene
+    gene_al_complete <- as.list(gene_al_complete)
+    gene_file_path <- paste0(gene_output_directory, "/", gene_row$name, ".fa")
+    write.fasta(sequences = gene_al_complete, names = names(gene_al_complete), file.out = gene_file_path)
+  }
+}
+
 
 

@@ -89,13 +89,13 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   
   ## Run treelikeness tests for all replicates
   tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
-                  splitstree_path = splitstree_path, 
-                  iqtree2_path = iqtree2_path, 
-                  iqtree_model = i_best_model,
-                  num_iqtree2_threads = num_iqtree2_threads, 
-                  sequence_format = sequence_format, 
-                  redo = TRUE,
-                  mc.cores = number_parallel_cores)
+                    splitstree_path = splitstree_path, 
+                    iqtree2_path = iqtree2_path, 
+                    iqtree_model = i_best_model,
+                    num_iqtree2_threads = num_iqtree2_threads, 
+                    sequence_format = sequence_format, 
+                    redo = TRUE,
+                    mc.cores = number_parallel_cores)
   
   ## Create a nice dataframe of all the output values
   tl_df <- as.data.frame(do.call(rbind, tl_op))
@@ -104,6 +104,21 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   # Save csv list
   csv_df_file <- paste0(replicate_folder, "collated_results_", i_id, ".csv")
   write.csv(csv_df, file = csv_df_file, row.names = FALSE)
+  
+  ## Calculate p-values
+  treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)])
+  scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)])
+  scdf_med_p_value <- calculate.p_value(value_vector = tl_df$sCF_median, alignment_value = tl_df$sCF_median[grep("gene", tl_df$unique_id)])
+  delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)])
+  
+  ## Create p-value dataframe
+  p_value_df <- data.frame("dataset" = i_row$dataset, "gene" = i_row$gene,
+                           "tree_proportion" = treelikeness_p_value[["alignment_value"]], "tree_proportion_p_value" = treelikeness_p_value[["p_value_ecdf"]], 
+                           "sCF_mean" = scdf_mean_p_value[["alignment_value"]], "sCF_mean_p_value" = scdf_mean_p_value[["p_value_ecdf"]], 
+                           "sCF_median" = scdf_med_p_value[["alignment_value"]], "sCF_median_p_value"  = scdf_med_p_value[["p_value_ecdf"]],
+                           "delta_plot_mean" = delta_plot_p_value[["alignment_value"]], "delta_plot_mean_p_value" =  delta_plot_p_value[["p_value_ecdf"]])
+  p_value_path <- paste0(replicate_folder, i_id, ".p_values.csv")
+  write.csv(p_value_df, file = p_value_path, row.names = F)
   
   ## Return output csv
   return(csv_df)

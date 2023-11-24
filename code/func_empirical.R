@@ -88,26 +88,21 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
                         paste0(i_directory, grep("param_bs", i_files, value = T)))
   
   ## Run treelikeness tests for all replicates
-  tl_op <- lapply(i_all_alignments,  treelikeness.metrics.empirical,
+  tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
                   splitstree_path = splitstree_path, 
                   iqtree2_path = iqtree2_path, 
                   iqtree_model = i_best_model,
                   num_iqtree2_threads = num_iqtree2_threads, 
                   sequence_format = sequence_format, 
-                  redo = redo,
+                  redo = TRUE,
                   mc.cores = number_parallel_cores)
   
   ## Create a nice dataframe of all the output values
-  # Identify csv files
-  all_files <- list.files(replicate_folder, recursive = TRUE)
-  csv_files <- paste0(replicate_folder, grep("_treelikeness_results.csv", all_files, value = T))
-  # Read in csv files
-  csv_list <- lapply(csv_files, read.csv, stringsAsFactors = FALSE)
-  csv_df <- as.data.frame(do.call(rbind, csv_list))
+  tl_df <- as.data.frame(do.call(rbind, tl_op))
+  tl_df$dataset <- i_row$dataset
+  tl_df$gene <- i_row$gene
   # Save csv list
-  name_split <- strsplit(basename(alignment_path), "\\.")[[1]]
-  op_id <- paste(name_split[1:(length(name_split) - 1)], collapse = ".")
-  csv_df_file <- paste0(replicate_folder, "collated_results_", op_id, ".csv")
+  csv_df_file <- paste0(replicate_folder, "collated_results_", i_id, ".csv")
   write.csv(csv_df, file = csv_df_file, row.names = FALSE)
   
   ## Return output csv
@@ -216,7 +211,7 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     }
     # Calculate the site concordance factors
     scfl_output <- scfl(alignment_path, iqtree2_path, iqtree2_number_threads = num_iqtree2_threads, number_scf_quartets = 100, 
-                        substitution_model = scfl_model)
+                        substitution_model = scfl_model, include.prefix = TRUE, prefix = unique_id, force.redo = TRUE)
     
     ## Apply Delta plots (Holland et. al. 2002)
     mldist_file <- paste0(alignment_path, ".mldist")

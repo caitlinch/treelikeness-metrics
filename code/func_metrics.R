@@ -534,20 +534,20 @@ scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", 
   } else {
     redo_call <- ""
   }
-  # Create prefix argument
+  # Create output path argument
   if ( (include.prefix == TRUE) & (is.na(prefix) == FALSE) ){
-    scf_prefix <- prefix
+    scf_path <- paste0(dirname(alignment_path), "/", prefix)
   } else {
-    scf_prefix <- "scfl"
+    scf_path <- paste0(dirname(alignment_path), "/scfl")
   }
   # for sCFl: iqtree -t concat.treefile -s ALN_FILE --scfl 100 --prefix concord -nt 10
   treefile <- paste0(alignment_path, ".treefile")
   call <- paste0(iqtree2_path, " -te ", treefile, " -s ", alignment_path, " -m ", substitution_model, " --scfl ", number_scf_quartets,
-                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre ", dirname(alignment_path), "/", scf_prefix)
+                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre ", scf_path)
   console_op <- system(call, intern = TRUE)
   
   ## Retrieve the site concordance factors from the output table
-  tablefile <- paste0(dirname(alignment_path), "/scfl.cf.stat")
+  tablefile <- paste0(scf_path, ".cf.stat")
   scf_table <- read.table(tablefile, header = TRUE, sep = "\t")
   scf_branch_ids <- scf_table$ID
   scf_vec <- scf_table$sCF

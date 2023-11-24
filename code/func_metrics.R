@@ -516,7 +516,8 @@ scf <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", n
 }
 
 
-scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100, substitution_model = "MFP", force.redo = FALSE){
+scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", number_scf_quartets = 100, substitution_model = "MFP", 
+                 include.prefix = TRUE, prefix = NA, force.redo = FALSE){
   # Function to calculate the site concordance factors with maximum likelihood, given a maximum likelihood tree estimated in IQ-Tree
   
   ## Check that the treefile already exists: if it doesn't, run IQ-Tree and create it
@@ -527,15 +528,22 @@ scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", 
   }
   
   # Call IQ-Tree2.2.2 and calculate the scfl (site concordance factors with likelihood)
+  # Create redo argument
   if (force.redo == TRUE){
     redo_call <- "-redo "
   } else {
     redo_call <- ""
   }
+  # Create prefix argument
+  if ( (include.prefix == TRUE) & (is.na(prefix) == FALSE) ){
+    scf_prefix <- prefix
+  } else {
+    scf_prefix <- "scfl"
+  }
   # for sCFl: iqtree -t concat.treefile -s ALN_FILE --scfl 100 --prefix concord -nt 10
   treefile <- paste0(alignment_path, ".treefile")
   call <- paste0(iqtree2_path, " -te ", treefile, " -s ", alignment_path, " -m ", substitution_model, " --scfl ", number_scf_quartets,
-                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre ", dirname(alignment_path), "/scfl")
+                 " -nt ", iqtree2_number_threads, " ", redo_call, "-safe -pre ", dirname(alignment_path), "/", scf_prefix)
   console_op <- system(call, intern = TRUE)
   
   ## Retrieve the site concordance factors from the output table

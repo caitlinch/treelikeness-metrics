@@ -443,74 +443,13 @@ if (control_parameters$per.gene.analysis == TRUE){
   gene_df$ID <- paste0(gene_df$dataset, ".", gene_df$gene)
   
   ## For each gene: estimate tree, then apply metrics: tree proportion, sCF, and delta plots
+  # Prepare output directory
   gene_output_directory <- paste0(output_directory, "genes/")
   if (dir.exists(gene_output_directory) == FALSE){dir.create(gene_output_directory)}
-  tl_output_directory <- gene_output_directory
-  i = 1
-  i_row <- gene_df[i, ]
-  num_iqtree2_threads <- "3"
-  sequence_format <- "AA"
-  redo = FALSE
-  best.tests.only = TRUE
-  number_parallel_cores = 1
-  
-  
-  ## For WEA17
-  # Extract the list of alignments using the id (WEA17F)
-  wea17_files <- paste0(replicate_alignment_directory, grep("WEA17_", all_files, value = T))
-  wea17_al <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T, invert = T)]
-  wea17_replicates <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T)]
-  # Copy original alignment and prepare for treelikeness metric runs
-  wea17_dir <- paste0(output_directory, "WEA17/")
-  if (dir.exists(wea17_dir) == FALSE){ dir.create(wea17_dir) }
-  wea17_copy <- paste0(wea17_dir, basename(wea17_al))
-  file.copy(from = wea17_al, to = wea17_copy)
-  # Calculate the tree proportion for the original alignments
-  treelikeness.metrics.empirical(wea17_copy,
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+R8{0.1639,0.0315,0.1812,0.1846,0.1454,0.4618,0.1171,0.7116,0.1742,1.1628,0.1403,2.0884,0.0676,3.6840,0.0103,6.4538}'", 
-                                 num_iqtree2_threads = num_cores, 
-                                 sequence_format = "AA", 
-                                 redo = FALSE)
-  # Apply the wrapper function to calculate treelikeness of bootstrap replicates
-  wea17_df <- bootstrap.wrapper(wea17_replicates, 
-                                output_directory = output_directory, 
-                                splitstree_path = splitstree_path, 
-                                iqtree2_path = iqtree2_path, 
-                                iqtree_model = "'Q.insect+R8{0.1639,0.0315,0.1812,0.1846,0.1454,0.4618,0.1171,0.7116,0.1742,1.1628,0.1403,2.0884,0.0676,3.6840,0.0103,6.4538}'", 
-                                num_iqtree2_threads = "10", 
-                                sequence_format = "AA", 
-                                redo = FALSE, 
-                                number_parallel_cores = mclapply_num_cores)
-  
-  ## For WEA17_filtered
-  # Extract the list of alignments using the id (WEA17F)
-  wea17f_files <- paste0(replicate_alignment_directory, grep("WEA17F_", all_files, value = T))
-  wea17f_al <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T, invert = T)]
-  wea17f_replicates <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T)]
-  # Copy original alignment and prepare for treelikeness metric runs
-  wea17f_dir <- paste0(output_directory, "WEA17F/")
-  if (dir.exists(wea17f_dir) == FALSE){ dir.create(wea17f_dir) }
-  wea17f_copy <- paste0(wea17f_dir, basename(wea17f_al))
-  file.copy(from = wea17f_al, to = wea17f_copy)
-  # Calculate the tree proportion for the original alignments
-  treelikeness.metrics.empirical(wea17f_copy,
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+I{0.0659}+R6{0.2004,0.1133,0.1734,0.3827,0.1439,0.6654,0.2108,1.1677,0.1549,2.2361,0.0508,4.3870}'", 
-                                 num_iqtree2_threads = num_cores, 
-                                 sequence_format = "AA", 
-                                 redo = FALSE)
-  
-  # Apply the wrapper function
-  wea17f_df <- bootstrap.wrapper(wea17f_replicates, 
-                                 output_directory = output_directory, 
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+I{0.0659}+R6{0.2004,0.1133,0.1734,0.3827,0.1439,0.6654,0.2108,1.1677,0.1549,2.2361,0.0508,4.3870}'", 
-                                 num_iqtree2_threads = "10", 
-                                 sequence_format = "AA", 
-                                 redo = FALSE, 
-                                 number_parallel_cores = mclapply_num_cores)
+  # Apply metrics
+  gene_metrics <- lapply(1:nrow(gene_df), treelikeness.metrics.with.parametric.bootstrap, 
+                         df = gene_df, tl_output_directory = gene_output_directory, 
+                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
+                         num_iqtree2_threads = "3", sequence_format = "AA", 
+                         redo = FALSE, number_parallel_cores = 1)
 }

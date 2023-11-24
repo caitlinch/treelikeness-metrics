@@ -61,8 +61,7 @@ bootstrap.wrapper <- function(bs_rep_al_paths, output_directory,
 treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_directory, 
                                                            splitstree_path, iqtree2_path, 
                                                            num_iqtree2_threads = "AUTO", sequence_format = "AA", 
-                                                           redo = FALSE, best.tests.only = TRUE, 
-                                                           number_parallel_cores = 1){
+                                                           redo = FALSE, number_parallel_cores = 1){
   ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
   
   ## Extract row of interest
@@ -71,57 +70,66 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   i_directory <- paste0(tl_output_directory, i_row$ID, "/")
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
   
-  ## Copy the alignment into the tl_output_directory (treelikeness output directory)
-  i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
-  file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
+  csv_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
+  p_value_path <- paste0(i_directory, i_id, ".p_values.csv")
   
-  ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
-  #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
-  #         estimated from the original alignment, and copy the same gap positions from the original alignment
-  alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " --alisim ", i_directory, "param_bs --num-alignments 100 --out-format fasta")
-  system(alisim_command)
-  # Extract best model of sequence evolution from the alisim output
-  i_best_model <- extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree"))
-  # Collect all alignments
-  i_files <- list.files(i_directory)
-  i_all_alignments <- c(i_alignment_path,
-                        paste0(i_directory, grep("param_bs", i_files, value = T)))
+  if (file.exists(csv_df_file) == FALSE){
+    ## Copy the alignment into the tl_output_directory (treelikeness output directory)
+    i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
+    file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
+    
+    ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
+    #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
+    #         estimated from the original alignment, and copy the same gap positions from the original alignment
+    alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " --alisim ", i_directory, "param_bs --num-alignments 100 --out-format fasta")
+    system(alisim_command)
+    # Extract best model of sequence evolution from the alisim output
+    i_best_model <- extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree"))
+    # Collect all alignments
+    i_files <- list.files(i_directory)
+    i_all_alignments <- c(i_alignment_path,
+                          paste0(i_directory, grep("param_bs", i_files, value = T)))
+    
+    ## Run treelikeness tests for all replicates
+    tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
+                      splitstree_path = splitstree_path, 
+                      iqtree2_path = iqtree2_path, 
+                      iqtree_model = i_best_model,
+                      num_iqtree2_threads = num_iqtree2_threads, 
+                      sequence_format = sequence_format, 
+                      redo = redo,
+                      mc.cores = number_parallel_cores)
+    
+    ## Create a nice dataframe of all the output values
+    tl_df <- as.data.frame(do.call(rbind, tl_op))
+    tl_df$dataset <- i_row$dataset
+    tl_df$gene <- i_row$gene
+    # Save csv list
+    write.csv(csv_df, file = csv_df_file, row.names = FALSE)
+  } else {
+    csv_df <- read.csv(csv_df_file)
+  }
   
-  ## Run treelikeness tests for all replicates
-  tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
-                    splitstree_path = splitstree_path, 
-                    iqtree2_path = iqtree2_path, 
-                    iqtree_model = i_best_model,
-                    num_iqtree2_threads = num_iqtree2_threads, 
-                    sequence_format = sequence_format, 
-                    redo = TRUE,
-                    mc.cores = number_parallel_cores)
-  
-  ## Create a nice dataframe of all the output values
-  tl_df <- as.data.frame(do.call(rbind, tl_op))
-  tl_df$dataset <- i_row$dataset
-  tl_df$gene <- i_row$gene
-  # Save csv list
-  csv_df_file <- paste0(replicate_folder, "collated_results_", i_id, ".csv")
-  write.csv(csv_df, file = csv_df_file, row.names = FALSE)
-  
-  ## Calculate p-values
-  treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)])
-  scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)])
-  scdf_med_p_value <- calculate.p_value(value_vector = tl_df$sCF_median, alignment_value = tl_df$sCF_median[grep("gene", tl_df$unique_id)])
-  delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)])
-  
-  ## Create p-value dataframe
-  p_value_df <- data.frame("dataset" = i_row$dataset, "gene" = i_row$gene,
-                           "tree_proportion" = treelikeness_p_value[["alignment_value"]], "tree_proportion_p_value" = treelikeness_p_value[["p_value_ecdf"]], 
-                           "sCF_mean" = scdf_mean_p_value[["alignment_value"]], "sCF_mean_p_value" = scdf_mean_p_value[["p_value_ecdf"]], 
-                           "sCF_median" = scdf_med_p_value[["alignment_value"]], "sCF_median_p_value"  = scdf_med_p_value[["p_value_ecdf"]],
-                           "delta_plot_mean" = delta_plot_p_value[["alignment_value"]], "delta_plot_mean_p_value" =  delta_plot_p_value[["p_value_ecdf"]])
-  p_value_path <- paste0(replicate_folder, i_id, ".p_values.csv")
-  write.csv(p_value_df, file = p_value_path, row.names = F)
+  if (file.exists(p_value_path) == FALSE){
+    ## Calculate p-values
+    treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)])
+    scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)])
+    scdf_med_p_value <- calculate.p_value(value_vector = tl_df$sCF_median, alignment_value = tl_df$sCF_median[grep("gene", tl_df$unique_id)])
+    delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)])
+    
+    ## Create p-value dataframe
+    p_value_df <- data.frame("dataset" = i_row$dataset, "gene" = i_row$gene,
+                             "tree_proportion" = treelikeness_p_value[["alignment_value"]], "tree_proportion_p_value" = treelikeness_p_value[["p_value_ecdf"]], 
+                             "sCF_mean" = scdf_mean_p_value[["alignment_value"]], "sCF_mean_p_value" = scdf_mean_p_value[["p_value_ecdf"]], 
+                             "sCF_median" = scdf_med_p_value[["alignment_value"]], "sCF_median_p_value"  = scdf_med_p_value[["p_value_ecdf"]],
+                             "delta_plot_mean" = delta_plot_p_value[["alignment_value"]], "delta_plot_mean_p_value" =  delta_plot_p_value[["p_value_ecdf"]])
+    write.csv(p_value_df, file = p_value_path, row.names = F)
+  } else {
+    p_value_df <- read.csv(p_value_path)
+  }
   
   ## Return output csv
-  return(csv_df)
+  return(p_value_df)
 }
 
 extract.best.model <- function(iqtree_file){

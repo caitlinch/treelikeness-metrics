@@ -65,7 +65,7 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
   
   ## Extract row of interest
-  i_row <- gene_df[i, ]
+  i_row <- df[i, ]
   i_id <- paste0(i_row$ID, ".alignment")
   i_directory <- paste0(tl_output_directory, i_row$ID, "/")
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}

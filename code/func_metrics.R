@@ -539,16 +539,20 @@ scfl <- function(alignment_path, iqtree2_path, iqtree2_number_threads = "AUTO", 
   system(call)
   
   ## Retrieve the site concordance factors from the output table
-  treefile <- paste0(dirname(alignment_path), "/scfl.cf.tree")
-  t <- read.tree(treefile)
-  scfl_vec <- as.numeric(t$node.label[which(t$node.label != "")])
-  scfl_branch_ids <- c(t$edge[,2])[which(t$edge[,2]>Ntip(t))] 
-  scfl_results <- list(mean_scf = round(mean(scfl_vec), digits = 2), 
-                       median_scf = round(median(scfl_vec), digits = 2), 
-                       all_scfs = scfl_vec, 
-                       branch_ids = scfl_branch_ids )
+  tablefile <- paste0(dirname(alignment_path), "/scfl.cf.stat")
+  scf_table <- read.table(tablefile, header = TRUE, sep = "\t")
+  scf_branch_ids <- scf_table$ID
+  scf_vec <- scf_table$sCF
+  scf_results <- list(mean_scf = round(mean(scf_vec), digits = 2), 
+                      median_scf = round(median(scf_vec), digits = 2), 
+                      branch_ids = scf_branch_ids,
+                      all_scfs = scf_vec,
+                      all_sdf1 = scf_table$sDF1,
+                      all_sdf2 = scf_table$sDF2,
+                      all_sN = scf_table$sN)
+  
   ## Return the site concordance factor results
-  return(scfl_results)
+  return(scf_results)
 }
 
 

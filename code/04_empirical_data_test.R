@@ -447,7 +447,7 @@ if (control_parameters$per.gene.analysis == TRUE){
   gene_output_directory <- paste0(output_directory, "genes/")
   if (dir.exists(gene_output_directory) == FALSE){dir.create(gene_output_directory)}
   # Apply metrics
-  gene_metrics <- lapply(1:nrow(gene_df), treelikeness.metrics.with.parametric.bootstrap, 
+  gene_metrics <- lapply(2:nrow(gene_df), treelikeness.metrics.with.parametric.bootstrap, 
                          df = gene_df, tl_output_directory = gene_output_directory, 
                          splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
                          num_iqtree2_threads = "3", sequence_format = "AA", 

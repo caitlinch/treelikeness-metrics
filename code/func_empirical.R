@@ -65,19 +65,25 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
   
   ## Extract row of interest
+  print(i)
   i_row <- df[i, ]
   i_id <- paste0(i_row$ID, ".alignment")
   i_directory <- paste0(tl_output_directory, i_row$ID, "/")
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
   
+  print("file paths")
   csv_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
+  print(csv_df_file)
   p_value_path <- paste0(i_directory, i_id, ".p_values.csv")
+  print(p_value_path)
   
   if (file.exists(csv_df_file) == FALSE){
+    print("copy alignment")
     ## Copy the alignment into the tl_output_directory (treelikeness output directory)
     i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
     file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
     
+    print("alisim")
     ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
     #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
     #         estimated from the original alignment, and copy the same gap positions from the original alignment
@@ -90,6 +96,7 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
     i_all_alignments <- c(i_alignment_path,
                           paste0(i_directory, grep("param_bs", i_files, value = T)))
     
+    print("metrics")
     ## Run treelikeness tests for all replicates
     tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
                       splitstree_path = splitstree_path, 
@@ -111,6 +118,7 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   }
   
   if (file.exists(p_value_path) == FALSE){
+    print("p-value")
     ## Calculate p-values
     treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)])
     scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)])

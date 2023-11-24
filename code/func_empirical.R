@@ -58,6 +58,111 @@ bootstrap.wrapper <- function(bs_rep_al_paths, output_directory,
 }
 
 
+treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_directory, 
+                                                           splitstree_path, iqtree2_path, 
+                                                           num_iqtree2_threads = "AUTO", sequence_format = "AA", 
+                                                           redo = FALSE, best.tests.only = TRUE, 
+                                                           number_parallel_cores = 1){
+  ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
+  
+  ## Extract row of interest
+  i_row <- gene_df[i, ]
+  i_id <- paste0(i_row$ID, ".alignment")
+  i_directory <- paste0(tl_output_directory, i_row$ID, "/")
+  if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
+  
+  ## Copy the alignment into the tl_output_directory (treelikeness output directory)
+  i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
+  file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
+  
+  ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
+  #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
+  #         estimated from the original alignment, and copy the same gap positions from the original alignment
+  alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " --alisim ", i_directory, "param_bs --num-alignments 100 --out-format fasta")
+  system(alisim_command)
+  # Extract best model of sequence evolution from the alisim output
+  i_best_model <- extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree"))
+  # Collect all alignments
+  i_files <- list.files(i_directory)
+  i_all_alignments <- c(i_alignment_path,
+                        paste0(i_directory, grep("param_bs", i_files, value = T)))
+  
+  ## Run treelikeness tests for all replicates
+  lapply(i_all_alignments,  treelikeness.metrics.empirical,
+         splitstree_path = splitstree_path, 
+         iqtree2_path = iqtree2_path, 
+         iqtree_model = i_best_model,
+         num_iqtree2_threads = num_iqtree2_threads, 
+         sequence_format = sequence_format, 
+         redo = redo,
+         mc.cores = number_parallel_cores)
+  
+  ## Create a nice dataframe of all the output values
+  # Identify csv files
+  all_files <- list.files(replicate_folder, recursive = TRUE)
+  csv_files <- paste0(replicate_folder, grep("_treelikeness_results.csv", all_files, value = T))
+  # Read in csv files
+  csv_list <- lapply(csv_files, read.csv, stringsAsFactors = FALSE)
+  csv_df <- as.data.frame(do.call(rbind, csv_list))
+  # Save csv list
+  name_split <- strsplit(basename(alignment_path), "\\.")[[1]]
+  op_id <- paste(name_split[1:(length(name_split) - 1)], collapse = ".")
+  csv_df_file <- paste0(replicate_folder, "collated_results_", op_id, ".csv")
+  write.csv(csv_df, file = csv_df_file, row.names = FALSE)
+  
+  ## Return output csv
+  return(csv_df)
+}
+
+extract.best.model <- function(iqtree_file){
+  # Function that will extract the best model of sequence evolution or the model of sequence evolution used,
+  #   given a .iqtree file
+    if (file.exists(iqtree_file) == TRUE){
+      # If the iqtree_file does exist:
+      ## Open the .iqtree file:
+      iq_lines <- readLines(iqtree_file)
+      ## Check for a ModelFinder section:
+      # Determine whether there is a ModelFinder section
+      mf_ind <- grep("ModelFinder", iq_lines)
+      # Determine whether there is a line detailing the best model
+      bm_ind <- grep("Best-fit model according to", iq_lines)
+      ## Check for a Substitution Process section:
+      # Determine the starting line of this section
+      sp_ind <- grep("SUBSTITUTION PROCESS", iq_lines)
+      # Determine the line detailing the model used
+      mos_ind <- grep("Model of substitution", iq_lines)
+      ## Extract the best fit model from the .iqtree file:
+      if ((identical(mf_ind, integer(0)) == FALSE) & (identical(bm_ind, integer(0)) == FALSE)){
+        # If ModelFinder was run, extract the best model from the ModelFinder section of the .iqtree file
+        # Extract the line containing the best fit model
+        m_line <- iq_lines[bm_ind]
+      } else if ((identical(sp_ind, integer(0)) == FALSE) & (identical(mos_ind, integer(0)) == FALSE)) {
+        # If there is no ModelFinder section, extract the model used from the substitution process section
+        m_line <- iq_lines[mos_ind]
+      } else {
+        m_line <- "NA:NA"
+      }
+      ## Format the model nicely for output: 
+      # Split the line at the colon into two parts
+      m_line_split <- strsplit(m_line, ":")[[1]]
+      # If the best model is a single model, the length of m_line_split will be 2
+      #     One section for the explanatory text and one for the model
+      # If the best model is a partition model, it will have more than two sections when split by colons
+      # Extract the second part of the line onwards (contains the best fit model)
+      best_model <- m_line_split[2:length(m_line_split)]
+      # If best_model is longer than 1, paste it together again using colons
+      if (length(best_model) >1){
+        best_model <- paste(best_model, collapse = ":")
+      }
+      # Remove any white space from the best model
+      best_model <- gsub(" ", "", best_model)
+    } else if (file.exists(iqtree_file) == FALSE){
+      # If the iqtree_file doesn't exist, return NA
+      best_model = NA
+    } # end if (file.exists(iqtree_file) == TRUE){
+  # Return the best model from the iqtree_file (if the file exists)
+  return(best_model)
+}
 
 
 #### Apply all treelikeness metrics ####
@@ -116,7 +221,6 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     ## Apply Delta plots (Holland et. al. 2002)
     mldist_file <- paste0(alignment_path, ".mldist")
     mean_delta_plot_value <- delta.plot.empirical( dist_matrix = mldist.matrix(mldist_file) )
-
     
     ## Apply tree proportion (new test)
     tree_proportion <- tree.proportion.long(nexus_alignment_path, sequence_format = sequence_format, model = NA, 
@@ -156,18 +260,23 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
       names(results_df) <- names_vec
     } else {
       ## Assemble results into a dataframe and save
-      results_vec <- c(unique_id, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs), 
-                      mean_delta_plot_value, tree_proportion, alignment_path)
+      results_vec <- c(unique_id, scfl_output$mean_scf, scfl_output$median_scf, min(scfl_output$all_scfs), max(scfl_output$all_scfs),
+                       mean(scfl_output$all_sdf1), median(scfl_output$all_sdf1), min(scfl_output$all_sdf1), max(scfl_output$all_sdf1),
+                       mean(scfl_output$all_sdf2), median(scfl_output$all_sdf2), min(scfl_output$all_sdf2), max(scfl_output$all_sdf2),
+                       mean_delta_plot_value, tree_proportion, alignment_path)
       results_df <- as.data.frame(matrix(data = results_vec, nrow = 1, ncol = length(results_vec), byrow = TRUE))
       names_vec <- c("unique_id", "sCF_mean", "sCF_median", "sCF_min", "sCF_max", 
+                     "sDF1_mean", "sDF1_median", "sDF1_min", "sDF1_max",
+                     "sDF2_mean", "sDF2_median", "sDF2_min", "sDF2_max",
                      "mean_delta_plot_value", "tree_proportion", "input_alignment_path")
       names(results_df) <- names_vec
     }
-
+    
     ## Save the csv 
     write.csv(results_df, file = df_name, row.names = FALSE)
   } # end run treelikeness tests
-  
+  # Return the dataframe
+  return(results_df)
 } # end function
 
 
@@ -461,6 +570,8 @@ split.partitions <- function(alignment_file, partition_file, gene_output_directo
   al <- read.FASTA(alignment_file, type = "AA")
   al <- as.matrix(al)
   alignment_taxa <- attr(al, "dimnames")[[1]]
+  # Create object for saving file paths
+  output_vector <- c()
   # Iterate through each row of the table and save the genes
   for (i in 1:nrow(gene_table)){
     # Extract row using the iterator
@@ -491,9 +602,13 @@ split.partitions <- function(alignment_file, partition_file, gene_output_directo
     gene_al_complete <- gene_al[taxa_to_keep,]
     # Save gene
     gene_al_complete <- as.list(gene_al_complete)
-    gene_file_path <- paste0(gene_output_directory, "/", gene_row$name, ".fa")
+    gene_file_path <- paste0(gene_output_directory, gene_row$name, ".fa")
     write.fasta(sequences = gene_al_complete, names = names(gene_al_complete), file.out = gene_file_path)
+    # Add path to output vector
+    output_vector <- c(output_vector, gene_file_path)
   }
+  # Output vector of gene file paths
+  return(output_vector)
 }
 
 

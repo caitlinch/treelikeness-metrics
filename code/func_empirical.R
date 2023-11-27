@@ -71,36 +71,43 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
   tl_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
   p_value_path <- paste0(i_directory, i_id, ".p_values.csv")
+  print(i_id)
   
   if (file.exists(tl_df_file) == FALSE){
     print("copy alignment")
     ## Copy the alignment into the tl_output_directory (treelikeness output directory)
+    if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
     i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
     file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
     
     ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
     #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
     #         estimated from the original alignment, and copy the same gap positions from the original alignment
+    print("alisim")
     alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " --alisim ", i_directory, "param_bs --num-alignments 100 --out-format fasta")
     system(alisim_command)
     # Extract best model of sequence evolution from the alisim output
-    i_best_model <- extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree"))
+    i_best_model <- paste0("'", extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree")), "'")
     # Collect all alignments
     i_files <- list.files(i_directory)
-    i_all_alignments <- c(i_alignment_path,
-                          paste0(i_directory, grep("param_bs", i_files, value = T)))
+    i_all_alignments_and_files <- c(i_alignment_path,
+                                    paste0(i_directory, grep("param_bs", i_files, value = T)))
+    i_all_alignments <-  grep(".nex", grep("\\.fa\\.", i_all_alignments_and_files, value = T, invert = T), value = T, invert = T)
+    
     
     ## Run treelikeness tests for all replicates
+    print("metrics for each alignment")
     tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
                       splitstree_path = splitstree_path, 
                       iqtree2_path = iqtree2_path, 
                       iqtree_model = i_best_model,
                       num_iqtree2_threads = num_iqtree2_threads, 
                       sequence_format = sequence_format, 
-                      redo = redo,
+                      redo = TRUE,
                       mc.cores = number_parallel_cores)
     
     ## Create a nice dataframe of all the output values
+    print("output metrics csv")
     tl_df <- as.data.frame(do.call(rbind, tl_op))
     tl_df$dataset <- i_row$dataset
     tl_df$gene <- i_row$gene
@@ -119,6 +126,7 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
     delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)])
     
     ## Create p-value dataframe
+    print("output pvalue csv")
     p_value_df <- data.frame("dataset" = i_row$dataset, "gene" = i_row$gene,
                              "tree_proportion" = treelikeness_p_value[["alignment_value"]], "tree_proportion_p_value" = treelikeness_p_value[["p_value_ecdf"]], 
                              "sCF_mean" = scdf_mean_p_value[["alignment_value"]], "sCF_mean_p_value" = scdf_mean_p_value[["p_value_ecdf"]], 
@@ -265,6 +273,20 @@ treelikeness.metrics.empirical <- function(alignment_path, splitstree_path, iqtr
     results_df <- read.csv(df_name)
   } else if (file.exists(df_name) == FALSE | redo == TRUE){
     ### Apply all treelikeness test statistics to generate the results csv file
+    
+    ## Estimate a tree in IQ-Tree
+    if ( ( is.na(iqtree_model) == TRUE ) | (iqtree_model == "MFP") ){
+      ml_tree_model <- "MFP"
+    } else {
+      ml_tree_model <- iqtree_model
+    }
+    if (redo == TRUE){
+      redo_command = " -redo "
+    } else {
+      redo_command = ""
+    }
+    iqtree_command <- paste0(iqtree2_path, " -s ", alignment_path, " -m ", ml_tree_model, " -nt ", num_iqtree2_threads, redo_command)
+    system(iqtree_command)
     
     ## Apply Site concordance factors with likelihood (Minh et. al. 2020): --scfl (iqtree2 v2.2.2)
     # Specify model for calculating site concordance factors

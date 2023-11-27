@@ -72,7 +72,7 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   tl_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
   p_value_path <- paste0(i_directory, i_id, ".p_values.csv")
   
-  if (file.exists(csv_df_file) == FALSE){
+  if (file.exists(tl_df_file) == FALSE){
     print("copy alignment")
     ## Copy the alignment into the tl_output_directory (treelikeness output directory)
     i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))

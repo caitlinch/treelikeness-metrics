@@ -65,17 +65,12 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
   
   ## Extract row of interest
-  print(i)
   i_row <- df[i, ]
   i_id <- paste0(i_row$ID, ".alignment")
   i_directory <- paste0(tl_output_directory, i_row$ID, "/")
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
-  
-  print("file paths")
-  csv_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
-  print(csv_df_file)
+  tl_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
   p_value_path <- paste0(i_directory, i_id, ".p_values.csv")
-  print(p_value_path)
   
   if (file.exists(csv_df_file) == FALSE){
     print("copy alignment")
@@ -83,7 +78,6 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
     i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
     file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
     
-    print("alisim")
     ## Generate parametric bootstrap alignments (using Alisim in IQ-Tree2)
     #  Simulate an alignment of the same length as the original alignment, using the tree and model parameters 
     #         estimated from the original alignment, and copy the same gap positions from the original alignment
@@ -96,7 +90,6 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
     i_all_alignments <- c(i_alignment_path,
                           paste0(i_directory, grep("param_bs", i_files, value = T)))
     
-    print("metrics")
     ## Run treelikeness tests for all replicates
     tl_op <- mclapply(i_all_alignments,  treelikeness.metrics.empirical,
                       splitstree_path = splitstree_path, 
@@ -112,9 +105,9 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
     tl_df$dataset <- i_row$dataset
     tl_df$gene <- i_row$gene
     # Save csv list
-    write.csv(csv_df, file = csv_df_file, row.names = FALSE)
+    write.csv(tl_df, file = tl_df_file, row.names = FALSE)
   } else {
-    csv_df <- read.csv(csv_df_file)
+    tl_df <- read.csv(tl_df_file)
   }
   
   if (file.exists(p_value_path) == FALSE){
@@ -139,6 +132,48 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   ## Return output csv
   return(p_value_df)
 }
+
+
+treelikeness.metrics.without.bootstrap <- function(i, df, tl_output_directory, 
+                                                   splitstree_path, iqtree2_path, 
+                                                   num_iqtree2_threads = "AUTO", sequence_format = "AA", 
+                                                   redo = FALSE){
+  ### Function to apply treelikeness metrics with parametric bootstrap and return the output + statistical significance for each metric
+  
+  ## Extract row of interest
+  i_row <- df[i, ]
+  i_id <- paste0(i_row$ID, ".alignment")
+  i_directory <- paste0(tl_output_directory, i_row$ID, "/")
+  i_alignment_path <- i_row$alignment_path
+  if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
+  tl_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
+  
+  ## Estimate tree in IQ0Tree
+  alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " -m MFP -nt ", num_iqtree2_threads)
+  system(alisim_command)
+  # Extract best model of sequence evolution from the alisim output
+  i_best_model <- extract.best.model(iqtree_file = paste0(i_alignment_path, ".iqtree"))
+  
+  ## Run treelikeness tests for all replicates
+  tl_op <- lapply(i_alignment_path,  treelikeness.metrics.empirical,
+                  splitstree_path = splitstree_path, 
+                  iqtree2_path = iqtree2_path, 
+                  iqtree_model = i_best_model,
+                  num_iqtree2_threads = num_iqtree2_threads, 
+                  sequence_format = sequence_format, 
+                  redo = redo)
+  
+  ## Create a nice dataframe of all the output values
+  tl_df <- as.data.frame(do.call(rbind, tl_op))
+  tl_df$dataset <- i_row$dataset
+  tl_df$gene <- i_row$gene
+  # Save csv list
+  write.csv(tl_df, file = tl_df_file, row.names = FALSE)
+  
+  ## Return output csv
+  return(tl_df)
+}
+
 
 extract.best.model <- function(iqtree_file){
   # Function that will extract the best model of sequence evolution or the model of sequence evolution used,

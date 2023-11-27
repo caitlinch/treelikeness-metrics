@@ -452,4 +452,12 @@ if (control_parameters$per.gene.analysis == TRUE){
                          splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
                          num_iqtree2_threads = "3", sequence_format = "AA", 
                          redo = FALSE, number_parallel_cores = 1)
+  
+  ## Apply metrics
+  gene_metrics <- lapply(1:nrow(gene_df), treelikeness.metrics.without.bootstrap, 
+                         df = gene_df, tl_output_directory = "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/genes_treelikeness_metrics/", 
+                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
+                         num_iqtree2_threads = "3", sequence_format = "AA", 
+                         redo = FALSE)
+  
 }

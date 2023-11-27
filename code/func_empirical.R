@@ -144,11 +144,14 @@ treelikeness.metrics.without.bootstrap <- function(i, df, tl_output_directory,
   i_row <- df[i, ]
   i_id <- paste0(i_row$ID, ".alignment")
   i_directory <- paste0(tl_output_directory, i_row$ID, "/")
-  i_alignment_path <- i_row$alignment_path
   if (dir.exists(i_directory) == FALSE){dir.create(i_directory)}
   tl_df_file <- paste0(i_directory, "collated_results_", i_id, ".csv")
   
-  ## Estimate tree in IQ0Tree
+  ## Copy the alignment into the tl_output_directory (treelikeness output directory)
+  i_alignment_path <- paste0(i_directory, basename(i_row$alignment_path))
+  file.copy(from = i_row$alignment_path, to = i_alignment_path, overwrite = TRUE)
+  
+  ## Estimate tree in IQ-Tree
   alisim_command <- paste0(iqtree2_path, " -s ", i_alignment_path, " -m MFP -nt ", num_iqtree2_threads)
   system(alisim_command)
   # Extract best model of sequence evolution from the alisim output

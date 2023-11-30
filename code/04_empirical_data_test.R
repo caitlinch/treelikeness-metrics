@@ -111,7 +111,10 @@ if (control_parameters$per.gene.analysis == TRUE){
                          splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
                          num_iqtree2_threads = "3", sequence_format = "AA", 
                          redo = FALSE, number_parallel_cores = 1)
-
+  
+  ## Collate and output the p-value
+  pvalue_df <- as.data.frame(do.call(rbind, gene_metrics))
+  write.csv(pvalue_df, file = paste0(repo_directory, "gene_treelikeness_pvalues.csv"), row.names = F)
 }
 
 

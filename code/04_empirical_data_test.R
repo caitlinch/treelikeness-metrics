@@ -78,163 +78,7 @@ if (control_parameters$apply.treelikeness.tests == TRUE){
 
 
 
-#### 3. Add gaps to the replicate alignments ####
-if (control_parameters$edit.replicate.alignments == TRUE){
-  ## Extract list of alignments
-  all_files <- list.files(replicate_alignment_directory, recursive = T)
-  
-  ## For WEA17
-  # Extract the list of alignments using the id (WEA17F)
-  wea17_files <- paste0(replicate_alignment_directory, grep("WEA17_", all_files, value = T))
-  wea17_al <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T, invert = T)]
-  wea17_replicates <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T)]
-  # Apply the gaps from the empirical alignment to the replicate alignments
-  lapply(wea17_replicates, copy.alignment.gaps, template_alignment_path = wea17_al)
-  
-  ## For WEA17_filtered
-  # Extract the list of alignments using the id (WEA17F)
-  wea17f_files <- paste0(replicate_alignment_directory, grep("WEA17F_", all_files, value = T))
-  wea17f_al <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T, invert = T)]
-  wea17f_replicates <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T)]
-  # Apply the gaps from the empirical alignment to the replicate alignments
-  lapply(wea17f_replicates, copy.alignment.gaps, template_alignment_path = wea17f_al)
-}
-
-
-
-#### 4. Apply tests for treelikeness to each alignment ####
-if (control_parameters$apply.treelikeness.tests == TRUE){
-  ## Extract list of alignments
-  all_files <- list.files(replicate_alignment_directory, recursive = T)
-  
-  ## For WEA17
-  # Extract the list of alignments using the id (WEA17F)
-  wea17_files <- paste0(replicate_alignment_directory, grep("WEA17_", all_files, value = T))
-  wea17_al <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T, invert = T)]
-  wea17_replicates <- wea17_files[grep("bs_rep", basename(wea17_files), ignore.case = T)]
-  # Copy original alignment and prepare for treelikeness metric runs
-  wea17_dir <- paste0(output_directory, "WEA17/")
-  if (dir.exists(wea17_dir) == FALSE){ dir.create(wea17_dir) }
-  wea17_copy <- paste0(wea17_dir, basename(wea17_al))
-  file.copy(from = wea17_al, to = wea17_copy)
-  # Calculate the tree proportion for the original alignments
-  treelikeness.metrics.empirical(wea17_copy,
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+R8{0.1639,0.0315,0.1812,0.1846,0.1454,0.4618,0.1171,0.7116,0.1742,1.1628,0.1403,2.0884,0.0676,3.6840,0.0103,6.4538}'", 
-                                 num_iqtree2_threads = num_cores, 
-                                 sequence_format = "AA", 
-                                 redo = FALSE)
-  # Apply the wrapper function to calculate treelikeness of bootstrap replicates
-  wea17_df <- bootstrap.wrapper(wea17_replicates, 
-                                output_directory = output_directory, 
-                                splitstree_path = splitstree_path, 
-                                iqtree2_path = iqtree2_path, 
-                                iqtree_model = "'Q.insect+R8{0.1639,0.0315,0.1812,0.1846,0.1454,0.4618,0.1171,0.7116,0.1742,1.1628,0.1403,2.0884,0.0676,3.6840,0.0103,6.4538}'", 
-                                num_iqtree2_threads = "10", 
-                                sequence_format = "AA", 
-                                redo = FALSE, 
-                                number_parallel_cores = mclapply_num_cores)
-  
-  ## For WEA17_filtered
-  # Extract the list of alignments using the id (WEA17F)
-  wea17f_files <- paste0(replicate_alignment_directory, grep("WEA17F_", all_files, value = T))
-  wea17f_al <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T, invert = T)]
-  wea17f_replicates <- wea17f_files[grep("bs_rep", basename(wea17f_files), ignore.case = T)]
-  # Copy original alignment and prepare for treelikeness metric runs
-  wea17f_dir <- paste0(output_directory, "WEA17F/")
-  if (dir.exists(wea17f_dir) == FALSE){ dir.create(wea17f_dir) }
-  wea17f_copy <- paste0(wea17f_dir, basename(wea17f_al))
-  file.copy(from = wea17f_al, to = wea17f_copy)
-  # Calculate the tree proportion for the original alignments
-  treelikeness.metrics.empirical(wea17f_copy,
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+I{0.0659}+R6{0.2004,0.1133,0.1734,0.3827,0.1439,0.6654,0.2108,1.1677,0.1549,2.2361,0.0508,4.3870}'", 
-                                 num_iqtree2_threads = num_cores, 
-                                 sequence_format = "AA", 
-                                 redo = FALSE)
-  
-  # Apply the wrapper function
-  wea17f_df <- bootstrap.wrapper(wea17f_replicates, 
-                                 output_directory = output_directory, 
-                                 splitstree_path = splitstree_path, 
-                                 iqtree2_path = iqtree2_path, 
-                                 iqtree_model = "'Q.insect+I{0.0659}+R6{0.2004,0.1133,0.1734,0.3827,0.1439,0.6654,0.2108,1.1677,0.1549,2.2361,0.0508,4.3870}'", 
-                                 num_iqtree2_threads = "10", 
-                                 sequence_format = "AA", 
-                                 redo = FALSE, 
-                                 number_parallel_cores = mclapply_num_cores)
-}
-
-
-
-#### 5. Calculate p-values for each test statistic ####
-if (control_parameters$calculate.empirical.p_values == TRUE){
-  ## Find file with parametric bootstrap results
-  all_output <- list.files(output_directory, recursive = TRUE)
-  all_csv <- grep("csv", all_output, value = T)
-  bs_csv_file <- paste0(output_directory, grep("empirical", grep("collated", grep("treelikeness_metrics", all_csv, value = T), value = T), value = T))
-  # Open csv file
-  bs_df <- read.csv(bs_csv_file, stringsAsFactors = F)
-  # Add identification columns for faceting and filtering
-  bs_df$rep_type <- factor(bs_df$unique_id,
-                           levels = bs_df$unique_id,
-                           labels = rep(c(rep("Bootstrap replicate", 100), "Alignment"), 2),
-                           ordered = TRUE)
-  # Add a column specifying which alignment the row is
-  bs_df$alignment_id <- factor(bs_df$unique_id,
-                               levels = bs_df$unique_id,
-                               labels = rep(c("WEA17", "WEA17F"), each = 101),
-                               ordered = TRUE)
-  
-  ## Calculate p-values for "WEA17" alignment
-  wea17_df <- bs_df[grep("WEA17F", bs_df$unique_id, invert = T), ]
-  wea17_df$unique_id[grep("rep", wea17_df$unique_id, invert = T)] <- "alignment"
-  wea17_p_value_df <- calculate.all.p_values(output_df = wea17_df, 
-                                             test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
-  wea17_p_value_df$dataset <- "WEA17"
-  wea17_p_value_df$statistic_type  <- "p-value"
-  wea17_p_value_df <- wea17_p_value_df[c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "p_value")]
-  names(wea17_p_value_df) <- c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "statistic_value")
-  # Extract Network Treelikeness Test values
-  wea17_ntlt <- bs_df[which(bs_df$rep_type == "Alignment" & bs_df$alignment_id == "WEA17"),]$NetworkTreelikenessTest
-  wea17_ntlt_stat_value <- length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17" & bs_df$NetworkTreelikenessTest == "Treelike"))/
-    length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17"))
-  wea17_ntlt_vector <- c("dataset" = "WEA17", "test_statistic" = "NetworkTreelikenessTest", 
-                         "test_statistic_value" = wea17_ntlt, "statistic_type" = "proportion_treelike_alignments", 
-                         "statistic_value" = wea17_ntlt_stat_value) 
-  # Bind the tree proportion results
-  wea17_p_value_df <- rbind(wea17_p_value_df, wea17_ntlt_vector)
-  
-  ## Calculate p-values for "WEA17F" alignment
-  wea17f_df <- bs_df[grep("WEA17F", bs_df$unique_id), ]
-  wea17f_df$unique_id[grep("rep", wea17f_df$unique_id, invert = T)] <- "alignment"
-  wea17f_p_value_df <- calculate.all.p_values(output_df = wea17f_df, 
-                                              test_statistic_names = c("LM_proportion_resolved_quartets", "sCF_mean", "mean_delta_plot_value", "Cunningham_test", "tree_proportion"))
-  wea17f_p_value_df$dataset <- "WEA17F"
-  wea17f_p_value_df$statistic_type  <- "p-value"
-  wea17f_p_value_df <- wea17f_p_value_df[c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "p_value")]
-  names(wea17f_p_value_df) <- c("dataset", "test_statistic", "test_statistic_value", "statistic_type", "statistic_value")
-  # Extract Network Treelikeness Test values
-  wea17f_ntlt <- bs_df[which(bs_df$rep_type == "Alignment" & bs_df$alignment_id == "WEA17F"),]$NetworkTreelikenessTest
-  wea17f_ntlt_stat_value <- length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17F" & bs_df$NetworkTreelikenessTest == "Treelike"))/
-    length(which(bs_df$rep_type == "Bootstrap replicate" & bs_df$alignment_id == "WEA17F"))
-  wea17f_ntlt_vector <- c("dataset" = "WEA17F", "test_statistic" = "NetworkTreelikenessTest", 
-                          "test_statistic_value" = wea17f_ntlt, "statistic_type" = "proportion_treelike_alignments", 
-                          "statistic_value" = wea17f_ntlt_stat_value) 
-  # Bind the tree proportion results
-  wea17f_p_value_df <- rbind(wea17f_p_value_df, wea17f_ntlt_vector)
-  
-  ## Combine and save dataframes
-  collated_p_value_df <- rbind(wea17_p_value_df, wea17f_p_value_df)
-  collated_p_value_file <- paste0(output_directory, "empirical_collated_p_values.csv")
-  write.csv(collated_p_value_df, file = collated_p_value_file, row.names = F)
-}
-
-
-
-#### 6. Apply tests for treelikeness to each gene ####
+#### 3. Apply tests for treelikeness to each gene in the 2 empirical datasets ####
 if (control_parameters$per.gene.analysis == TRUE){
   ## Split each alignment into individual genes
   # List all files in the empirical data directory
@@ -269,8 +113,10 @@ if (control_parameters$per.gene.analysis == TRUE){
                          redo = FALSE, number_parallel_cores = 1)
   
   ## Apply metrics
+  gene_treelikeness_output_directory <- paste0(output_directory, "genes_treelikeness_metrics/")
+  if (dir.exists(gene_treelikeness_output_directory) == FALSE){dir.create(gene_treelikeness_output_directory)}
   gene_metrics <- lapply(1:nrow(gene_df), treelikeness.metrics.without.bootstrap, 
-                         df = gene_df, tl_output_directory = "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/genes_treelikeness_metrics/", 
+                         df = gene_df, tl_output_directory = gene_treelikeness_output_directory, 
                          splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
                          num_iqtree2_threads = "3", sequence_format = "AA", 
                          redo = FALSE)

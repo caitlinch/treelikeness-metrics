@@ -56,7 +56,7 @@ ae_tree <- ggtree(tree, size = 1.5) +
   geom_segment(aes(x = 0.73, y = 1.05, xend = 0.73, yend = 5.06), linewidth = 1.5, arrow = arrow(length = unit(0.7, "cm"), type = "closed"), color = "red")
 
 ## Combine tree plots with patchwork
-quilt = re_tree + ae_tree + plot_annotation(tag_levels = 'a', tag_suffix = ".") & 
+quilt = re_tree + ae_tree + plot_annotation(tag_levels = 'a', tag_suffix = ")") & 
   theme(plot.tag = element_text(size = 40))
 quilt_title <- paste0(plot_directory, "methods_introgression_events.")
 ggsave(filename = paste0(quilt_title, "pdf"), plot = quilt, device = "pdf", width = 15, height = 6, units = "in")

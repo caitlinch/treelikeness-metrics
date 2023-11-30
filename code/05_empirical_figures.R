@@ -31,6 +31,16 @@ source(paste0(repo_directory, "code/func_empirical.R"))
 
 
 
+#### 2. Plot histograms for gene test statistic values ####
+
+
+
+
+#### 3. Plot gene test statistic p-values ####
+
+
+
+
 #### 6. Plot histograms of empirical bootstrap test statistic values ####
 if (control_parameters$plots == TRUE){
   ## Find file with parametric bootstrap results

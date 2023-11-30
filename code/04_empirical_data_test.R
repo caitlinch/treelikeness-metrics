@@ -111,15 +111,7 @@ if (control_parameters$per.gene.analysis == TRUE){
                          splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
                          num_iqtree2_threads = "3", sequence_format = "AA", 
                          redo = FALSE, number_parallel_cores = 1)
-  
-  ## Apply metrics
-  gene_treelikeness_output_directory <- paste0(output_directory, "genes_treelikeness_metrics/")
-  if (dir.exists(gene_treelikeness_output_directory) == FALSE){dir.create(gene_treelikeness_output_directory)}
-  gene_metrics <- lapply(1:nrow(gene_df), treelikeness.metrics.without.bootstrap, 
-                         df = gene_df, tl_output_directory = gene_treelikeness_output_directory, 
-                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
-                         num_iqtree2_threads = "3", sequence_format = "AA", 
-                         redo = FALSE)
+
 }
 
 

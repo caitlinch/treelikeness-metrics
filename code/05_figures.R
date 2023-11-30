@@ -8,7 +8,7 @@
 # plot_directory           <- Directory for output of data analysis
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
-plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/plots/"
+plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 

@@ -12,10 +12,8 @@
 
 
 # Directories
-empirical_data_directory        <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/03_empirical_tree_estimation/"
-output_directory                <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/"
-replicate_alignment_directory   <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/04_bs_replicate_alignments/"
-repo_directory                  <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
 
 
 

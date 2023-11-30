@@ -144,7 +144,7 @@ table(filtered_p_df$p_value_significance, filtered_p_df$variable_label)
 # Assemble main figure
 quilt <- hist/(og_p_plot + filtered_p_plot) + 
   plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))
-quilt_file <- paste0(plot_directory, "gene_treelikeness_composite")
+quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite")
 ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
 ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
 # Save test statistic histogram

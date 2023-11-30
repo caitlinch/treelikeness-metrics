@@ -1,2 +1,0 @@
-"unique_id","LM_num_resolved_quartets","LM_num_partly_resolved_quartets","LM_num_unresolved_quartets","LM_total_num_quartets","LM_proportion_resolved_quartets","sCF_mean","sCF_median","sCF_min","sCF_max","NetworkTreelikenessTest","mean_delta_plot_value","Cunningham_test","tree_proportion","input_alignment_path"
-"WEA17F","1715","87","98","1900","0.902631578947368","44.78","45.2","9.51","88","Non-treelike","0.353597846259091","0.906603332330628","0.68715628269559","/data/caitlin/treelikeness_metrics/empirical_treelikeness_output/WEA17F/WEA17F.fasta"

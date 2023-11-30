@@ -90,7 +90,7 @@ if (plot_exp1 == TRUE){
                                    labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")), 
                                               expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                               expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")), 
-                                              expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
+                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 }
 
 
@@ -316,7 +316,7 @@ if (plot_exp3 == TRUE){
                                    labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
                                               expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                               expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
-                                              expression(atop("Mean", "sCFL value")), expression(atop("Mean","TIGER value"))) )
+                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 } # end if (plot_exp3 == TRUE)
 
 

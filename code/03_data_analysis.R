@@ -6,17 +6,17 @@
 
 #### 1. Set parameters ####
 # data_directory          <- Directory where alignments will be saved/treelikeness metrics will be run.
-# output_directory        <- Directory for output of data analysis
+# plot_directory.         <- Directory for output of data analysis/plots
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
 # plot_exp1 <- either TRUE to plot experiment 1 results, or FALSE to skip
 # plot_exp3 <- either TRUE to plot experiment 3 results, or FALSE to skip
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
-output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/02_data_analysis/"
+output_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
-plot_exp1 = FALSE
+plot_exp1 = TRUE
 plot_exp3 = TRUE
 
 
@@ -34,9 +34,7 @@ library(patchwork)
 # List all data files
 data_files <- paste0(data_directory, list.files(data_directory))
 
-# Create folder for plots
-plot_directory <- paste0(output_directory, "plots/")
-if (dir.exists(plot_directory) == FALSE){dir.create(plot_directory)}
+# Create subfolders for plots
 if (dir.exists(paste0(plot_directory, "pdf_plots/")) == FALSE){dir.create(paste0(plot_directory, "pdf_plots/"))}
 if (dir.exists(paste0(plot_directory, "png_plots/")) == FALSE){dir.create(paste0(plot_directory, "png_plots/"))}
 

@@ -120,10 +120,10 @@ treelikeness.metrics.with.parametric.bootstrap <- function(i, df, tl_output_dire
   if (file.exists(p_value_path) == FALSE){
     print("p-value")
     ## Calculate p-values
-    treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)])
-    scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)])
-    scdf_med_p_value <- calculate.p_value(value_vector = tl_df$sCF_median, alignment_value = tl_df$sCF_median[grep("gene", tl_df$unique_id)])
-    delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)])
+    treelikeness_p_value <- calculate.p_value(value_vector = tl_df$tree_proportion, alignment_value = tl_df$tree_proportion[grep("gene", tl_df$unique_id)], test_type = "lower-tail")
+    scdf_mean_p_value <- calculate.p_value(value_vector = tl_df$sCF_mean, alignment_value = tl_df$sCF_mean[grep("gene", tl_df$unique_id)], test_type = "lower-tail")
+    scdf_med_p_value <- calculate.p_value(value_vector = tl_df$sCF_median, alignment_value = tl_df$sCF_median[grep("gene", tl_df$unique_id)], test_type = "lower-tail")
+    delta_plot_p_value <- calculate.p_value(value_vector = tl_df$mean_delta_plot_value, alignment_value = tl_df$mean_delta_plot_value[grep("gene", tl_df$unique_id)], test_type = "upper-tail")
     
     ## Create p-value dataframe
     print("output pvalue csv")
@@ -584,10 +584,13 @@ generate.mimic.alignment <- function(output_prefix, alignment_path, iqtree_path,
 
 
 #### Statistics ####
-calculate.p_value <- function(value_vector, alignment_value){
+calculate.p_value <- function(value_vector, alignment_value, test_type = "lower-tail"){
   ## Function that given two vectors (one of test statistic values, and one of ids), calculates the p-value for that alignment
   ##    We are interested in whether the alignment value is LOWER than the bootstrap replicate values - which would indicate
   ##    that the parametric bootstrap replicates are MORE treelike then the alignment
+  ## The null hypothesis is that the alignment is treelike. To reject the null hypothesis, the empirical value would be less than the bootstrap values.
+  ##     I.e., if the null hypothesis is true, very few random samples will have a difference in value less than the empirical value
+  ## This is a left-tailed p-value i.e. P-value = P(Z < z_0)
   
   # Check whether the alignment value is present or is NA
   if (is.na(alignment_value) == TRUE){
@@ -597,16 +600,28 @@ calculate.p_value <- function(value_vector, alignment_value){
   } else {
     # If it's possible to calculate a p-value, calculate one using the CDF
     # Compute an empirical cumulative distribution function (ecdf)
-    cdf <- ecdf(value_vector)
+    #   For all observations x = (x_1, x_2, ..., x_n), F_n is the fraction of observations less than or equal to t
+    #     ECDF(t) = F_n(t) = #{x_i <= t}/n = 1/n SUM(1_(x_i <= t)),
+    #           where SUM is from (i = 1) to (n), and where (1_A) is the indicator of event A
     # Calculate the p-value by feeding the alignment test statistic value into the ecdf
     #     The probability that a randomly selected test statistic value has a value less than or equal 
     #     to the alignment value is the CDF at the alignment value
+    cdf <- ecdf(value_vector)
     p_value_cdf <- cdf(alignment_value)
   }
   
+  ## Check for lower or upper tail p-value
+  if (test_type == "lower-tail" | test_type == "lower_tail" | test_type == "lowertail"){
+    p_value_type = "lower-tail"
+    p_value_op = p_value_cdf
+  } else if (test_type == "upper-tail" | test_type == "upper_tail" | test_type == "uppertail"){
+    p_value_type = "upper-tail"
+    p_value_op = (1 - p_value_cdf)
+  } 
+  
   # return the p-value
-  op_vector <- c(alignment_value, p_value_cdf)
-  names(op_vector) <- c("alignment_value", "p_value_ecdf")
+  op_vector <- c(alignment_value, p_value_op, p_value_type)
+  names(op_vector) <- c("alignment_value", "p_value_ecdf", "p_value_type")
   return(op_vector)
 }
 
@@ -628,6 +643,31 @@ calculate.all.p_values <- function(output_df, test_statistic_names){
   return(p_value_df)
 }
 
+
+csv.to.p_values <- function(csv_path){
+  # Function to input a csv path and output all p-values
+  
+  # Open csv file
+  gene_df <- read.csv(csv_path, stringsAsFactors = FALSE)
+  # Separate bootstraps and alignment
+  bs_df <- gene_df[grep("param_bs", gene_df$unique_id), ]
+  al_df <- gene_df[grep("param_bs", gene_df$unique_id, invert = T), ]
+  # Calculate p-values
+  tree_proportion_p <- calculate.p_value(value_vector = bs_df$tree_proportion,       alignment_value = al_df$tree_proportion, 
+                                         test_type = "lower-tail")
+  scf_mean_p        <- calculate.p_value(value_vector = bs_df$sCF_mean,              alignment_value = al_df$sCF_mean, 
+                                         test_type = "lower-tail")
+  scf_median_p      <- calculate.p_value(value_vector = bs_df$sCF_median,            alignment_value = al_df$sCF_median, 
+                                         test_type = "lower-tail")
+  delta_plot_p      <- calculate.p_value(value_vector = bs_df$mean_delta_plot_value, alignment_value = al_df$mean_delta_plot_value, 
+                                         test_type = "upper-tail")
+  # Construct output
+  names_p_value_op <- names(tree_proportion_p)
+  p_value_op <- c(al_df$dataset, al_df$gene, tree_proportion_p, scf_mean_p, scf_median_p, delta_plot_p)
+  names(p_value_op) <- c("dataset", "gene", paste0(rep(c("tree_proportion_", "sCF_mean_", "sCF_median_", "mean_delta_plot_"), each = 3), names_p_value_op) )
+  # Return output
+  return(p_value_op)
+}
 
 ### Partition and file management
 split.partitions <- function(alignment_file, partition_file, gene_output_directory){

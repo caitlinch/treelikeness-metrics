@@ -1,4 +1,4 @@
-# caitlinch/treelikeness-metrics/code/04_empirical_figures.R
+# caitlinch/treelikeness-metrics/code/05_empirical_figures.R
 # Caitlin Cherryh 2023
 
 ## Script summary:

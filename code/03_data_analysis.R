@@ -13,7 +13,7 @@
 # plot_exp3 <- either TRUE to plot experiment 3 results, or FALSE to skip
 
 data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
-plot_directory. <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
+plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
 repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
 
 plot_exp1 = TRUE

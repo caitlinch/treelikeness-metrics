@@ -84,7 +84,7 @@ ts_df <- melt(gene_df,
              measure.vars = c("tree_proportion_alignment_value", "sCF_mean_alignment_value", "mean_delta_plot_alignment_value"))
 # Create labels for plotting
 ts_df$dataset_label <- factor(ts_df$dataset,
-                             levels = unique(p_df$dataset),
+                             levels = unique(ts_df$dataset),
                              labels = c("Original", "Orthology-enriched"),
                              ordered = TRUE)
 ts_df$variable_label <- factor(ts_df$variable,
@@ -97,13 +97,19 @@ p2 <- ggplot(data = ts_df, aes(x = variable_label, y = value, fill = dataset_lab
   scale_fill_manual(name = "Dataset", values = c("#d01c8b", "#b8e186")) +
   scale_y_continuous(name = "Test statistic value", limits = c(0, 1), breaks = seq(0,1,0.2), labels = seq(0,1,0.2), minor_breaks = seq(0,1,0.05)) +
   scale_x_discrete(name = NULL) +
+  guides(fill = guide_legend(override.aes = list(size = 12))) +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 18, angle = 45, vjust = 1.0, hjust = 1.0), 
-        axis.title.y = element_text(size = 22, margin = margin(t = 0, r = 20, b = 0, l = 10, unit = "pt"), color = "grey30"), 
-        axis.text.y = element_text(size = 18),
-        legend.title = element_text(size = 20),
-        legend.text = element_text(size = 18) )
+        axis.text.x = element_text(size = 20, angle = 45, vjust = 1.0, hjust = 1.0, margin = margin(t = 5, r = 0, b = 0, l = 0, unit = "pt")), 
+        axis.title.y = element_text(size = 26, margin = margin(t = 0, r = 20, b = 0, l = 10, unit = "pt"), color = "grey30"), 
+        axis.text.y = element_text(size = 20, margin = margin(t = 0, r = 5, b = 0, l = 0, unit = "pt")),
+        legend.title = element_text(size = 26),
+        legend.text = element_text(size = 24),
+        axis.line = element_line(linewidth = 1), 
+        axis.ticks = element_line(linewidth = 1),
+        panel.grid.major = element_line(linewidth = 1),
+        panel.grid.minor = element_line(linewidth = 0.8),
+        panel.border = element_rect(linewidth = 2, fill = NA))
 # Save the plot
 p2_path <- paste0(plot_directory, "es_gene_test_statistics")
 ggsave(filename = paste0(p2_path, ".png"), plot = p2)
@@ -153,6 +159,45 @@ ggsave(filename = paste0(p3_path, ".png"), plot = p3)
 ggsave(filename = paste0(p3_path, ".pdf"), plot = p3)
 
 
+
+# Plot stacked bar charts
+og_p_df <- p_df[which(p_df$dataset == "WEA17"), ]
+filtered_p_df <- p_df[which(p_df$dataset == "WEA17F"), ]
+# Plot original dataset
+og_p_plot <- ggplot(data = og_p_df, aes(x = variable_label, fill = p_value_significance)) +
+  geom_bar() +
+  scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
+  labs(title = "Original dataset") +
+  scale_x_discrete(name = "Test statistic p-values") +
+  scale_y_continuous(name = "Count") +
+  guides(fill = "none") +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 14),
+        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
+# Plot filtered dataset
+filtered_p_plot <- ggplot(data = filtered_p_df, aes(x = variable_label, fill = p_value_significance)) +
+  geom_bar() +
+  scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
+  labs(title = "Orthology-enriched dataset") +
+  scale_x_discrete(name = "Test statistic p-values") +
+  scale_y_continuous(name = "Count") +
+  theme_bw() +
+  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
+# Collate
+quilt <- (og_p_plot + filtered_p_plot)
+# Save the plot
+p3_path <- paste0(plot_directory, "es_gene_stacked_p_values")
+ggsave(filename = paste0(p3_path, ".png"), plot = quilt)
+ggsave(filename = paste0(p3_path, ".pdf"), plot = quilt)
 
 
 

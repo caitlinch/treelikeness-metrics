@@ -163,3 +163,54 @@ ggsave(filename = paste0(quilt2_file, ".pdf"), plot = quilt2)
 ggsave(filename = paste0(quilt2_file, ".png"), plot = quilt2)
 
 
+
+#### 7. Compare distributions of test statistic values ####
+### For tree proportion:
+## F test (compare variance)
+# F = 1.3279, num df = 116, denom df = 41, p-value = 0.3015
+# Accept null hypothesis that variances are equal
+tp_f <- var.test(gene_op_df$tree_proportion_alignment_value[which(gene_op_df$dataset == "WEA17")],
+                 gene_op_df$tree_proportion_alignment_value[which(gene_op_df$dataset == "WEA17F")], 
+                 alternative = "two.sided")
+## t-test (compare means)
+# t = -3.294, df = 157, p-value = 0.001221
+# Reject null hypothesis that the true difference in means is equal to 0
+tp_t <- t.test(gene_op_df$tree_proportion_alignment_value[which(gene_op_df$dataset == "WEA17")], 
+               gene_op_df$tree_proportion_alignment_value[which(gene_op_df$dataset == "WEA17F")],
+               alternative = c("two.sided"),
+               paired = FALSE, var.equal = TRUE,
+               conf.level = 0.95)
+
+### For mean sCF
+## F test (compare variance)
+# F = 2.3656, num df = 116, denom df = 41, p-value = 0.002256
+# Reject null hypothesis that variances are equal (in t.test function, set var.equal to FALSE)
+scf_f <- var.test(gene_op_df$sCF_mean_alignment_value[which(gene_op_df$dataset == "WEA17")],
+                 gene_op_df$sCF_mean_alignment_value[which(gene_op_df$dataset == "WEA17F")], 
+                 alternative = "two.sided")
+## t-test (compare means)
+# t = 0.52804, df = 111.72, p-value = 0.5985
+# Accept null hypothesis that the true difference in means is equal to 0
+scf_t <- t.test(gene_op_df$sCF_mean_alignment_value[which(gene_op_df$dataset == "WEA17")], 
+               gene_op_df$sCF_mean_alignment_value[which(gene_op_df$dataset == "WEA17F")],
+               alternative = c("two.sided"),
+               paired = FALSE, var.equal = FALSE,
+               conf.level = 0.95)
+
+
+### For mean delta plot
+## F test (compare variance)
+# F = 1.323, num df = 116, denom df = 41, p-value = 0.308
+# Accept null hypothesis that variances are equal
+dp_f <- var.test(gene_op_df$mean_delta_plot_alignment_value[which(gene_op_df$dataset == "WEA17")],
+                 gene_op_df$mean_delta_plot_alignment_value[which(gene_op_df$dataset == "WEA17F")], 
+                 alternative = "two.sided")
+## t-test (compare means)
+# t = 2.9828, df = 157, p-value = 0.003312
+# Reject null hypothesis that the true difference in means is equal to 0
+dp_t <- t.test(gene_op_df$mean_delta_plot_alignment_value[which(gene_op_df$dataset == "WEA17")], 
+                gene_op_df$mean_delta_plot_alignment_value[which(gene_op_df$dataset == "WEA17F")],
+                alternative = c("two.sided"),
+                paired = FALSE, var.equal = TRUE,
+                conf.level = 0.95)
+

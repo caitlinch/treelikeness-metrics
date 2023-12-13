@@ -150,10 +150,10 @@ og_p_plot <- ggplot(data = og_p_df, aes(x = variable_label, fill = p_value_signi
   guides(fill = "none") +
   theme_bw() +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 20, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 24, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
-        axis.text.y = element_text(size = 18),
-        plot.title = element_text(size = 24, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 24, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 28, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 22),
+        plot.title = element_text(size = 26, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
         axis.line = element_line(linewidth = 1, color = "grey70"), 
         axis.ticks = element_line(linewidth = 1, color = "grey70"),
         panel.grid.major = element_line(linewidth = 1),
@@ -168,12 +168,12 @@ filtered_p_plot <- ggplot(data = filtered_p_df, aes(x = variable_label, fill = p
   theme_bw() +
   guides(fill = guide_legend(override.aes = list(size = 10))) +
   theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 20, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 24, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
-        axis.text.y = element_text(size = 18),
-        legend.title = element_text(size = 24, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
-        legend.text = element_text(size = 20),
-        plot.title = element_text(size = 24, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 24, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 28, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 22),
+        legend.title = element_text(size = 28, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        legend.text = element_text(size = 24),
+        plot.title = element_text(size = 26, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
         axis.line = element_line(linewidth = 1, color = "grey70"), 
         axis.ticks = element_line(linewidth = 1, color = "grey70"),
         panel.grid.major = element_line(linewidth = 1),

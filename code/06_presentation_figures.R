@@ -138,29 +138,7 @@ p_df$variable_label <- factor(p_df$variable,
                               levels = c("tree_proportion_p_value_ecdf", "sCF_mean_p_value_ecdf", "mean_delta_plot_p_value_ecdf"),
                               labels = c("Tree proportion", "Mean sCF", "Mean delta plot"),
                               ordered = TRUE)
-# Plot stacked bar charts
-p3 <- ggplot(data = p_df, aes(x = variable_label, fill = p_value_significance)) +
-  geom_bar() +
-  facet_grid(~dataset_label) +
-  scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
-  scale_x_discrete(name = "Test statistic p-values") +
-  scale_y_continuous(name = "Count") +
-  theme_bw() +
-  theme(axis.title.x = element_text(size = 22, margin = margin(t = 30, r = 0, b = 5, l = 0, unit = "pt"), color = "grey30"),
-        axis.text.x = element_text(size = 18, hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 22, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt"),  color = "grey30"), 
-        axis.text.y = element_text(size = 18),
-        legend.title = element_text(size = 20),
-        legend.text = element_text(size = 16),
-        strip.text = element_text(size = 22))
-# Save the plot
-p3_path <- paste0(plot_directory, "es_gene_stacked_p_values")
-ggsave(filename = paste0(p3_path, ".png"), plot = p3)
-ggsave(filename = paste0(p3_path, ".pdf"), plot = p3)
-
-
-
-# Plot stacked bar charts
+# Separate dataframes for separate datasets
 og_p_df <- p_df[which(p_df$dataset == "WEA17"), ]
 filtered_p_df <- p_df[which(p_df$dataset == "WEA17F"), ]
 # Plot original dataset

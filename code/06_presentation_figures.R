@@ -146,36 +146,45 @@ og_p_plot <- ggplot(data = og_p_df, aes(x = variable_label, fill = p_value_signi
   geom_bar() +
   scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
   labs(title = "Original dataset") +
-  scale_x_discrete(name = "Test statistic p-values") +
   scale_y_continuous(name = "Count") +
   guides(fill = "none") +
   theme_bw() +
-  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
-        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
-        axis.text.y = element_text(size = 14),
-        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 24, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 18),
+        plot.title = element_text(size = 24, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        axis.line = element_line(linewidth = 1, color = "grey70"), 
+        axis.ticks = element_line(linewidth = 1, color = "grey70"),
+        panel.grid.major = element_line(linewidth = 1),
+        panel.grid.minor = element_line(linewidth = 0.8),
+        panel.border = element_rect(linewidth = 2, fill = NA, color = "grey70") )
 # Plot filtered dataset
 filtered_p_plot <- ggplot(data = filtered_p_df, aes(x = variable_label, fill = p_value_significance)) +
   geom_bar() +
   scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
   labs(title = "Orthology-enriched dataset") +
-  scale_x_discrete(name = "Test statistic p-values") +
   scale_y_continuous(name = "Count") +
   theme_bw() +
-  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
-        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
-        axis.text.y = element_text(size = 14),
-        legend.title = element_text(size = 16),
-        legend.text = element_text(size = 14),
-        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
+  guides(fill = guide_legend(override.aes = list(size = 10))) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(size = 20, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 24, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 18),
+        legend.title = element_text(size = 24, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        legend.text = element_text(size = 20),
+        plot.title = element_text(size = 24, hjust = 0.5, margin = margin(t = 0, r = 0, b = 15, l = 0, unit = "pt")),
+        axis.line = element_line(linewidth = 1, color = "grey70"), 
+        axis.ticks = element_line(linewidth = 1, color = "grey70"),
+        panel.grid.major = element_line(linewidth = 1),
+        panel.grid.minor = element_line(linewidth = 0.8),
+        panel.border = element_rect(linewidth = 2, fill = NA, color = "grey70") )
 # Collate
 quilt <- (og_p_plot + filtered_p_plot)
 # Save the plot
 p3_path <- paste0(plot_directory, "es_gene_stacked_p_values")
-ggsave(filename = paste0(p3_path, ".png"), plot = quilt)
-ggsave(filename = paste0(p3_path, ".pdf"), plot = quilt)
+ggsave(filename = paste0(p3_path, ".png"), plot = quilt, width = 13, height = 10)
+ggsave(filename = paste0(p3_path, ".pdf"), plot = quilt, width = 13, height = 10)
 
 
 

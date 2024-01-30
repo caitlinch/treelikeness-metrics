@@ -19,6 +19,7 @@ plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plo
 # Open packages
 library(reshape2)
 library(ggplot2)
+library(ggpubr)
 library(patchwork)
 
 # Open empirical gene p-value file
@@ -224,7 +225,7 @@ violin_df <- melt(gene_op_df,
 # Create labels for plotting
 violin_df$dataset_label <- factor(violin_df$dataset,
                                   levels = unique(violin_df$dataset),
-                                  labels = c("Original", "Orthology-enriched"),
+                                  labels = c("Original", "Orthology-\nenriched"),
                                   ordered = TRUE)
 violin_df$variable_label <- factor(violin_df$variable,
                                    levels = c("tree_proportion_alignment_value", "sCF_mean_alignment_value", "mean_delta_plot_alignment_value"),
@@ -238,17 +239,27 @@ violin_plot <- ggplot(data = violin_df, aes(x = variable_label, y = value, fill 
   scale_x_discrete(name = NULL) +
   guides(fill = guide_legend(override.aes = list(size = 12))) +
   theme_bw() +
-  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
-        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
-        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
-        axis.text.y = element_text(size = 14),
-        legend.title = element_text(size = 16),
-        legend.text = element_text(size = 14),
-        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
-# Save the plot
-violin_path <- paste0(plot_directory, "mainfig_gene_test_statistics_violin")
-ggsave(filename = paste0(violin_path, ".png"), plot = violin_plot)
-ggsave(filename = paste0(violin_path, ".pdf"), plot = violin_plot)
+  theme(axis.title.x = element_text(size = 22, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 20, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 22, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 18),
+        axis.line = element_line(linewidth = 0.8), 
+        axis.ticks = element_line(linewidth = 0.8),
+        panel.grid.major = element_line(linewidth = 0.8),
+        panel.grid.minor = element_line(linewidth = 0.6),
+        panel.border = element_rect(linewidth = 1, fill = NA)) 
+# Save plot with significance markers
+violin_plot1 <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = T, size = 10)
+violin_path1 <- paste0(plot_directory, "mainfig_gene_test_statistics_significance")
+ggsave(filename = paste0(violin_path1, ".png"), plot = violin_plot1)
+ggsave(filename = paste0(violin_path1, ".pdf"), plot = violin_plot1)
+# Save plot with p values
+violin_plot2 <- violin_plot + stat_compare_means(method = "t.test", aes(label = paste0("p=", ..p.format..)), label.y = c(0.9, 0.73, 0.6), size = 5)
+violin_path2 <- paste0(plot_directory, "gene_test_statistics_pvalues")
+ggsave(filename = paste0(violin_path2, ".png"), plot = violin_plot2)
+ggsave(filename = paste0(violin_path2, ".pdf"), plot = violin_plot2)
 
 
 

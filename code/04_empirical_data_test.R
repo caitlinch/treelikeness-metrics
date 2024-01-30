@@ -114,7 +114,7 @@ if (control_parameters$per.gene.analysis == TRUE){
   
   ## Collate and output the p-values
   pvalue_df <- as.data.frame(do.call(rbind, gene_metrics))
-  write.csv(pvalue_df, file = paste0(repo_directory, "gene_treelikeness_pvalues.csv"), row.names = F)
+  write.csv(pvalue_df, file = paste0(repo_directory, "output/gene_treelikeness_pvalues.csv"), row.names = F)
 }
 
 

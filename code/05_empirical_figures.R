@@ -238,17 +238,13 @@ violin_plot <- ggplot(data = violin_df, aes(x = variable_label, y = value, fill 
   scale_x_discrete(name = NULL) +
   guides(fill = guide_legend(override.aes = list(size = 12))) +
   theme_bw() +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(size = 20, angle = 45, vjust = 1.0, hjust = 1.0, margin = margin(t = 5, r = 0, b = 0, l = 0, unit = "pt")), 
-        axis.title.y = element_text(size = 26, margin = margin(t = 0, r = 20, b = 0, l = 10, unit = "pt"), color = "grey30"), 
-        axis.text.y = element_text(size = 20, margin = margin(t = 0, r = 5, b = 0, l = 0, unit = "pt")),
-        legend.title = element_text(size = 26),
-        legend.text = element_text(size = 24),
-        axis.line = element_line(linewidth = 1), 
-        axis.ticks = element_line(linewidth = 1),
-        panel.grid.major = element_line(linewidth = 1),
-        panel.grid.minor = element_line(linewidth = 0.8),
-        panel.border = element_rect(linewidth = 2, fill = NA))
+  theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
+        axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45), 
+        axis.title.y = element_text(size = 16, margin = margin(t = 0, r = 10, b = 0, l = 10, unit = "pt")), 
+        axis.text.y = element_text(size = 14),
+        legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
 # Save the plot
 violin_path <- paste0(plot_directory, "gene_test_statistics_violin")
 ggsave(filename = paste0(violin_path, ".png"), plot = violin_plot)

@@ -36,7 +36,7 @@ ts_df <- melt(gene_op_df,
 # Create long format dataframe for p-values
 p_df <- melt(gene_op_df,
              id.vars = c("dataset", "gene"),
-             measure.vars = c("tree_proportion_p_value_ecdf", "sCF_mean_p_value_ecdf", "mean_delta_plot_p_value_ecdf"))
+             measure.vars = c("tree_proportion_p_value", "sCF_mean_p_value", "mean_delta_plot_p_value"))
 
 
 
@@ -81,7 +81,7 @@ p_df$dataset_label <- factor(p_df$dataset,
                              labels = c("Original dataset", "Orthology-enriched dataset"),
                              ordered = TRUE)
 p_df$variable_label <- factor(p_df$variable,
-                              levels = c("tree_proportion_p_value_ecdf", "sCF_mean_p_value_ecdf", "mean_delta_plot_p_value_ecdf"),
+                              levels = c("tree_proportion_p_value", "sCF_mean_p_value", "mean_delta_plot_p_value"),
                               labels = c("Tree proportion", "Mean sCF", "Mean delta plot"),
                               ordered = TRUE)
 # Plot histogram for each p-value, faceted by test statistic and dataset

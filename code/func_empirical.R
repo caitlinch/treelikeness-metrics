@@ -596,31 +596,26 @@ calculate.p_value <- function(value_vector, alignment_value, test_type = "lower-
   if (is.na(alignment_value) == TRUE){
     # If the alignment value is NA, can't calculate a score
     # If it wasn't possible to calculate a score for the alignment, output an NA
-    p_value_cdf <- NA
+    p_value <- NA
   } else {
-    # If it's possible to calculate a p-value, calculate one using the CDF
-    # Compute an empirical cumulative distribution function (ecdf)
-    #   For all observations x = (x_1, x_2, ..., x_n), F_n is the fraction of observations less than or equal to t
-    #     ECDF(t) = F_n(t) = #{x_i <= t}/n = 1/n SUM(1_(x_i <= t)),
-    #           where SUM is from (i = 1) to (n), and where (1_A) is the indicator of event A
-    # Calculate the p-value by feeding the alignment test statistic value into the ecdf
-    #     The probability that a randomly selected test statistic value has a value less than or equal 
-    #     to the alignment value is the CDF at the alignment value
-    cdf <- ecdf(value_vector)
-    p_value_cdf <- cdf(alignment_value)
+    ## Check for lower or upper tail p-value
+    if (test_type == "lower-tail" | test_type == "lower_tail" | test_type == "lowertail"){
+      ## Calculate p-value
+      p_value_type = "lower-tail"
+      num_reps <- length(value_vector)
+      num_le_val <- which(value_vector <= alignment_value) 
+      p_value <- num_le_val/num_reps
+    } else if (test_type == "upper-tail" | test_type == "upper_tail" | test_type == "uppertail"){
+      ## Calculate p-value
+      p_value_type = "upper-tail"
+      num_reps <- length(value_vector)
+      num_ge_val <- which(value_vector >= alignment_value) 
+      p_value = num_ge_val/num_reps
+    } 
   }
   
-  ## Check for lower or upper tail p-value
-  if (test_type == "lower-tail" | test_type == "lower_tail" | test_type == "lowertail"){
-    p_value_type = "lower-tail"
-    p_value_op = p_value_cdf
-  } else if (test_type == "upper-tail" | test_type == "upper_tail" | test_type == "uppertail"){
-    p_value_type = "upper-tail"
-    p_value_op = (1 - p_value_cdf)
-  } 
-  
-  # return the p-value
-  op_vector <- c(alignment_value, p_value_op, p_value_type)
+  # Return the p-value
+  op_vector <- c(alignment_value, p_value, p_value_type)
   names(op_vector) <- c("alignment_value", "p_value_ecdf", "p_value_type")
   return(op_vector)
 }
@@ -653,13 +648,17 @@ csv.to.p_values <- function(csv_path){
   bs_df <- gene_df[grep("param_bs", gene_df$unique_id), ]
   al_df <- gene_df[grep("param_bs", gene_df$unique_id, invert = T), ]
   # Calculate p-values
-  tree_proportion_p <- calculate.p_value(value_vector = bs_df$tree_proportion,       alignment_value = al_df$tree_proportion, 
+  tree_proportion_p <- calculate.p_value(value_vector = bs_df$tree_proportion,       
+                                         alignment_value = al_df$tree_proportion, 
                                          test_type = "lower-tail")
-  scf_mean_p        <- calculate.p_value(value_vector = bs_df$sCF_mean,              alignment_value = al_df$sCF_mean, 
+  scf_mean_p        <- calculate.p_value(value_vector = bs_df$sCF_mean,              
+                                         alignment_value = al_df$sCF_mean, 
                                          test_type = "lower-tail")
-  scf_median_p      <- calculate.p_value(value_vector = bs_df$sCF_median,            alignment_value = al_df$sCF_median, 
+  scf_median_p      <- calculate.p_value(value_vector = bs_df$sCF_median,            
+                                         alignment_value = al_df$sCF_median, 
                                          test_type = "lower-tail")
-  delta_plot_p      <- calculate.p_value(value_vector = bs_df$mean_delta_plot_value, alignment_value = al_df$mean_delta_plot_value, 
+  delta_plot_p      <- calculate.p_value(value_vector = bs_df$mean_delta_plot_value, 
+                                         alignment_value = al_df$mean_delta_plot_value, 
                                          test_type = "upper-tail")
   # Construct output
   names_p_value_op <- names(tree_proportion_p)

@@ -616,7 +616,7 @@ calculate.p_value <- function(value_vector, alignment_value, test_type = "lower-
   
   # Return the p-value
   op_vector <- c(alignment_value, p_value, p_value_type)
-  names(op_vector) <- c("alignment_value", "p_value_ecdf", "p_value_type")
+  names(op_vector) <- c("alignment_value", "p_value", "p_value_type")
   return(op_vector)
 }
 

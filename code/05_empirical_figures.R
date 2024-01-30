@@ -246,7 +246,7 @@ violin_plot <- ggplot(data = violin_df, aes(x = variable_label, y = value, fill 
         legend.text = element_text(size = 14),
         plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
 # Save the plot
-violin_path <- paste0(plot_directory, "gene_test_statistics_violin")
+violin_path <- paste0(plot_directory, "mainfig_gene_test_statistics_violin")
 ggsave(filename = paste0(violin_path, ".png"), plot = violin_plot)
 ggsave(filename = paste0(violin_path, ".pdf"), plot = violin_plot)
 

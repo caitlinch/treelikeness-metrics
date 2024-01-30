@@ -603,13 +603,13 @@ calculate.p_value <- function(value_vector, alignment_value, test_type = "lower-
       ## Calculate p-value
       p_value_type = "lower-tail"
       num_reps <- length(value_vector)
-      num_le_val <- which(value_vector <= alignment_value) 
+      num_le_val <- length(which(value_vector <= alignment_value))
       p_value <- num_le_val/num_reps
     } else if (test_type == "upper-tail" | test_type == "upper_tail" | test_type == "uppertail"){
       ## Calculate p-value
       p_value_type = "upper-tail"
       num_reps <- length(value_vector)
-      num_ge_val <- which(value_vector >= alignment_value) 
+      num_ge_val <- length(which(value_vector >= alignment_value))
       p_value = num_ge_val/num_reps
     } 
   }

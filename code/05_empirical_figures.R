@@ -136,8 +136,8 @@ filtered_p_plot <- ggplot(data = filtered_p_df, aes(x = variable_label, fill = p
         plot.title = element_text(size = 20, hjust = 0.5, margin = margin(t = 10, r = 0, b = 10, l = 0, unit = "pt")) )
 
 # Create tables
-table(og_p_df$p_value_significance, og_p_df$variable_label)
-table(filtered_p_df$p_value_significance, filtered_p_df$variable_label)
+table(og_p_df$p_value_significance, og_p_df$variable)
+table(filtered_p_df$p_value_significance, filtered_p_df$variable)
 
 
 
@@ -261,5 +261,32 @@ violin_path2 <- paste0(plot_directory, "gene_test_statistics_pvalues")
 ggsave(filename = paste0(violin_path2, ".png"), plot = violin_plot2)
 ggsave(filename = paste0(violin_path2, ".pdf"), plot = violin_plot2)
 
+
+
+
+### 9. Combine box plots with bar charts for ms ####
+# Save just the plot
+quilt <- violin_plot/(og_p_plot + filtered_p_plot) + 
+  plot_layout(heights = c(2, 1)) +
+  plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))
+quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplot")
+ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
+ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
+# Save plot with significance markers
+violin_plot_sig <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = T, size = 10)
+quilt <- violin_plot_sig/(og_p_plot + filtered_p_plot) + 
+  plot_layout(heights = c(2, 1)) +
+  plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))
+quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplot_significance")
+ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
+ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
+# Save plot with p-values
+violin_plot_pval <- violin_plot + stat_compare_means(method = "t.test", aes(label = paste0("p=", ..p.format..)), label.y = c(0.9, 0.73, 0.6), size = 5)
+quilt <- violin_plot_pval/(og_p_plot + filtered_p_plot) + 
+  plot_layout(heights = c(2, 1)) +
+  plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))
+quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplot_pvalues")
+ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
+ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
 
 

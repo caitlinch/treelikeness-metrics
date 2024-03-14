@@ -273,7 +273,8 @@ quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplo
 ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
 ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
 # Save plot with significance markers
-violin_plot_sig <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = T, size = 10)
+violin_plot_sig <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = F, size = 10, 
+                                                    symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns")) )
 quilt <- violin_plot_sig/(og_p_plot + filtered_p_plot) + 
   plot_layout(heights = c(1, 1)) +
   plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))

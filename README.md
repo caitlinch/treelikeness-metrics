@@ -3,7 +3,7 @@
 
 Caitlin Cherryh
 
-July 2023
+June 2024
 
 ***
 ### Summary
@@ -28,9 +28,6 @@ If you replicate any part of these analyses or use functions from these scripts,
 + Scripts
     + All scripts necessary to completely replicate this analysis are included in the `code/` folder
     + Each script includes an overview, a list of necessary parameters or file paths,  and a list of software necessary to run that script
-+ Output
-    + All `.csv` files containing output from each stage of the analysis can be found in the `output/` folder
-    + The `.csv` files are grouped by the simulation approach -  `exp1` for the random tree simulations and `exp2` for the introgression simulations
 + Conda enviroment
     + The `environment.yml` file is included to replicate the conda environment used for this project
 + Instructions for replication
@@ -156,4 +153,4 @@ We included the "PHANGORN" method of phylogenetic network estimation for users w
 ### Citation information
 If you replicate any part of these analyses or use functions from these scripts, please cite this repository. Thank you! 
 
-Cherryh, C., 2023. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 6/7/2023)
+Cherryh, C., 2024. "Treelikeness metrics", GitHub repository. https://github.com/caitlinch/treelikeness-metrics (Accessed 18/6/2024)

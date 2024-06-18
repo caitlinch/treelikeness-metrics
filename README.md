@@ -151,7 +151,7 @@ We included the "PHANGORN" method of phylogenetic network estimation for users w
 
 ***
 ### Empirical data
-We applied treelikeness metrics to two empirical datasets: the 
+We applied treelikeness metrics to two empirical datasets: 
 - **Original dataset:** Metazoa_Choano_RCFV_strict.phy
     - Whelan N.V., Kocot K.M., Moroz T.P., Mukherjee K., Williams P., Paulay G., Moroz L.L., Halanych K.M., 2017. "Ctenophore relationships and their placement as the sister group to all other animals". _Nature Ecology & Evolution_. 1:1737–1746 https://doi.org/10.1038/s41559-017-0331-3
     - Whelan N.V., Kocot K.M., Moroz T.P., Mukherjee K., Williams P., Paulay G., Moroz L.L., Halanych K.M., 2017. "Ctenophora Phylogeny Datasets and Core Orthologs". Dataset. Version 1. https://doi.org/10.6084/m9.figshare.4484138.v1

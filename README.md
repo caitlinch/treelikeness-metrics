@@ -155,7 +155,7 @@ We applied treelikeness metrics to two empirical datasets:
 - **Original dataset:** Metazoa_Choano_RCFV_strict.phy
     - Whelan N.V., Kocot K.M., Moroz T.P., Mukherjee K., Williams P., Paulay G., Moroz L.L., Halanych K.M., 2017. "Ctenophore relationships and their placement as the sister group to all other animals". _Nature Ecology & Evolution_. 1:1737–1746 https://doi.org/10.1038/s41559-017-0331-3
     - Whelan N.V., Kocot K.M., Moroz T.P., Mukherjee K., Williams P., Paulay G., Moroz L.L., Halanych K.M., 2017. "Ctenophora Phylogeny Datasets and Core Orthologs". Dataset. Version 1. https://doi.org/10.6084/m9.figshare.4484138.v1
-**Filtered dataset:** 5_Whelan2017MCRS.tar.gz
+- **Filtered dataset:** 5_Whelan2017MCRS.tar.gz
     - McCarthy, Charley G, P., Mulhair,  P. O., Siu-Ting, K., Creevey, C. J., O’Connell, M. J., 2023. "Improving Orthologous Signal and Model Fit in Datasets Addressing the Root of the Animal Phylogeny", _Molecular Biology and Evolution_, 40:msac276, https://doi.org/10.1093/molbev/msac276
     - McCarthy C. 2022. "ATOLRootStudy", GitHub repository, https://github.com/chmccarthy/ATOLRootStudy (Accessed 18/06/2024)
 

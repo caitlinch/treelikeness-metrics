@@ -8,8 +8,14 @@
 # plot_directory           <- Directory for output of data analysis
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
 
-plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
-repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+location = "macbook"
+if (location == "work"){
+  plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
+  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
+} else if (location == "macbook"){
+  plot_directory <- "/Users/caitlin/Documents/PhD/Ch02_treelikeness_metrics/plots/thesis_revisions/"
+  repo_directory <- "/Users/caitlin/Repositories/treelikeness-metrics/"
+}
 
 
 
@@ -56,7 +62,7 @@ ae_tree <- ggtree(tree, size = 1.5) +
   geom_segment(aes(x = 0.73, y = 1.05, xend = 0.73, yend = 5.06), linewidth = 1.5, arrow = arrow(length = unit(0.7, "cm"), type = "closed"), color = "red")
 
 ## Combine tree plots with patchwork
-quilt = re_tree + ae_tree + plot_annotation(tag_levels = 'a', tag_suffix = ")") & 
+quilt = re_tree + ae_tree + plot_annotation(tag_levels = 'a', tag_suffix = ")") &
   theme(plot.tag = element_text(size = 40))
 quilt_title <- paste0(plot_directory, "methods_introgression_events.")
 ggsave(filename = paste0(quilt_title, "pdf"), plot = quilt, device = "pdf", width = 15, height = 6, units = "in")

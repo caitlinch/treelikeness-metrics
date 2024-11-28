@@ -96,92 +96,8 @@ if (plot_exp1 == TRUE){
                                               expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
                                               expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
                                               expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
-  # Extract range of values
-  all_rows_df <- as.data.frame(matrix(NA, nrow = 0, ncol = 10))
-  names(all_rows_df) = c("num_taxa", "num_trees", "tree_depth",
-                         "variable",
-                         "min", "min_80",
-                         "max", "max_80",
-                         "mean", "median")
-
-  for (i in unique(exp1_long_df$variable)){
-    for (j in unique(exp1_long_df$num_taxa)){
-      for (k in unique(exp1_long_df$num_trees)){
-        for (l in unique(exp1_long_df$tree_depth))
-          subset_df <- exp1_long_df[(exp1_long_df$variable == i &
-                                       exp1_long_df$num_taxa == j &
-                                       exp1_long_df$num_trees == k &
-                                       exp1_long_df$tree_depth == l), ]
-        temp_row <- c(j, k, l,
-                      as.character(i),
-                      min(subset_df$value), min(sort(subset_df$value)[2:(length(subset_df$value) - 1)]),
-                      max(subset_df$value), max(sort(subset_df$value)[2:(length(subset_df$value) - 1)]),
-                      mean(subset_df$value), median(subset_df$value) )
-        temp_df <- as.data.frame(matrix(temp_row, nrow = 1, ncol = 10))
-        names(temp_df) = c("num_taxa", "num_trees", "tree_depth",
-                           "variable",
-                           "min", "min_80",
-                           "max", "max_80",
-                           "mean", "median")
-
-        all_rows_df <- rbind(all_rows_df, temp_row)
-        names(all_rows_df) = c("num_taxa", "num_trees", "tree_depth",
-                               "variable",
-                               "min", "min_80",
-                               "max", "max_80",
-                               "mean", "median")
-      }
-    }
-  }
-
-  summary_df <- all_rows_df
-  summary_df$num_taxa <- as.numeric(summary_df$num_taxa)
-  summary_df$num_trees <- as.numeric(summary_df$num_trees)
-  summary_df$tree_depth <- as.numeric(summary_df$tree_depth)
-  summary_df$min <- as.numeric(summary_df$min)
-  summary_df$min_80 <- as.numeric(summary_df$min_80)
-  summary_df$max <- as.numeric(summary_df$max)
-  summary_df$max_80 <- as.numeric(summary_df$max_80)
-  summary_df$mean <- as.numeric(summary_df$mean)
-  summary_df$median <- as.numeric(summary_df$median)
-  summary_df$var_label <- factor(summary_df$variable,
-                                 levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
-                                            "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                            "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
-                                 ordered = TRUE,
-                                 labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
-                                            expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                            expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
-                                            expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
 }
 
-ggplot(summary_df,
-       aes(x = num_trees, y = median, color = as.factor(num_taxa)) ) +
-  stat_smooth(method = "loess",
-              geom = "line",
-              linewidth = 1.2,
-              alpha = 0.8,
-              span = 0.75) +
-  geom_ribbon(data = summary_df, aes(ymin = min_80, ymax = max_80), color = "grey90") +
-  facet_grid(var_label ~ tree_depth,
-             scales = "free",
-             labeller = label_parsed) +
-  scale_color_viridis_d(direction = -1) +
-  guides(color = guide_legend(title = "Number of\ntaxa")) +
-  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-  scale_y_continuous(name = "Test statistic value")
-
-ggplot(summary_df,
-       aes(x = num_trees, y = median, color = as.factor(num_taxa)) ) +
-  geom_ribbon(data = summary_df, aes(ymin = min_80, ymax = max_80),
-              alpha = 0.2, color = "grey80", fill = "grey80") +
-  facet_grid(var_label ~ tree_depth,
-             scales = "free",
-             labeller = label_parsed) +
-  scale_color_viridis_d(direction = -1) +
-  guides(color = guide_legend(title = "Number of\ntaxa")) +
-  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-  scale_y_continuous(name = "Test statistic value")
 
 
 #### 4. Plot data from Experiment 1 ####
@@ -193,73 +109,13 @@ if (plot_exp1 == TRUE){
                              levels = c(5, 10, 20, 50, 100),
                              labels = c(5, 10, 20, 50, 100),
                              ordered = T)
-  # Remove Cunningham metric < 0
-  plot_df <- plot_df[which(plot_df$value > 0), ]
   # Set log10 minor breaks for x axis
   x_axis_minor_breaks <-  unique( c(seq(1, 10, 1),
                                     seq(10, 100, 10),
                                     seq(100, 1000, 100),
                                     seq(1000, 10000, 1000)))
-  # Construct plot with free y axis and log10 x axis
+  # Construct plot with fixed y axis and log10 x axis
   # Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
-  line_palette <- c("#fde725", "#5ec962", "#21918c", "#3b528b", "#440154")
-  ribbon_palette  <- c("#fef8be", "#cfefd0", "#aeedea", "#bdc8e3", "#e581fd")
-
-  ggplot(plot_df,
-         aes(x = num_trees, y = value,
-             color = num_taxa, fill = num_taxa) ) +
-    stat_smooth(method = "loess",
-                geom = "line") +
-    facet_grid(var_label ~ tree_depth,
-               scales = "free",
-               labeller = label_parsed) +
-    scale_color_manual(values = line_palette) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    scale_y_continuous(name = "Test statistic value",
-                       limits = c(0,1.10),
-                       breaks = c(0, 0.25, 0.5, 0.75, 1),
-                       labels = c(0, 0.25, 0.5, 0.75, 1)) +
-    scale_x_log10(minor_breaks = x_axis_minor_breaks)
-
-  ggplot(plot_df,
-         aes(x = num_trees, y = value,
-             color = num_taxa, fill = num_taxa) ) +
-    geom_smooth(stat = 'summary', alpha = 0.6,
-                fun.data = median_hilow, fun.args = list(conf.int = 1),
-                linewidth = 0) +
-    stat_smooth(method = "loess",
-                geom = "line",
-                linewidth = 1.2,
-                alpha = 1,
-                span = 0.8) +
-    facet_grid(var_label ~ tree_depth,
-               scales = "free",
-               labeller = label_parsed) +
-    scale_color_manual(values = line_palette) +
-    scale_fill_manual(values = ribbon_palette) +
-    guides(color = guide_legend(title = "Number of\ntaxa"),
-           fill = guide_legend(title = "Number of\ntaxa")) +
-    scale_y_continuous(name = "Test statistic value",
-                       limits = c(0,1.10),
-                       breaks = c(0, 0.25, 0.5, 0.75, 1),
-                       labels = c(0, 0.25, 0.5, 0.75, 1),
-                       oob=scales::rescale_none) +
-    scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Random Tree Simulations",
-         subtitle = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18),
-          axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18),
-          axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18),
-          legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
-          plot.subtitle = element_text(hjust = 0.5, size = 18))
-
   p <- ggplot(plot_df,
               aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
     geom_smooth(method = "loess",
@@ -297,55 +153,48 @@ if (plot_exp1 == TRUE){
           strip.text = element_text(size = 11),
           plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
           plot.subtitle = element_text(hjust = 0.5, size = 18))
+  # Save plot
+  plot_prefix <- "mainFig_exp1_plot1_tree_depth."
+  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
+  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
 
-
-
-  p_old <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) +
-    geom_smooth(method = "loess", alpha = 0.2, linewidth = 0, span = 0.75,
-                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.2, alpha = 0.7, span = 0.75) +
-    facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
+  # Construct plot with free y axis and log10 x axis
+  # Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
+  p <- ggplot(plot_df,
+              aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
+    geom_smooth(method = "loess",
+                alpha = 0.2,
+                linewidth = 0,
+                span = 0.75,
+                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)),
+                    ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
+    stat_smooth(method = "loess",
+                geom = "line",
+                linewidth = 1.2,
+                alpha = 0.7,
+                span = 0.75) +
+    facet_grid(var_label ~ tree_depth,
+               scales = "free",
+               labeller = label_parsed) +
     scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
+    scale_y_continuous(name = "Test statistic value") +
     scale_color_viridis_d(direction = -1) +
     guides(color = guide_legend(title = "Number of\ntaxa")) +
     labs(title = "Random Tree Simulations",
          subtitle = "Tree depth (substitutions per site)",
          x = expression("Number of trees ("*log[10]*" scale)")) +
     theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
+    theme(axis.title.x = element_text(size = 18),
+          axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+          axis.title.y = element_text(size = 18),
+          axis.text.y = element_text(size = 14),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16),
           strip.text = element_text(size = 11),
           plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
           plot.subtitle = element_text(hjust = 0.5, size = 18))
   # Save plot
-  plot_prefix <- "mainFig_exp1_plot1_tree_depth."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
-
-  # Construct plot with fixed y axis from 0-1, log axis
-  y_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  y_axis_labels <- c("0", "0.0001", "0.001", "0.01", "0.1", "1")
-  y_axis_breaks <- as.numeric(y_axis_labels)
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) +
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_log10(name = "Test statistic value", breaks = y_axis_breaks, labels = y_axis_labels, oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot1_tree_depth_logY."
+  plot_prefix <- "mainFig_exp1_plot1_tree_depth_freeY."
   ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
   ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
 
@@ -581,7 +430,8 @@ if (plot_exp3 == TRUE){
 
     # Construct plot with free y axis
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) +
-      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75,
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
       stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
       facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
       scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
@@ -653,7 +503,8 @@ if (plot_exp3 == TRUE){
 
     # Construct plot with free y axis
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(num_taxa))) +
-      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75,
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
       stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
       facet_grid(var_label~tree_age, scales = "free_y", labeller = label_parsed) +
       scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +
@@ -679,7 +530,8 @@ if (plot_exp3 == TRUE){
     plot_df <- plot_df[plot_df$recombination_type == "Ancient", ]
     # Construct plot
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) +
-      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75,
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
       stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
       facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
       scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.25), labels = seq(0,0.5, 0.25), minor_breaks = seq(0,0.5, 0.05)) +
@@ -726,7 +578,8 @@ if (plot_exp3 == TRUE){
     plot_df <- plot_df[plot_df$recombination_type == "Recent", ]
     # Construct plot
     p <- ggplot(plot_df, aes(x = recombination_value, y = value, color = as.factor(tree_age))) +
-      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
+      geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75,
+                  aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)), ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
       stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
       facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
       scale_x_continuous(name = "Proportion of recombinant DNA", breaks = seq(0,0.5, 0.1), labels = seq(0,0.5, 0.1), minor_breaks = seq(0,0.5, 0.05)) +

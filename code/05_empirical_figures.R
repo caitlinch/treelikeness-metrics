@@ -117,7 +117,7 @@ og_p_plot <- ggplot(data = og_p_df, aes(x = variable_label, fill = p_value_signi
   scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
   labs(title = "Original dataset") +
   scale_x_discrete(name = "Test statistic p-values") +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "Count\n(num. genes)") +
   guides(fill = "none") +
   theme_bw() +
   theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
@@ -129,9 +129,9 @@ og_p_plot <- ggplot(data = og_p_df, aes(x = variable_label, fill = p_value_signi
 filtered_p_plot <- ggplot(data = filtered_p_df, aes(x = variable_label, fill = p_value_significance)) +
   geom_bar() +
   scale_fill_manual(name = "p-value result", values = c("#67a9cf", "#ef8a62")) +
-  labs(title = "Orthology-enriched dataset") +
+  labs(title = "Filtered dataset") +
   scale_x_discrete(name = "Test statistic p-values") +
-  scale_y_continuous(name = "Count") +
+  scale_y_continuous(name = "Count\n(num. genes)") +
   theme_bw() +
   theme(axis.title.x = element_text(size = 16, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt")),
         axis.text.x = element_text(size = 14, margin = margin(t = 5, r = 0, b = 5, l = 0, unit = "pt"), hjust = 1, vjust = 1, angle = 45),
@@ -230,8 +230,8 @@ violin_df <- melt(gene_op_df,
                   measure.vars = c("tree_proportion_alignment_value", "sCF_mean_alignment_value", "mean_delta_plot_alignment_value"))
 # Create labels for plotting
 violin_df$dataset_label <- factor(violin_df$dataset,
-                                  levels = unique(violin_df$dataset),
-                                  labels = c("Original", "Orthology-\nenriched"),
+                                  levels = c("WEA17", "WEA17F"),
+                                  labels = c("Original", "Filtered"),
                                   ordered = TRUE)
 violin_df$variable_label <- factor(violin_df$variable,
                                    levels = c("tree_proportion_alignment_value", "sCF_mean_alignment_value", "mean_delta_plot_alignment_value"),
@@ -257,12 +257,28 @@ violin_plot <- ggplot(data = violin_df, aes(x = variable_label, y = value, fill 
         panel.grid.minor = element_line(linewidth = 0.6),
         panel.border = element_rect(linewidth = 1, fill = NA))
 # Save plot with significance markers
-violin_plot1 <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = T, size = 10)
+violin_plot1 <- violin_plot +
+  stat_compare_means(
+    method = "t.test",
+    paired = FALSE,
+    method.args = list(var.equal = TRUE),
+    aes(label = ..p.signif..),
+    label.y = c(0.9, 0.73, 0.6),
+    hide.ns = FALSE,
+    size = 10)
 violin_path1 <- paste0(plot_directory, "mainfig_gene_test_statistics_significance")
 ggsave(filename = paste0(violin_path1, ".png"), plot = violin_plot1)
 ggsave(filename = paste0(violin_path1, ".pdf"), plot = violin_plot1)
 # Save plot with p values
-violin_plot2 <- violin_plot + stat_compare_means(method = "t.test", aes(label = paste0("p=", ..p.format..)), label.y = c(0.9, 0.73, 0.6), size = 5)
+violin_plot2 <- violin_plot +
+  stat_compare_means(
+    method = "t.test",
+    paired = FALSE,
+    method.args = list(var.equal = TRUE),
+    aes(label = paste0("p=", ..p.format..)),
+    label.y = c(0.9, 0.73, 0.6),
+    size = 5
+  )
 violin_path2 <- paste0(plot_directory, "gene_test_statistics_pvalues")
 ggsave(filename = paste0(violin_path2, ".png"), plot = violin_plot2)
 ggsave(filename = paste0(violin_path2, ".pdf"), plot = violin_plot2)
@@ -279,8 +295,17 @@ quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplo
 ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
 ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
 # Save plot with significance markers
-violin_plot_sig <- violin_plot + stat_compare_means(method = "t.test", aes(label = ..p.signif..), label.y = c(0.9, 0.73, 0.6), hide.ns = F, size = 10,
-                                                    symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns")) )
+violin_plot_sig <- violin_plot +
+  stat_compare_means(
+    method = "t.test",
+    paired = FALSE,
+    method.args = list(var.equal = TRUE),
+    aes(label = ..p.signif..),
+    label.y = c(0.9, 0.73, 0.6),
+    hide.ns = F,
+    size = 10,
+    symnum.args = list(cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, 1), symbols = c("****", "***", "**", "*", "ns"))
+    )
 quilt <- violin_plot_sig/(og_p_plot + filtered_p_plot) +
   plot_layout(heights = c(1, 1)) +
   plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))
@@ -288,7 +313,12 @@ quilt_file <- paste0(plot_directory, "mainfig_gene_treelikeness_composite_boxplo
 ggsave(filename = paste0(quilt_file, ".pdf"), plot = quilt, width = 10, height = 12)
 ggsave(filename = paste0(quilt_file, ".png"), plot = quilt, width = 10, height = 12)
 # Save plot with p-values
-violin_plot_pval <- violin_plot + stat_compare_means(method = "t.test", aes(label = paste0("p=", ..p.format..)), label.y = c(0.9, 0.73, 0.6), size = 5)
+violin_plot_pval <- violin_plot +
+  stat_compare_means(
+    method = "t.test",
+    aes(label = paste0("p=", ..p.format..)),
+    label.y = c(0.9, 0.73, 0.6),
+    size = 5)
 quilt <- violin_plot_pval/(og_p_plot + filtered_p_plot) +
   plot_layout(heights = c(1, 1)) +
   plot_annotation(tag_levels = 'a', tag_suffix = ")") &  theme(plot.tag = element_text(size = 25))

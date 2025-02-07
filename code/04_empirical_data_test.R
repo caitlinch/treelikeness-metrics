@@ -25,11 +25,11 @@ if (run_location == "local"){
   output_directory                <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/05_empirical_treelikeness_results/"
   replicate_alignment_directory   <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/04_bs_replicate_alignments/"
   repo_directory                  <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
-  
+
   # Executable paths
   iqtree2_path      <- "iqtree2"
   splitstree_path   <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
-  
+
   # Run parameters
   num_cores <- 1
 } else if (run_location == "soma"){
@@ -37,11 +37,11 @@ if (run_location == "local"){
   output_directory                <- "/data/caitlin/treelikeness_metrics/empirical_treelikeness_output/"
   replicate_alignment_directory   <- "/data/caitlin/treelikeness_metrics/empirical_alignments/"
   repo_directory                  <- "/data/caitlin/treelikeness_metrics/"
-  
+
   # Executable paths
   iqtree2_path      <- "/data/caitlin/executables/iqtree-2.2.2-Linux/bin/iqtree2"
   splitstree_path   <- "/home/caitlin/splitstree4/SplitsTree"
-  
+
   # Run parameters
   num_cores <- 30
 }
@@ -70,7 +70,7 @@ if (control_parameters$apply.treelikeness.tests == TRUE){
     # Minimum of one process running at once
     mclapply_num_cores <- 1
   } else {
-    # Take floor of the decimal to run a conservative number of processes 
+    # Take floor of the decimal to run a conservative number of processes
     #     (e.g. if 31 cores and each IQ-Tree run uses 10, you can run 3 alignments at once)
     mclapply_num_cores <- floor(mclapply_num_cores)
   }
@@ -94,27 +94,29 @@ if (control_parameters$per.gene.analysis == TRUE){
   wea17f_partition_file <- grep("partitions", grep("Whelan2017_filtered", data_files, value = T), value = T)
   wea17f_gene_directory <- paste0(dirname(wea17f_alignment_file), "/")
   wea17f_gene_paths <- split.partitions(alignment_file = wea17f_alignment_file, partition_file = wea17f_partition_file, gene_output_directory = wea17f_gene_directory)
-  
+
   ## Assemble dataframe of genes
-  gene_df <- data.frame(dataset = c(rep("WEA17", length(wea17_gene_paths)), rep("WEA17F", length(wea17f_gene_paths))), 
+  gene_df <- data.frame(dataset = c(rep("WEA17", length(wea17_gene_paths)), rep("WEA17F", length(wea17f_gene_paths))),
                         gene = c(gsub(".fa", "", basename(wea17_gene_paths)), gsub(".fa", "", basename(wea17f_gene_paths))),
                         alignment_path = c(wea17_gene_paths, wea17f_gene_paths))
   gene_df$ID <- paste0(gene_df$dataset, ".", gene_df$gene)
-  
+
   ## For each gene: estimate tree, then apply metrics: tree proportion, sCF, and delta plots
   # Prepare output directory
   gene_output_directory <- paste0(output_directory, "genes/")
   if (dir.exists(gene_output_directory) == FALSE){dir.create(gene_output_directory)}
   # Apply metrics
-  gene_metrics <- lapply(2:nrow(gene_df), treelikeness.metrics.with.parametric.bootstrap, 
-                         df = gene_df, tl_output_directory = gene_output_directory, 
-                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path, 
-                         num_iqtree2_threads = "3", sequence_format = "AA", 
+  gene_metrics <- lapply(2:nrow(gene_df), treelikeness.metrics.with.parametric.bootstrap,
+                         df = gene_df, tl_output_directory = gene_output_directory,
+                         splitstree_path = splitstree_path, iqtree2_path = iqtree2_path,
+                         num_iqtree2_threads = "3", sequence_format = "AA",
                          redo = FALSE, number_parallel_cores = 1)
-  
+
   ## Collate and output the p-values
   pvalue_df <- as.data.frame(do.call(rbind, gene_metrics))
   write.csv(pvalue_df, file = paste0(repo_directory, "output/gene_treelikeness_pvalues.csv"), row.names = F)
 }
 
+
+#### 4. Calculate p-values and save output
 

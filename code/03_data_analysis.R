@@ -4,34 +4,21 @@
 # This program takes results from applying various treelikeness tests and
 # performs data analysis/plotting
 
+# Use the treelikeness-metrics RProject for this script
+
+
 
 #### 1. Set parameters ####
-# data_directory          <- Directory where alignments will be saved/treelikeness metrics will be run.
-# plot_directory.         <- Directory for output of data analysis/plots
-# repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions)
-
-# plot_exp1 <- either TRUE to plot experiment 1 results, or FALSE to skip
-# plot_exp3 <- either TRUE to plot experiment 3 results, or FALSE to skip
-
-location = "macbook"
-if (location == "work"){
-  data_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/01_results/"
-  plot_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/06_plots/"
-  repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
-} else if (location == "macbook"){
-  data_directory <- "/Users/caitlin/Documents/PhD/Ch02_treelikeness_metrics/data/"
-  plot_directory <- "/Users/caitlin/Documents/PhD/Ch02_treelikeness_metrics/plots/thesis_revisions/"
-  repo_directory <- "/Users/caitlin/Repositories/treelikeness-metrics/"
-}
-
-plot_exp1 = TRUE
-plot_exp3 = TRUE
+# data_directory <- Directory containing result csv files
+# plot_directory <- Directory for output of data analysis/plots
+data_directory <- "output/"
+plot_directory <- "plot/"
 
 
 
 #### 2. Prepare analyses ####
 # Source function files
-source(paste0(repo_directory, "code/func_data_analysis.R"))
+source("code/func_data_analysis.R")
 
 # Open packages
 library(scales)
@@ -42,278 +29,385 @@ library(patchwork)
 # List all data files
 data_files <- paste0(data_directory, list.files(data_directory))
 
-# Create subfolders for plots
-if (dir.exists(paste0(plot_directory, "pdf_plots/")) == FALSE){dir.create(paste0(plot_directory, "pdf_plots/"))}
-if (dir.exists(paste0(plot_directory, "png_plots/")) == FALSE){dir.create(paste0(plot_directory, "png_plots/"))}
-
-
 
 
 #### 3. Prepare data from Experiment 1 for plotting ####
-if (plot_exp1 == TRUE){
-  # Open data file from Experiment 1 as a dataframe
-  exp1_data_file <- grep("exp1", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE)
-  exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
+# Open data file from Experiment 1 as a dataframe
+exp1_data_file <- grep(
+  "exp1",
+  grep("treelikeness_metrics_collated_results", data_files, value = TRUE),
+  value = TRUE
+)
+exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
 
-  # Convert sCFL values to decimal from percentage
-  exp1_df$sCFL_mean <- exp1_df$sCFL_mean / 100
+# Convert sCFL values to decimal from percentage
+exp1_df$sCFL_mean <- exp1_df$sCFL_mean / 100
 
-  # Convert mean tiger value to numeric
-  # Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
-  #       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
-  exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
+# Convert mean tiger value to numeric
+# Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
+#       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
+exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
 
-  # Remove columns you don't want for plotting
-  exp1_wide_df <- exp1_df[, c("row_id", "uid", "num_taxa", "num_trees", "tree_depth",
-                              "tree_proportion", "Cunningham_test", "mean_delta_plot_value",
-                              "LM_proportion_resolved_quartets", "mean_Q_residual",
-                              "sCFL_mean", "mean_TIGER_value")]
+# Remove columns you don't want for plotting
+nonbinary_metrics <- c(
+  "tree_proportion",
+  "Cunningham_test",
+  "mean_delta_plot_value",
+  "LM_proportion_resolved_quartets",
+  "mean_Q_residual",
+  "sCFL_mean",
+  "mean_TIGER_value"
+)
+exp1_df <- exp1_df[, c(
+  "row_id",
+  "uid",
+  "num_taxa",
+  "num_trees",
+  "tree_depth",
+  nonbinary_metrics,
+  "NetworkTreelikenessTest"
+)]
 
-  # Melt exp1_wide_df for better plotting
-  exp1_long_df <- melt(exp1_wide_df, id.vars = c("row_id", "uid", "num_taxa", "num_trees", "tree_depth"))
+# Create data frame of summary statistics for the non-binary metrics
+exp1_summary_df <- as.data.frame(do.call(
+  rbind,
+  lapply(nonbinary_metrics, exp1.metric.statistics.wrapper, df = exp1_df)
+))
 
-  # Transform the Network Treelikeness Test results into more plottable format
-  # Make a table of all possible parameter values for the network treelikeness test
-  ntlt_params <- expand.grid("num_taxa" = unique(exp1_df$num_taxa), "num_trees" = unique(exp1_df$num_trees), "tree_depth" = unique(exp1_df$tree_depth))
-  # Calculate proportion of treelike alignments for each set of parameter values
-  prop_tl_results <- unlist(lapply(1:nrow(ntlt_params), reformat.network.treelikeness.test.results.exp1, params_df = ntlt_params, results_df = exp1_df))
-  # Add columns to match the exp1_long_df
-  ntlt_params$row_id <- rep(NA, length(prop_tl_results))
-  ntlt_params$uid <- rep(NA, length(prop_tl_results))
-  ntlt_params$value <- prop_tl_results
-  ntlt_params$variable <- "NetworkTreelikenessTest"
-  # Restructure the dataframe to match the exp1_long_df
-  ntlt_params <- ntlt_params[,c(names(exp1_long_df))]
-  # Bind to the exp1_long_df
-  exp1_long_df <- rbind(exp1_long_df, ntlt_params)
+# Reformat and bind the Network Treelikeness Test results
+exp1_summary_df <- rbind(exp1_summary_df,
+                         exp1.process.NetworkTreelikenessTest(exp1_df))
 
-  # Add fancy labels for facets
-  exp1_long_df$var_label <- factor(exp1_long_df$variable,
-                                   levels = c("tree_proportion", "Cunningham_test", "mean_delta_plot_value",
-                                              "LM_proportion_resolved_quartets","NetworkTreelikenessTest",
-                                              "mean_Q_residual", "sCFL_mean", "mean_TIGER_value"),
-                                   ordered = TRUE,
-                                   labels = c(expression(atop("Tree","proportion")), expression(atop("Cunningham","metric")),
-                                              expression(paste('Mean ', delta["q"])), expression(atop("Proportion","resolved quartets")),
-                                              expression(atop("Proportion","treelike alignments")), expression(atop("Mean", "Q-Residual value")),
-                                              expression(atop("Mean", "sCF value")), expression(atop("Mean","TIGER value"))) )
-}
+# Format the experiment 1 results for pretty plots
+exp1_df <- exp1.format.dataframe(exp1_df)
+exp1_summary_df <- exp1.format.summary.dataframe(exp1_summary_df)
+
+# Replace any Cunningham metric values <0 with 0
+# (for plotting purposes - to manage out of bounds values with free y axes)
+exp1_summary_squish_df <- exp1_summary_df
+exp1_summary_squish_df[which(exp1_summary_squish_df$minimum < 0), "minimum"] <- 0
+exp1_summary_squish_df[which(exp1_summary_squish_df$maximum > 1), "maximum"] <- 1
 
 
 
 #### 4. Plot data from Experiment 1 ####
-if (plot_exp1 == TRUE){
-  ## Plot 1: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree depth ##
-  # Set dataset for plot
-  plot_df <- exp1_long_df
-  plot_df$num_taxa <- factor(plot_df$num_taxa,
-                             levels = c(5, 10, 20, 50, 100),
-                             labels = c(5, 10, 20, 50, 100),
-                             ordered = T)
-  # Set log10 minor breaks for x axis
-  x_axis_minor_breaks <-  unique( c(seq(1, 10, 1),
-                                    seq(10, 100, 10),
-                                    seq(100, 1000, 100),
-                                    seq(1000, 10000, 1000)))
-  # Construct plot with fixed y axis and log10 x axis
-  # Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
-  p <- ggplot(plot_df,
-              aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
-    geom_smooth(method = "loess",
-                alpha = 0.2,
-                linewidth = 0,
-                span = 0.75,
-                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)),
-                    ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
-    stat_smooth(method = "loess",
-                geom = "line",
-                linewidth = 1.2,
-                alpha = 0.7,
-                span = 0.75) +
-    facet_grid(var_label ~ tree_depth,
-               scales = "fixed",
-               labeller = label_parsed) +
-    scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value",
-                       limits = c(0,1.10),
-                       breaks = c(0, 0.25, 0.5, 0.75, 1),
-                       labels = c(0, 0.25, 0.5, 0.75, 1),
-                       oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Random Tree Simulations",
-         subtitle = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18),
-          axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18),
-          axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18),
-          legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
-          plot.subtitle = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "mainFig_exp1_plot1_tree_depth."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
+# Set log10 minor breaks for x axis
+x_axis_minor_breaks <-  unique(c(
+  seq(1, 10, 1),
+  seq(10, 100, 10),
+  seq(100, 1000, 100),
+  seq(1000, 10000, 1000)
+))
 
-  # Construct plot with free y axis and log10 x axis
-  # Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
-  p <- ggplot(plot_df,
-              aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
-    geom_smooth(method = "loess",
-                alpha = 0.2,
-                linewidth = 0,
-                span = 0.75,
-                aes(ymin = ifelse(after_stat(ymin) < 0, 0, after_stat(ymin)),
-                    ymax = ifelse(after_stat(ymax) > 1, 1, after_stat(ymax)))) +
-    stat_smooth(method = "loess",
-                geom = "line",
-                linewidth = 1.2,
-                alpha = 0.7,
-                span = 0.75) +
-    facet_grid(var_label ~ tree_depth,
-               scales = "free",
-               labeller = label_parsed) +
-    scale_x_log10(minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value") +
-    scale_color_viridis_d(direction = -1) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Random Tree Simulations",
-         subtitle = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18),
-          axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18),
-          axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18),
-          legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 25, margin = margin(t = 0, r = 0, b = 15, l = 0)),
-          plot.subtitle = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "mainFig_exp1_plot1_tree_depth_freeY."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
-
-  # Construct plot with points not smoothed geom
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) +
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~tree_depth, scales = "fixed", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot1_tree_depth_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
-
-  # Construct plot with free y axis
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(num_taxa))) +
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~tree_depth, scales = "free_y", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1) +
-    guides(color = guide_legend(title = "Number of\ntaxa")) +
-    labs(title = "Tree depth (substitutions per site)",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot1_freey_tree_depth."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
+## Plot 1:
+# Lines showing median values for each test statistic as the number of trees
+# increases, faceted by tree depth
+#   - Log10 x-axis
+#   - Free y-axis for each test statistic
+#   - Use "squish" version of df to avoid the 2 minimum Cunningham values < 0
+exp1_plot1 <-
+  ggplot(exp1_summary_squish_df) +
+  geom_ribbon(aes(
+    x = num_trees,
+    ymin = minimum,
+    ymax = maximum,
+    fill = as.factor(num_taxa)
+  ),
+  alpha = 0.2) +
+  geom_line(aes(
+    x = num_trees,
+    y = median,
+    color = as.factor(num_taxa)
+  )) +
+  facet_grid(var_label ~ tree_depth, scales = "free", labeller = label_parsed) +
+  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Median test statistic value", oob = scales::squish) +
+  scale_color_viridis_d(direction = -1) +
+  scale_fill_viridis_d(direction = -1) +
+  guides(
+    color = guide_legend(title = "Number of\ntaxa"),
+    fill = guide_legend(title = "Number of\ntaxa")
+  ) +
+  labs(
+    title = "Random Tree Simulations",
+    subtitle = "Tree depth (substitutions per site)",
+    x = expression("Number of trees (" * log[10] * " scale)")
+  ) +
+  theme_bw() +
+  theme(
+    axis.title.x = element_text(
+      size = 18,
+      margin = margin(t = 15, r = 0, b = 0, l = 0)
+    ),
+    axis.text.x = element_text(
+      size = 14,
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    ),
+    axis.title.y = element_text(
+      size = 18,
+      margin = margin(t = 0, r = 15, b = 0, l = 0)
+    ),
+    axis.text.y = element_text(size = 14),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    strip.text = element_text(size = 10),
+    plot.title = element_text(
+      hjust = 0.5,
+      size = 25,
+      margin = margin(t = 0, r = 0, b = 15, l = 0)
+    ),
+    plot.subtitle = element_text(hjust = 0.5, size = 18)
+  )
+ggsave(exp1_plot1,
+       filename = paste0(plot_directory, "exp1_plot1_median_ribbon.pdf"),
+       width = 10,
+       height = 13,
+       units = "in"
+)
+ggsave(exp1_plot1,
+       filename = paste0(plot_directory, "exp1_plot1_median_ribbon.png"),
+       width = 10,
+       height = 13,
+       units = "in"
+)
 
 
-  ## Plot 2: Smooth lines showing average values for each test statistic as the number of trees increases, faceted by tree number of taxa ##
-  # Set dataset for plot
-  plot_df <- exp1_long_df
-  # Set log10 minor breaks for x axis
-  x_axis_minor_breaks <-  unique(c(seq(1, 10, 1), seq(10, 100, 10), seq(100, 1000, 100), seq(1000, 10000, 1000)))
-  # Construct plot  with fixed y axis from 0-1
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) +
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
-    labs(title = "Number of taxa",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot2_num_taxa."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
+## Plot 2:
+# Lines showing median values for each test statistic as the number of trees
+# increases, faceted by tree depth
+#   - Log10 x-axis
+#   - Free y-axis for each test statistic and each tree depth
+#   - Use "squish" version of df to avoid the 2 minimum Cunningham values < 0
+exp1_plot2_panel1 <-
+  ggplot(exp1_summary_squish_df[which(exp1_summary_squish_df$tree_depth == 0.01),]) +
+  geom_ribbon(aes(
+    x = num_trees,
+    ymin = minimum,
+    ymax = maximum,
+    fill = as.factor(num_taxa)
+  ),
+  alpha = 0.2) +
+  geom_line(aes(
+    x = num_trees,
+    y = median,
+    color = as.factor(num_taxa)
+  )) +
+  facet_grid(var_label ~ tree_depth, scales = "free", labeller = label_parsed) +
+  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Median test statistic value", oob = scales::squish) +
+  scale_color_viridis_d(direction = -1) +
+  scale_fill_viridis_d(direction = -1) +
+  guides(
+    color = guide_legend(title = "Number of\ntaxa"),
+    fill = guide_legend(title = "Number of\ntaxa")
+  ) +
+  labs(
+    title = "Random Tree Simulations",
+    subtitle = "Tree depth (substitutions per site)",
+    x = expression("Number of trees (" * log[10] * " scale)")
+  ) +
+  theme_bw() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(
+      size = 14,
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    ),
+    axis.title.y = element_text(
+      size = 18,
+      margin = margin(t = 0, r = 15, b = 0, l = 0)
+    ),
+    axis.text.y = element_text(size = 14),
+    legend.position = "none",
+    strip.text.x = element_text(size = 11),
+    strip.text.y = element_blank(),
+    plot.title = element_blank(),
+    plot.subtitle = element_blank()
+  )
 
-  # Construct plot  with points
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) +
-    geom_point(alpha = 0.4) +
-    facet_grid(var_label~num_taxa, scales = "fixed", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", limits = c(0,1.10), breaks = c(0, 0.25, 0.5, 0.75, 1), labels = c(0, 0.25, 0.5, 0.75, 1), oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
-    labs(title = "Number of taxa",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot2_num_taxa_points."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
+exp1_plot2_panel2 <-
+  ggplot(exp1_summary_squish_df[which(exp1_summary_squish_df$tree_depth == 0.1),]) +
+  geom_ribbon(aes(
+    x = num_trees,
+    ymin = minimum,
+    ymax = maximum,
+    fill = as.factor(num_taxa)
+  ),
+  alpha = 0.2) +
+  geom_line(aes(
+    x = num_trees,
+    y = median,
+    color = as.factor(num_taxa)
+  )) +
+  facet_grid(var_label ~ tree_depth, scales = "free", labeller = label_parsed) +
+  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Median test statistic value", oob = scales::squish) +
+  scale_color_viridis_d(direction = -1) +
+  scale_fill_viridis_d(direction = -1) +
+  guides(
+    color = guide_legend(title = "Number of\ntaxa"),
+    fill = guide_legend(title = "Number of\ntaxa")
+  ) +
+  labs(
+    title = "Random Tree Simulations",
+    subtitle = "Tree depth (substitutions per site)",
+    x = expression("Number of trees (" * log[10] * " scale)")
+  ) +
+  theme_bw() +
+  theme(
+    axis.title.x = element_text(
+      size = 18,
+      margin = margin(t = 15, r = 0, b = 0, l = 0)
+    ),
+    axis.text.x = element_text(
+      size = 14,
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    ),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 14),
+    legend.position = "none",
+    strip.text.x = element_text(size = 11),
+    strip.text.y = element_blank(),
+    plot.title = element_text(
+      hjust = 0.5,
+      size = 25,
+      margin = margin(t = 0, r = 0, b = 15, l = 0)
+    ),
+    plot.subtitle = element_text(
+      hjust = 0.5,
+      size = 18,
+      margin = margin(t = 0, r = 0, b = 15, l = 0)
+    )
+  )
 
-  # Construct plot  with free y axis
-  p <- ggplot(plot_df, aes(x = num_trees, y = value, color = as.factor(tree_depth))) +
-    geom_smooth(method = "loess", alpha = 0.3, linewidth = 0, span = 0.75) +
-    stat_smooth(method = "loess", geom = "line", linewidth = 1.1, alpha = 1, span = 0.75) +
-    facet_grid(var_label~num_taxa, scales = "free_y", labeller = label_parsed) +
-    scale_x_log10( minor_breaks = x_axis_minor_breaks) +
-    scale_y_continuous(name = "Test statistic value", oob=scales::rescale_none) +
-    scale_color_viridis_d(direction = -1, option = "C") +
-    guides(color = guide_legend(title = "Tree depth\n(substitutions\nper site)")) +
-    labs(title = "Number of taxa",
-         x = expression("Number of trees ("*log[10]*" scale)")) +
-    theme_bw() +
-    theme(axis.title.x = element_text(size = 18), axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
-          axis.title.y = element_text(size = 18), axis.text.y = element_text(size = 14),
-          legend.title = element_text(size = 18), legend.text = element_text(size = 16),
-          strip.text = element_text(size = 11),
-          plot.title = element_text(hjust = 0.5, size = 18))
-  # Save plot
-  plot_prefix <- "exp1_plot2_freey_num_taxa."
-  ggsave(p, filename = paste0(plot_directory, "/pdf_plots/", plot_prefix, "pdf"), width = 10, height = 13.5, units = "in")
-  ggsave(p, filename = paste0(plot_directory, "/png_plots/", plot_prefix, "png"), width = 10, height = 13.5, units = "in")
-}
+exp1_plot2_panel3 <-
+  ggplot(exp1_summary_squish_df[which(exp1_summary_squish_df$tree_depth == 1),]) +
+  geom_ribbon(aes(
+    x = num_trees,
+    ymin = minimum,
+    ymax = maximum,
+    fill = as.factor(num_taxa)
+  ),
+  alpha = 0.2) +
+  geom_line(aes(
+    x = num_trees,
+    y = median,
+    color = as.factor(num_taxa)
+  )) +
+  facet_grid(var_label ~ tree_depth, scales = "free", labeller = label_parsed) +
+  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(name = "Median test statistic value", oob = scales::squish) +
+  scale_color_viridis_d(direction = -1) +
+  scale_fill_viridis_d(direction = -1) +
+  guides(
+    color = guide_legend(title = "Number of\ntaxa"),
+    fill = guide_legend(title = "Number of\ntaxa")
+  ) +
+  labs(
+    title = "Random Tree Simulations",
+    subtitle = "Tree depth (substitutions per site)",
+    x = expression("Number of trees (" * log[10] * " scale)")
+  ) +
+  theme_bw() +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(
+      size = 14,
+      angle = 90,
+      vjust = 0.5,
+      hjust = 1
+    ),
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 14),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    strip.text.x = element_text(size = 11),
+    strip.text.y = element_text(size = 11),
+    plot.title = element_blank(),
+    plot.subtitle = element_blank()
+  )
 
+exp1_plot2 <-
+  exp1_plot2_panel1 + exp1_plot2_panel2 + exp1_plot2_panel3
+ggsave(exp1_plot2,
+       filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.pdf"),
+       width = 12,
+       height = 14,
+       units = "in"
+)
+ggsave(exp1_plot2,
+       filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.png"),
+       width = 12,
+       height = 14,
+       units = "in"
+)
+
+## Plot 3:
+# Dot plot of raw data
+#   - Log10 x-axis
+#   - Free y-axis for each column
+# Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
+exp1_plot3 <-
+  ggplot(exp1_df,
+         aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
+  geom_point(alpha = 0.4) +
+  facet_grid(var_label ~ tree_depth, scales = "free", labeller = label_parsed) +
+  scale_x_log10(minor_breaks = x_axis_minor_breaks) +
+  scale_y_continuous(
+    name = "Test statistic value",
+    limits = c(0,1.10),
+    breaks = c(0, 0.25, 0.5, 0.75, 1),
+    labels = c(0, 0.25, 0.5, 0.75, 1),
+    oob = scales::rescale_none) +
+  scale_color_viridis_d(direction = -1) +
+  guides(color = guide_legend(title = "Number of\ntaxa")) +
+  labs(title = "Tree depth\n(substitutions per site)",
+       x = expression("Number of trees (" * log[10] * " scale)")) +
+  theme_bw() +
+  theme(
+    axis.title.x = element_text(
+      size = 18,
+      margin = margin(
+        t = 15,
+        r = 0,
+        b = 0,
+        l = 0
+      )
+    ),
+    axis.text.x = element_text(size = 14, angle = 90, vjust = 0.5, hjust = 1),
+    axis.title.y = element_text(
+      size = 18,
+      margin = margin(
+        t = 0,
+        r = 15,
+        b = 0,
+        l = 0
+      )
+    ),
+    axis.text.y = element_text(size = 14),
+    legend.title = element_text(size = 18),
+    legend.text = element_text(size = 16),
+    strip.text = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 18)
+  )
+ggsave(exp1_plot3,
+       filename = paste0(plot_directory, "exp1_plot3_points.pdf"),
+       width = 10,
+       height = 13,
+       units = "in"
+)
+ggsave(exp1_plot3,
+       filename = paste0(plot_directory, "exp1_plot3_points.png"),
+       width = 10,
+       height = 13,
+       units = "in"
+)
 
 
 #### 5. Prepare data from Experiment 3 for plotting ####

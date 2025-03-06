@@ -188,7 +188,7 @@ exp1.format.summary.dataframe<- function(df){
         expression(atop("Mean", "TIGER value")),
         expression(paste('Mean ', delta["q"])),
         expression(atop("Mean", "Q-Residual value")),
-        expression(atop("Mean", "sCFL value")),
+        expression(atop("Mean", "sCF value")),
         expression(atop("Proportion", "resolved quartets")),
         expression(atop("Proportion", "treelike alignments"))
       )
@@ -292,7 +292,7 @@ exp1.format.dataframe<- function(df){
         expression(atop("Mean", "TIGER value")),
         expression(paste('Mean ', delta["q"])),
         expression(atop("Mean", "Q-Residual value")),
-        expression(atop("Mean", "sCFL value")),
+        expression(atop("Mean", "sCF value")),
         expression(atop("Proportion", "resolved quartets")),
         expression(atop("Proportion", "treelike alignments"))
       )

@@ -166,12 +166,12 @@ ggsave(exp1_plot1,
        height = 13,
        units = "in"
 )
-ggsave(exp1_plot1,
-       filename = paste0(plot_directory, "exp1_plot1_median_ribbon.png"),
-       width = 10,
-       height = 13,
-       units = "in"
-)
+# ggsave(exp1_plot1,
+#        filename = paste0(plot_directory, "exp1_plot1_median_ribbon.png"),
+#        width = 10,
+#        height = 13,
+#        units = "in"
+# )
 
 
 ## Plot 2:
@@ -341,12 +341,12 @@ ggsave(exp1_plot2,
        height = 14,
        units = "in"
 )
-ggsave(exp1_plot2,
-       filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.png"),
-       width = 12,
-       height = 14,
-       units = "in"
-)
+# ggsave(exp1_plot2,
+#        filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.png"),
+#        width = 12,
+#        height = 14,
+#        units = "in"
+# )
 
 ## Plot 3:
 # Dot plot of raw data
@@ -402,15 +402,76 @@ ggsave(exp1_plot3,
        height = 13,
        units = "in"
 )
-ggsave(exp1_plot3,
-       filename = paste0(plot_directory, "exp1_plot3_points.png"),
-       width = 10,
-       height = 13,
-       units = "in"
-)
+# ggsave(exp1_plot3,
+#        filename = paste0(plot_directory, "exp1_plot3_points.png"),
+#        width = 10,
+#        height = 13,
+#        units = "in"
+# )
 
 
 #### 5. Prepare data from Experiment 3 for plotting ####
+# Open data file from Experiment 1 as a dataframe
+exp3_data_file <- grep("00_",
+                       grep(
+                         "exp3",
+                         grep("treelikeness_metrics_collated_results", data_files, value = TRUE),
+                         value = TRUE
+                       ),
+                       value = TRUE,
+                       invert = TRUE)
+exp3_df <- read.csv(file = exp3_data_file, stringsAsFactors = FALSE)
+
+# Convert sCFL values to decimal from percentage
+exp1_df$sCFL_mean <- exp1_df$sCFL_mean / 100
+
+# Convert mean tiger value to numeric
+# Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
+#       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
+exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
+
+# Remove columns you don't want for plotting
+nonbinary_metrics <- c(
+  "tree_proportion",
+  "Cunningham_test",
+  "mean_delta_plot_value",
+  "LM_proportion_resolved_quartets",
+  "mean_Q_residual",
+  "sCFL_mean",
+  "mean_TIGER_value"
+)
+exp1_df <- exp1_df[, c(
+  "row_id",
+  "uid",
+  "num_taxa",
+  "num_trees",
+  "tree_depth",
+  nonbinary_metrics,
+  "NetworkTreelikenessTest"
+)]
+
+# Create data frame of summary statistics for the non-binary metrics
+exp1_summary_df <- as.data.frame(do.call(
+  rbind,
+  lapply(nonbinary_metrics, exp1.metric.statistics.wrapper, df = exp1_df)
+))
+
+# Reformat and bind the Network Treelikeness Test results
+exp1_summary_df <- rbind(exp1_summary_df,
+                         exp1.process.NetworkTreelikenessTest(exp1_df))
+
+# Format the experiment 1 results for pretty plots
+exp1_df <- exp1.format.dataframe(exp1_df)
+exp1_summary_df <- exp1.format.summary.dataframe(exp1_summary_df)
+
+# Replace any Cunningham metric values <0 with 0
+# (for plotting purposes - to manage out of bounds values with free y axes)
+exp1_summary_squish_df <- exp1_summary_df
+exp1_summary_squish_df[which(exp1_summary_squish_df$minimum < 0), "minimum"] <- 0
+exp1_summary_squish_df[which(exp1_summary_squish_df$maximum > 1), "maximum"] <- 1
+
+
+
 if (plot_exp3 == TRUE){
   ## Open data file from Experiment 3 as a dataframe
   exp3_data_file <- grep("00_", grep("exp3", grep("treelikeness_metrics_collated_results", data_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE)

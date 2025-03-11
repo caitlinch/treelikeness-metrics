@@ -21,6 +21,7 @@ save.png <- TRUE
 #### 2. Prepare analyses ####
 # Source function files
 source("code/func_data_analysis.R")
+source("code/func_plotting.R")
 
 # Open packages
 library(scales)
@@ -160,19 +161,21 @@ exp1_plot1 <-
       size = 25,
       margin = margin(t = 0, r = 0, b = 15, l = 0)
     ),
-    plot.subtitle = element_text(hjust = 0.5, size = 18)
+    plot.subtitle = element_text(hjust = 0.5, size = 18),
+    panel.spacing.x = unit(0.75, units = "lines"),
+    panel.spacing.y = unit(0.75, units = "lines")
   )
 ggsave(exp1_plot1,
        filename = paste0(plot_directory, "exp1_plot1_median_ribbon.pdf"),
-       width = 10,
-       height = 13,
+       width = 11,
+       height = 14,
        units = "in"
 )
 if (save.png){
   ggsave(exp1_plot1,
          filename = paste0(plot_directory, "exp1_plot1_median_ribbon.png"),
-         width = 10,
-         height = 13,
+         width = 11,
+         height = 14,
          units = "in"
   )
 }
@@ -230,7 +233,8 @@ exp1_plot2_panel1 <-
     strip.text.x = element_text(size = 11),
     strip.text.y = element_blank(),
     plot.title = element_blank(),
-    plot.subtitle = element_blank()
+    plot.subtitle = element_blank(),
+    panel.spacing.y = unit(0.85, units = "lines")
   )
 
 exp1_plot2_panel2 <-
@@ -287,7 +291,8 @@ exp1_plot2_panel2 <-
       hjust = 0.5,
       size = 18,
       margin = margin(t = 0, r = 0, b = 15, l = 0)
-    )
+    ),
+    panel.spacing.y = unit(0.85, units = "lines")
   )
 
 exp1_plot2_panel3 <-
@@ -334,7 +339,8 @@ exp1_plot2_panel3 <-
     strip.text.x = element_text(size = 11),
     strip.text.y = element_text(size = 11),
     plot.title = element_blank(),
-    plot.subtitle = element_blank()
+    plot.subtitle = element_blank(),
+    panel.spacing.y = unit(0.85, units = "lines")
   )
 
 exp1_plot2 <-
@@ -342,14 +348,14 @@ exp1_plot2 <-
 ggsave(exp1_plot2,
        filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.pdf"),
        width = 12,
-       height = 14,
+       height = 15,
        units = "in"
 )
 if (save.png){
   ggsave(exp1_plot2,
          filename = paste0(plot_directory, "exp1_plot2_median_ribbon_freeY.png"),
          width = 12,
-         height = 14,
+         height = 15,
          units = "in"
   )
 }
@@ -358,7 +364,7 @@ if (save.png){
 # Dot plot of raw data
 #   - Log10 x-axis
 #   - Free y-axis for each column
-# Note: 150 NAs from TIGER, 2 values < 0 from Cunningham metric
+# Note: 150 NA's from TIGER, 2 values < 0 from Cunningham metric
 exp1_plot3 <-
   ggplot(exp1_df,
          aes(x = num_trees, y = value, color = as.factor(num_taxa)) ) +
@@ -400,7 +406,8 @@ exp1_plot3 <-
     legend.title = element_text(size = 18),
     legend.text = element_text(size = 16),
     strip.text = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, size = 18)
+    plot.title = element_text(hjust = 0.5, size = 18),
+    panel.spacing = unit(0.75, units = "lines")
   )
 ggsave(exp1_plot3,
        filename = paste0(plot_directory, "exp1_plot3_points.pdf"),
@@ -569,7 +576,8 @@ for (i in 1:length(plot_list)){
         size = 25,
         margin = margin(t = 0, r = 0, b = 15, l = 0)
       ),
-      plot.subtitle = element_text(size = 18, hjust = 0.5)
+      plot.subtitle = element_text(size = 18, hjust = 0.5),
+      panel.spacing = unit(0.75, units = "lines")
     )
 
   plot_file_suffix <- paste0(
@@ -666,7 +674,8 @@ for (i in 1:length(plot_list)){
       strip.text.x = element_text(size = 11),
       strip.text.y = element_blank(),
       plot.title = element_blank(),
-      plot.subtitle = element_blank()
+      plot.subtitle = element_blank(),
+      panel.spacing.y = unit(0.85, units = "lines")
     )
 
   exp3_plot2_p2 <-
@@ -724,7 +733,8 @@ for (i in 1:length(plot_list)){
         hjust = 0.5,
         size = 18,
         margin = margin(t = 0, r = 0, b = 15, l = 0)
-      )
+      ),
+      panel.spacing.y = unit(0.85, units = "lines")
     )
 
   exp3_plot2_p3 <-
@@ -772,7 +782,8 @@ for (i in 1:length(plot_list)){
       strip.text.x = element_text(size = 11),
       strip.text.y = element_text(size = 11),
       plot.title = element_blank(),
-      plot.subtitle = element_blank()
+      plot.subtitle = element_blank(),
+      panel.spacing.y = unit(0.85, units = "lines")
     )
 
   exp3_plot2 <-
@@ -785,15 +796,15 @@ for (i in 1:length(plot_list)){
   )
   ggsave(exp3_plot2,
          filename = paste0(plot_directory, "exp3_plot2_", plot_file_suffix, "_median_ribbon_freeY.pdf"),
-         width = 10,
-         height = 13,
+         width = 12,
+         height = 15,
          units = "in"
   )
   if (save.png){
     ggsave(exp3_plot2,
            filename = paste0(plot_directory, "exp3_plot2_", plot_file_suffix, "_median_ribbon_freeY.png"),
-           width = 10,
-           height = 13,
+           width = 12,
+           height = 15,
            units = "in"
     )
   }
@@ -871,7 +882,8 @@ for (i in 1:length(plot_list)){
         size = 25,
         margin = margin(t = 0, r = 0, b = 15, l = 0)
       ),
-      plot.subtitle = element_text(size = 18, hjust = 0.5)
+      plot.subtitle = element_text(size = 18, hjust = 0.5),
+      panel.spacing = unit(0.75, units = "lines")
     )
 
   plot_file_suffix <- paste0(

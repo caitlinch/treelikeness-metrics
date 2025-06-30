@@ -47,7 +47,7 @@ if (run_location == "dayhoff"){
   repo_directory          <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/"
   simulation_directory    <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
   iqtree2_path            <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/software/iqtree-2.2.2.6-Linux/bin/iqtree2"
-  number_parallel_threads <- 30
+  number_parallel_threads <- 20
 } else if (run_location == "WSL"){
   repo_directory          <- ""
   simulation_directory    <- "suppA/"

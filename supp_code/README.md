@@ -7,7 +7,16 @@ output: html_document
 
 ## On Dayhoff:
 
-From home, after logging in:
+From home, after logging in (Conda):
+```
+cd treelikeness_supp
+conda activate /mnt/data/dayhoff/home/u5348329/treelikeness_supp/envs
+```
+
+
+## On Dayhoff (DEPRECATED):
+
+From home, after logging in (Mamba):
 ```
 cd treelikeness_supp
 module load mamba

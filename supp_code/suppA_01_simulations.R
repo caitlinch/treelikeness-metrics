@@ -39,7 +39,7 @@
 ## CONTROL PARAMETERS
 parameter.values    <- TRUE
 run.experiment.A1   <- TRUE
-run.experiment.A2   <- FALSE
+run.experiment.A2   <- TRUE
 
 ## DIRECTORY PATHS
 run_location = "dayhoff"
@@ -51,8 +51,9 @@ if (run_location == "dayhoff"){
 } else if (run_location == "WSL"){
   repo_directory          <- ""
   simulation_directory    <- "suppA/"
-  iqtree_path             <- "iqtree2"
+  iqtree2_path             <- "iqtree2"
   number_parallel_threads <- 1
+  if (dir.exists(simulation_directory) == FALSE){dir.create(simulation_directory)}
 }
 
 ## SIMULATION PARAMETERS

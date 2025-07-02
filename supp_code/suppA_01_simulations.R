@@ -37,8 +37,8 @@
 
 
 ## CONTROL PARAMETERS
-parameter.values    <- TRUE
-run.experiment.A1   <- TRUE
+parameter.values    <- FALSE
+run.experiment.A1   <- FALSE
 run.experiment.A2   <- TRUE
 
 ## DIRECTORY PATHS
@@ -47,7 +47,7 @@ if (run_location == "dayhoff"){
   repo_directory          <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/"
   simulation_directory    <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
   iqtree2_path            <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/software/iqtree-2.2.2.6-Linux/bin/iqtree2"
-  number_parallel_threads <- 20
+  number_parallel_threads <- 10
 } else if (run_location == "WSL"){
   repo_directory          <- ""
   simulation_directory    <- "suppA/"
@@ -59,23 +59,23 @@ if (run_location == "dayhoff"){
 ## SIMULATION PARAMETERS
 if (parameter.values == TRUE){
   # Experiment SA1
-  SA1_total_alignment_length      <- 10000
-  SA1_num_taxa                    <- c(5, seq(10, 100, 10))
-  SA1_num_trees                   <- c(1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000)
+  SA1_alignment_length            <- 10000
+  SA1_num_taxa                    <- seq(10, 100, 10)
+  SA1_num_trees                   <- 1
   SA1_sequence_type               <- "DNA"
-  SA1_tree_depth                  <- c(0.1, 1)
-  SA1_reps                        <- 1:10
+  SA1_tree_depth                  <- c(0.01, 0.1, 1)
+  SA1_reps                        <- 1:100
   SA1_alisim_gene_models          <- "JC"
   SA1_alisim_gene_tree_length     <- NA
   # Experiment SA2
-  SA2_num_taxa                    <- c(5, 10, 20, 50, 100)
-  SA2_num_trees                   <- c(1, 2, 5, 10)
+  SA2_num_taxa                    <- 100
+  SA2_num_trees                   <- 1:10
   SA2_sequence_type               <- "DNA"
-  SA2_tree_depth                  <- c(0.1, 1)
-  SA2_reps                        <- 1:10
+  SA2_tree_depth                  <- 1.0
+  SA2_reps                        <- 1:100
   SA2_alisim_gene_models          <- "JC"
   SA2_alisim_gene_tree_length     <- NA
-  SA2_alisim_gene_length          <- 10000
+  SA2_alignment_length            <- 10000 * 1:10
 }
 
 #### 02. Prepare packages and functions ####
@@ -102,7 +102,7 @@ if (run.experiment.A1 == TRUE){
   if(!file.exists(expA1_dir)){dir.create(expA1_dir)}
   # Create file path for parameters csv
   expA1_df_path <- paste0(simulation_directory, "expA1_parameters.csv")
-
+  # Open or create parameters dataframe
   if (file.exists(expA1_df_path) == TRUE){
     expA1_params <- read.csv(expA1_df_path)
   } else {
@@ -111,10 +111,11 @@ if (run.experiment.A1 == TRUE){
       "num_reps" = SA1_reps,
       "num_taxa" = SA1_num_taxa,
       "num_trees" = SA1_num_trees,
-      "tree_depth" = SA1_tree_depth
+      "tree_depth" = SA1_tree_depth,
+      "total_alignment_length"= SA1_alignment_length
     )
     # Add a unique identifier (uid):
-    #   {experiment}_{number of trees}_{number of taxa}_{replicate number}_{tree_depth}
+    # expA1_{num. trees}_{num. taxa}_{rep. num.}_{tree_depth}_{alnmt. length}
     expA1_params$uid <- paste0(
       "expA1_",
       sprintf("%05d", expA1_params$num_trees),
@@ -123,23 +124,22 @@ if (run.experiment.A1 == TRUE){
       "_",
       sprintf("%03d", expA1_params$num_reps),
       "_",
-      expA1_params$tree_depth
+      expA1_params$tree_depth,
+      "_",
+      paste0(expA1_params$total_alignment_length/1000, "kbp")
     )
     # Add parameters for Alisim
     expA1_params$alisim_gene_models <- SA1_alisim_gene_models
     expA1_params$alisim_gene_tree_length <- SA1_alisim_gene_tree_length
     # Add other parameters
-    expA1_params$total_alignment_length <- SA1_total_alignment_length
     expA1_params$sequence_type <- SA1_sequence_type
     # Add names for the tree file, partition file and output alignment file for each simulated alignment
     expA1_params$tree_file <- paste0(expA1_params$uid, "_random_trees.phy")
     expA1_params$partition_file <- paste0(expA1_params$uid, "_partitions.nex")
     expA1_params$output_alignment_file <- paste0(expA1_params$uid, "_output_alignment")
-
     # Write expA1_params dataframe to file as a csv
     write.csv(expA1_params, file = expA1_df_path, row.names = TRUE)
   }
-
   # Iterate through each row in the parameters dataframe
   if (number_parallel_threads == 1) {
     expA1_op_list <- lapply(
@@ -159,7 +159,6 @@ if (run.experiment.A1 == TRUE){
       mc.cores = number_parallel_threads
     )
   }
-
   # Change output file names from list to dataframe
   expA1_op_df <- as.data.frame(do.call(rbind, expA1_op_list))
   expA1_op_df_path <- paste0(simulation_directory, "expA1_file_output_paths.csv")
@@ -180,7 +179,7 @@ if (run.experiment.A2 == TRUE){
   if(!file.exists(expA2_dir)){dir.create(expA2_dir)}
   # Create file path for parameters csv
   expA2_df_path <- paste0(simulation_directory, "expA2_parameters.csv")
-
+  # Open or create parameters dataframe
   if (file.exists(expA2_df_path) == TRUE){
     expA2_params <- read.csv(expA2_df_path)
   } else {
@@ -189,10 +188,11 @@ if (run.experiment.A2 == TRUE){
       "num_reps" = SA2_reps,
       "num_taxa" = SA2_num_taxa,
       "num_trees" = SA2_num_trees,
-      "tree_depth" = SA2_tree_depth
+      "tree_depth" = SA2_tree_depth,
+      "total_alignment_length" = SA2_alignment_length
     )
     # Add a unique identifier (uid):
-    #   {experiment}_{number of trees}_{number of taxa}_{replicate number}_{tree_depth}
+    # expA1_{num. trees}_{num. taxa}_{rep. num.}_{tree_depth}_{alnmt. length}
     expA2_params$uid <- paste0(
       "expA2_",
       sprintf("%05d", expA2_params$num_trees),
@@ -201,23 +201,22 @@ if (run.experiment.A2 == TRUE){
       "_",
       sprintf("%03d", expA2_params$num_reps),
       "_",
-      expA2_params$tree_depth
+      expA2_params$tree_depth,
+      "_",
+      paste0(expA2_params$total_alignment_length/1000, "kbp")
     )
     # Add parameters for Alisim
     expA2_params$alisim_gene_models <- SA2_alisim_gene_models
     expA2_params$alisim_gene_tree_length <- SA2_alisim_gene_tree_length
     # Add other parameters
-    expA2_params$total_alignment_length <- expA2_params$num_trees * SA2_alisim_gene_length
     expA2_params$sequence_type <- SA2_sequence_type
     # Add names for the tree file, partition file and output alignment file for each simulated alignment
     expA2_params$tree_file <- paste0(expA2_params$uid, "_random_trees.phy")
     expA2_params$partition_file <- paste0(expA2_params$uid, "_partitions.nex")
     expA2_params$output_alignment_file <- paste0(expA2_params$uid, "_output_alignment")
-
     # Write expA2_params dataframe to file as a csv
     write.csv(expA2_params, file = expA2_df_path, row.names = TRUE)
   }
-
   # Iterate through each row in the parameters dataframe
   if (number_parallel_threads == 1) {
     expA2_op_list <- lapply(
@@ -237,10 +236,10 @@ if (run.experiment.A2 == TRUE){
       mc.cores = number_parallel_threads
     )
   }
-
   # Change output file names from list to dataframe
   expA2_op_df <- as.data.frame(do.call(rbind, expA2_op_list))
   expA2_op_df_path <- paste0(simulation_directory, "expA2_file_output_paths.csv")
   write.csv(expA2_op_df, file = expA2_op_df_path, row.names = TRUE)
 }
+
 

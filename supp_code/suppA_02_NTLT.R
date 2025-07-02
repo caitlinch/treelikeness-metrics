@@ -32,10 +32,10 @@ if (run_location == "WSL"){
 
   # Executable paths
   iqtree2_path <- "iqtree2"
-  splitstree_path <-
+  splitstree_path <- ""
 
-    # Run parameters
-    num_cores <- 1
+  # Run parameters
+  num_cores <- 1
 } else if (run_location == "dayhoff"){
   # Directories
   local_directory <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
@@ -84,6 +84,7 @@ if (run_expA1 == TRUE){
   expA1_op_df <- read.csv(expA1_op_file, stringsAsFactors = FALSE)
   # Call NTLT wrapper function on each row of the expA1_op_df
   if (num_cores == 1){
+    # Apply sequentially
     lapply(
       1:nrow(expA1_op_df),
       network.treelikeness.test.wrapper,
@@ -93,16 +94,17 @@ if (run_expA1 == TRUE){
       iqtree2_num_threads = 2
     )
   } else {
+    # Apply in parallel
     mclapply(
       1:nrow(expA1_op_df),
       network.treelikeness.test.wrapper,
       alignment_dataframe = expA1_op_df,
       splitstree_path = splitstree_path,
       iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 2,
-      mc.cores = num_cores/2)
+      iqtree2_num_threads = 1,
+      mc.cores = num_cores
+    )
   }
-
   # Collect all output files
   expA1_ntlt_csvs <- paste0(
     results_directory,
@@ -112,11 +114,9 @@ if (run_expA1 == TRUE){
       grep("expA1_",
            list.files(
              paste0(results_directory, "exp_A1/"),
-             recursive = TRUE,
-             value = TRUE),
-           value = TRUE
-      )
-    )
+             recursive = TRUE),
+           value = TRUE),
+      value = TRUE)
   )
   # Read in all output files and collate
   expA1_ntlt_rows <- lapply(
@@ -133,7 +133,6 @@ if (run_expA1 == TRUE){
 
 if (run_expA2 == TRUE){
   ## For experiment A2:
-  ## For experiment 1:
   # Extract all csv files from results dir
   csv_files = grep(".csv",
                    list.files(results_directory, include.dirs = FALSE),
@@ -148,25 +147,27 @@ if (run_expA2 == TRUE){
   expA2_op_df <- read.csv(expA2_op_file, stringsAsFactors = FALSE)
   # Call NTLT wrapper function on each row of the expA2_op_df
   if (num_cores == 1){
+    # Apply sequentially
     lapply(
       1:nrow(expA2_op_df),
       network.treelikeness.test.wrapper,
       alignment_dataframe = expA2_op_df,
       splitstree_path = splitstree_path,
       iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 2
+      iqtree2_num_threads = 1
     )
   } else {
+    # Apply in parallel
     mclapply(
       1:nrow(expA2_op_df),
       network.treelikeness.test.wrapper,
       alignment_dataframe = expA2_op_df,
       splitstree_path = splitstree_path,
       iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 2,
-      mc.cores = num_cores/2)
+      iqtree2_num_threads = 1,
+      mc.cores = num_cores
+    )
   }
-
   # Collect all output files
   expA2_ntlt_csvs <- paste0(
     results_directory,
@@ -176,11 +177,9 @@ if (run_expA2 == TRUE){
       grep("expA2_",
            list.files(
              paste0(results_directory, "exp_A2/"),
-             recursive = TRUE,
-             value = TRUE),
-           value = TRUE
-      )
-    )
+             recursive = TRUE),
+           value = TRUE),
+      value = TRUE)
   )
   # Read in all output files and collate
   expA2_ntlt_rows <- lapply(

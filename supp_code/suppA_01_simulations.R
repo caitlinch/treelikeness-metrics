@@ -9,32 +9,25 @@
 
 #### 01. Set parameters ####
 ## CONTROL PARAMETERS
-# parameter.values  <- Control flag for creating the simulation parameter values (TRUE to create objects containing simulation parameter values)
-# run.experiment.A1 <- Control flag for experiment A1 (TRUE to run code to generate simulations for Experiment A1)
-# run.experiment.A2 <- Control flag for experiment A2 (TRUE to run code to generate simulations for Experiment A2)
+# parameter.values  <- TRUE to input simulation parameter values
+# run.experiment.A1 <- TRUE to run code to generate simulations for Exp. A1
+# run.experiment.A2 <- TRUE to run code to generate simulations for Exp. A2
 
 ## DIRECTORY PATHS
 # simulation_directory    <- Directory where alignments will be saved/treelikeness metrics will be run.
 # repo_directory          <- Location of caitlinch/treelikeness-metrics github repository (for access to functions).
-# ms_path                 <- Path to ms executable
 # iqtree2_path            <- Path to IQ-Tree2 executable (version 2.2-beta or later to ensure Alisim is included).
 # number_parallel_threads <- Number of threads to run simultaneously in mclapply when generating alignments
 
 ## SIMULATION PARAMETERS
-# total_alignment_length      <- Total length of concatenated alignments in base pairs (we chose 10000) for the random tree analyses (experiment 1).
-# gene_length                 <- Length of each gene generated in ms. Total alignment length will be length of each gene multiplied by number of gene trees.
-#                                 For Total Alignment Length = 10000, use 100 gene trees of 100 bp each.
-# sequence_type               <- Sequence type for simulation (we chose "DNA").
-# taxa_vec                    <- Number of taxa to simulate (we chose 10,20,50,100,200,500, and 1000).
-# num_reps                    <- Number of replicates to run for each set of simulation conditions (we chose 10). Must be >= 1.
-# tree_depth_random_sims      <- One or more values for the tree length of randomly generated trees (in substitutions per site).
-# tree_depth_coalescent_sims  <- One or more values for the tree length of coalescent trees (in coalescent units).
-# speciation_rates            <- One of more values for the speciation rate for the introgression simulations (experiment 3)
-# number_gene_trees           <- Number of gene trees to generate for coalescent simulations
-# r_vec                       <- Values of introgression (we chose from 0 to 1 in intervals of 0.05)
-# alisim_gene_models          <- Model of sequence evolution for Alisim
-# alisim_gene_tree_length     <- Gene-specific tree length for Alisim
-
+# *_num_taxa                  <- Number of taxa
+# *_num_trees                 <- Number of random trees to generate
+# *_sequence_type             <- Sequence type for simulation ("DNA")
+# *_tree_depth                <- One or more values for the tree length of randomly generated trees (substitutions per site)
+# *_reps                      <- Number of replicates to run for each set of simulation conditions (>= 1)
+# *_alisim_gene_models        <- Model of sequence evolution for Alisim
+# *_alisim_gene_tree_length   <- Gene-specific tree length for Alisim
+# *_alignment_length          <- Total length of concatenated alignments in base pairs
 
 ## CONTROL PARAMETERS
 parameter.values    <- FALSE
@@ -77,6 +70,7 @@ if (parameter.values == TRUE){
   SA2_alisim_gene_tree_length     <- NA
   SA2_alignment_length            <- 10000 * 1:10
 }
+
 
 #### 02. Prepare packages and functions ####
 # Load packages

@@ -24,7 +24,7 @@ mamba install <package_name>
 ## R packages location (Dayhoff)
 `/tmp/RtmpJNryzw/downloaded_packages`
 
-## Checking progress of NTLT
+## Checking progress of Supp A: NTLT
 In BASH:
 ```
 expA1_dir=/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/
@@ -44,11 +44,45 @@ num_A1_complete <- length(grep("NTLT_results.csv", list.files(expA1_dir, recursi
 pc_A1_complete <- round(num_A1_complete/3000*100, digits = 2)
 num_A2_complete <- length(grep("NTLT_results.csv", list.files(expA2_dir, recursive = TRUE)))
 pc_A2_complete <- round(num_A2_complete/10000*100, digits = 2)
-status <- c(
-paste0("Exp A1 complete: ", num_A1_complete, " of 3000 (", pc_A1_complete, "%)"),
-paste0("Exp A2 complete: ", num_A2_complete, " of 10,000(", pc_A2_complete, "%)")
+status <- paste0(
+    "Exp A1 complete: ", 
+    num_A1_complete, 
+    " of 3000 (", 
+    pc_A1_complete, 
+    "%) ; Exp A2 complete: ", 
+    num_A2_complete, 
+    " of 10,000 (", 
+    pc_A2_complete, 
+    "%)"
 )
 print(status)
 ```
+
+## Checking progress of Supp B: LM
+
+In R:
+```{r}
+results_dir = "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppB/"
+expB1_dir <- paste0(results_dir, "exp_B1/")
+expB2_dir <- paste0(results_dir, "exp_B2/")
+num_B1_complete <- length(grep("LM_results.csv", list.files(expB1_dir, recursive = TRUE)))
+pc_B1_complete <- round(num_B1_complete/3750*100, digits = 2)
+num_B2_complete <- length(grep("LM_results.csv", list.files(expB2_dir, recursive = TRUE)))
+pc_B2_complete <- round(num_B2_complete/5940*100, digits = 2)
+status <- paste0(
+    "Exp B1 complete: ",
+    num_B1_complete,
+    " of 3750 (",
+    pc_B1_complete,
+    "%) ; Exp B2 complete: ",
+    num_B2_complete,
+    " of 5940 (",
+    pc_B2_complete,
+    "%)"
+)
+print(status)
+```
+
+
 
 

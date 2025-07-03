@@ -7,6 +7,7 @@
 ## Open packages
 library(treestats) # for calculating treeness of quartets
 library(Quartet) # for extracting quartets from phylogenetic tree
+library(parallel) # for multithreading quartet treeness
 
 
 
@@ -22,66 +23,79 @@ likelihood.mapping.wrapper <- function(
   row <- alignment_dataframe[row_number, ]
   rownames(row) <- NULL
   # Create results file for the row
-  row_results_file = gsub(
+  row_results_file <- gsub(
     "output_alignment.fa",
     "LM_results.csv",
     row$output_alignment_file
   )
+  quartet_treeness_file <- gsub(
+    "output_alignment.fa",
+    "quartet_treeness.csv",
+    row$output_alignment_file
+  )
+  # Check whether LM results are present and complete
+  run_LM <- check.LM.run.present(
+    row_results_file = row_results_file,
+    quartet_treeness_file = quartet_treeness_file
+  )
   # Apply functions if the results file doesn't exist
-  # Apply LM function
-  row_LM <- likelihood.mapping(
-    alignment_path = row$output_alignment_file,
-    iqtree2_path = iqtree2_path,
-    iqtree2_number_threads = iqtree2_num_threads,
-    substitution_model = row$alisim_gene_models,
-    number_of_taxa = row$num_taxa,
-    sequence_format = row$sequence_type
-  )
-  # Calculate quartet treeness
-  row_quartet_treeness <- quartet.treeness.wrapper(
-    iqtree_tree_path = paste0(row$output_alignment_file, ".treefile")
-  )
-  # Save the dataframe of quartet treeness to output
-  output_quartet_treeness_df <- cbind(row, row_quartet_treeness)
-  write.csv(
-    output_quartet_treeness_df,
-    file = gsub(
-      "output_alignment.fa",
-      "quartet_treeness.csv",
-      row$output_alignment_file
-    ),
-    row.names = FALSE
-  )
-  # Create summary statistics from treeness df
-  treeness_summary_stats <- summary(as.numeric(row_quartet_treeness$treeness))
-  row_treeness_stats <- c(
-    "quartet_treeness_num_quartets" = nrow(row_quartet_treeness),
-    "quartet_treeness_min" = treeness_summary_stats[["Min."]],
-    "quartet_treeness_1st_qu" = treeness_summary_stats[["1st Qu."]],
-    "quartet_treeness_median" = treeness_summary_stats[["Median"]],
-    "quartet_treeness_mean" = treeness_summary_stats[["Mean"]],
-    "quartet_treeness_3rd_qu" = treeness_summary_stats[["3rd Qu."]],
-    "quartet_treeness_max" = treeness_summary_stats[["Max."]]
-  )
-  # Create output row
-  output_row <- c(
-    unlist(row),
-    row_LM,
-    row_treeness_stats
-  )
-  names(output_row) <- c(
-    names(row),
-    names(row_LM),
-    names(row_treeness_stats)
-  )
-  # Save results as csv (allows you to run in batches and extract files after)
-  out_csv <- as.data.frame(rbind(output_row))
-  rownames(out_csv) <- NULL
-  write.csv(
-    out_csv,
-    file = row_results_file,
-    row.names = FALSE
-  )
+  if (run_LM == TRUE){
+    # Apply LM function
+    row_LM <- likelihood.mapping(
+      alignment_path = row$output_alignment_file,
+      iqtree2_path = iqtree2_path,
+      iqtree2_number_threads = iqtree2_num_threads,
+      substitution_model = row$alisim_gene_models,
+      number_of_taxa = row$num_taxa,
+      sequence_format = row$sequence_type
+    )
+    # Calculate quartet treeness
+    row_quartet_treeness <- quartet.treeness.wrapper(
+      iqtree_tree_path = paste0(row$output_alignment_file, ".treefile"),
+      num_sampled_quartets = row_LM[["total_num_quartets"]],
+      num_threads = iqtree2_num_threads
+    )
+    # Save the dataframe of quartet treeness to output
+    output_quartet_treeness_df <- cbind(row, row_quartet_treeness)
+    write.csv(
+      output_quartet_treeness_df,
+      file = quartet_treeness_file,
+      row.names = FALSE
+    )
+    # Create summary statistics from treeness df
+    treeness_summary_stats <- summary(as.numeric(row_quartet_treeness$treeness))
+    row_treeness_stats <- c(
+      "quartet_treeness_min" = treeness_summary_stats[["Min."]],
+      "quartet_treeness_1st_qu" = treeness_summary_stats[["1st Qu."]],
+      "quartet_treeness_median" = treeness_summary_stats[["Median"]],
+      "quartet_treeness_mean" = treeness_summary_stats[["Mean"]],
+      "quartet_treeness_3rd_qu" = treeness_summary_stats[["3rd Qu."]],
+      "quartet_treeness_max" = treeness_summary_stats[["Max."]],
+      "quartet_treeness_num_sampled_quartets" = nrow(row_quartet_treeness),
+      "quartet_treeness_total_num_quartets" = get.total.num.quartets(
+        iqtree_tree_path = paste0(row$output_alignment_file, ".treefile")
+        )
+    )
+    # Create output row
+    output_row <- c(
+      unlist(row),
+      row_LM,
+      row_treeness_stats
+    )
+    names(output_row) <- c(
+      names(row),
+      names(row_LM),
+      names(row_treeness_stats)
+    )
+    # Save results as csv (allows you to run in batches and extract files after)
+    out_csv <- as.data.frame(rbind(output_row))
+    rownames(out_csv) <- NULL
+    write.csv(
+      out_csv,
+      file = row_results_file,
+      row.names = FALSE
+    )
+  }
   # Create status row to output
   status_op <- paste0(
     "Row ",
@@ -94,21 +108,103 @@ likelihood.mapping.wrapper <- function(
 }
 
 
-## Calculate treeness for quartets
-quartet.treeness.wrapper <- function(iqtree_tree_path){
+## Determine whether to run the LM (IQ-Tree)
+check.LM.run.present <- function(row_results_file, quartet_treeness_file){
+  if ((file.exists(row_results_file) == FALSE) |
+      (file.exists(quartet_treeness_file) == FALSE)) {
+    # One or both of the output files don't exist - run LM
+    run_LM <- TRUE
+  } else {
+    # Check file size
+    check_file_size <- file.info(row_results_file)[["size"]]
+    if (check_file_size == 0) {
+      # Empty file - run LM
+      run_LM <- TRUE
+    } else {
+      # Open file and check all necessary rows are present
+      check_row <- read.csv(row_results_file)
+      # Check for results in column names
+      col_names_check <- c(
+        "uid",
+        "num_resolved_quartets",
+        "num_partly_resolved_quartets",
+        "num_unresolved_quartets",
+        "total_num_quartets",
+        "proportion_resolved_quartets",
+        "quartet_treeness_min",
+        "quartet_treeness_1st_qu",
+        "quartet_treeness_median",
+        "quartet_treeness_mean",
+        "quartet_treeness_3rd_qu",
+        "quartet_treeness_max",
+        "quartet_treeness_num_sampled_quartets",
+        "quartet_treeness_total_num_quartets"
+      )
+      missing_cols <- length(which(!col_names_check %in% names(check_row)))
+      # Check whether any of those columns are missing (i.e., missing_cols > 0)
+      if (missing_cols == 0) {
+        # All required rows are present - do not run LM
+        run_LM <- FALSE
+      } else {
+        # One or more rows are missing - run LM
+        run_LM <- TRUE
+      }
+    }
+  }
+  return(run_LM)
+}
+
+
+
+## Calculate the total number of quartets in a tree
+get.total.num.quartets <- function(iqtree_tree_path){
   # Open tree
   tree <- read.tree(iqtree_tree_path)
   # Identify all quartets in tree (each row = 1 quartet)
   all_quartets <- t(Quartet::AllQuartets(Ntip(tree)))
+  # Get total number of quartets in tree
+  num_quartets <- nrow(all_quartets)
+  return(num_quartets)
+}
+
+
+
+## Calculate treeness for quartets
+quartet.treeness.wrapper <- function(
+    iqtree_tree_path,
+    num_sampled_quartets,
+    num_threads = 1){
+  # Open tree
+  tree <- read.tree(iqtree_tree_path)
+  # Identify all quartets in tree (each row = 1 quartet)
+  all_quartets <- t(Quartet::AllQuartets(Ntip(tree)))
+  # Reduce to the subset of quartets to sample
+  if (num_sampled_quartets < nrow(all_quartets)){
+    # Reduce number of quartets to sample
+    quartets_to_sample <- sort(sample(
+      1:nrow(all_quartets),
+      size = num_sampled_quartets
+    ))
+    sample_quartets <- all_quartets[quartets_to_sample, ]
+  } else {
+    # Sample all quartets
+    sample_quartets <- all_quartets
+  }
+  # Make sure num_threads is a number (may be "AUTO" for IQ-Tree2)
+  mcl_num_threads = tryCatch(
+    as.numeric(num_threads),
+    warning = function(num_threads){num_threads = 1}
+  )
   # Calculate treeness for each quartet
   all_quartet_df <- as.data.frame(do.call(
     rbind,
-    lapply(
-      1:nrow(all_quartets),
+    mclapply(
+      1:nrow(sample_quartets),
       quartet.treeness,
-      all_quartets = all_quartets,
+      quartets_df = sample_quartets,
       tree = tree,
-      tip_names = tree$tip.label
+      tip_names = tree$tip.label,
+      mc.cores = mcl_num_threads
     )
   ))
   names(all_quartet_df) <- c(
@@ -123,9 +219,9 @@ quartet.treeness.wrapper <- function(iqtree_tree_path){
 }
 
 
-quartet.treeness <- function(quartet_number, all_quartets, tree, tip_names){
+quartet.treeness <- function(quartet_number, quartets_df, tree, tip_names){
   # Calculate treeness for a single quartet
-  quartet_tips <- tip_names[all_quartets[quartet_number, ]]
+  quartet_tips <- tip_names[quartets_df[quartet_number, ]]
   quartet_tree <- ape::keep.tip(tree, tip = quartet_tips)
   quartet_treeness <- treestats::treeness(quartet_tree)
   quartet_results <- c(quartet_number, quartet_tips, quartet_treeness)

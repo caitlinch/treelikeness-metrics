@@ -53,6 +53,10 @@ if (run_location == "WSL"){
 run_expB1 <- TRUE
 run_expB2 <- TRUE
 
+# Set number of parallel processes
+# 2 threads for IQ-Tree, so number of processes = num_cores/2 (rounded down, must be >=1)
+mcl_cores <- ifelse(floor(num_cores/2) == 0, 1, floor(num_cores/2))
+
 
 
 #### 2. Prepare analyses ####
@@ -82,26 +86,14 @@ if (run_expB1 == TRUE){
                           ))
   expB1_op_df <- read.csv(expB1_op_file, stringsAsFactors = FALSE)
   # Call LM wrapper function on each row of the expB1_op_df
-  if (num_cores == 1){
-    # Apply sequentially
-    lapply(
-      1:nrow(expB1_op_df),
-      likelihood.mapping.wrapper,
-      alignment_dataframe = expB1_op_df,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1
-    )
-  } else {
-    # Apply in parallel
-    mclapply(
-      1:nrow(expB1_op_df),
-      likelihood.mapping.wrapper,
-      alignment_dataframe = expB1_op_df,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1,
-      mc.cores = num_cores
-    )
-  }
+  mclapply(
+    1:nrow(expB1_op_df),
+    likelihood.mapping.wrapper,
+    alignment_dataframe = expB1_op_df,
+    iqtree2_path = iqtree2_path,
+    iqtree2_num_threads = 2,
+    mc.cores = mcl_cores
+  )
   # Collect all output files
   expB1_lm_csvs <- paste0(
     results_directory,
@@ -143,26 +135,14 @@ if (run_expB2 == TRUE){
                           ))
   expB2_op_df <- read.csv(expB2_op_file, stringsAsFactors = FALSE)
   # Call LM wrapper function on each row of the expB2_op_df
-  if (num_cores == 1){
-    # Apply sequentially
-    lapply(
-      1:nrow(expB2_op_df),
-      likelihood.mapping.wrapper,
-      alignment_dataframe = expB2_op_df,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1
-    )
-  } else {
-    # Apply in parallel
-    mclapply(
-      1:nrow(expB2_op_df),
-      likelihood.mapping.wrapper,
-      alignment_dataframe = expB2_op_df,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1,
-      mc.cores = num_cores
-    )
-  }
+  mclapply(
+    1:nrow(expB2_op_df),
+    likelihood.mapping.wrapper,
+    alignment_dataframe = expB2_op_df,
+    iqtree2_path = iqtree2_path,
+    iqtree2_num_threads = 2,
+    mc.cores = mcl_cores
+  )
   # Collect all output files
   expB2_lm_csvs <- paste0(
     results_directory,
@@ -188,4 +168,5 @@ if (run_expB2 == TRUE){
     row.names = FALSE
   )
 }
+
 

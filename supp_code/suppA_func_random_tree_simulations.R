@@ -1,5 +1,5 @@
 # caitlinch/treelikeness_metrics/supp_code/suppA_func_simulating_alignment.R
-# Caitlin Cherryh 2023
+# Caitlin Cherryh 2025
 
 #This file contains functions to simulate DNA multiple sequence alignments with varying levels of treelikeness
 # Some functions require IQ-Tree2 (2.2-beta or above), or ms

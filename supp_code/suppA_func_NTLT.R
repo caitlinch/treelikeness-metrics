@@ -1,5 +1,5 @@
 # caitlinch/treelikeness_metrics/supp_code/suppA_func_NTLT.R
-# Caitlin Cherryh 2023
+# Caitlin Cherryh 2025
 
 # This file contains functions to apply the Network Treelikeness Test to a single alignment
 # Some functions require IQ-Tree2 (2.2-beta or above) or SplitsTree (4.17.2 or above).

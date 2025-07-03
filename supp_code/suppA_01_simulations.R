@@ -7,6 +7,7 @@
 # This program requires IQ-Tree2 (2.2-beta or above) and ms.
 
 
+
 #### 01. Set parameters ####
 ## CONTROL PARAMETERS
 # parameter.values  <- TRUE to input simulation parameter values

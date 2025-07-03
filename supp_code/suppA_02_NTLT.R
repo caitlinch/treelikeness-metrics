@@ -1,5 +1,7 @@
-# caitlinch/treelikeness-metrics/code/02_apply_treelikeness_metrics.R
-# Caitlin Cherryh 2023
+## Supplementary analysis A: Network Treelikeness Test
+
+# caitlinch/treelikeness-metrics/supp_code/suppA_02_NTLT.R
+# Caitlin Cherryh 2025
 
 # This program will apply the Network Treelikeness Test to simulated alignments
 # This program requires IQ-Tree2 (2.2-beta or above) and SplitsTree (4.17.2 or above).

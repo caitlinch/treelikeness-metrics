@@ -10,6 +10,7 @@ output: html_document
 From home directory on Dayhoff:
 ```
 cd treelikeness_supp
+module load mamba
 source activate /mnt/data/dayhoff/home/u5348329/treelikeness_supp/envs
 ```
 

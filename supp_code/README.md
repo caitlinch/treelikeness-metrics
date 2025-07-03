@@ -21,6 +21,9 @@ mamba activate /mnt/data/dayhoff/home/u5348329/treelikeness_supp/envs
 mamba install <package_name>
 ```
 
+## R packages location (Dayhoff)
+`/tmp/RtmpJNryzw/downloaded_packages`
+
 ## Checking progress of NTLT
 In BASH:
 ```

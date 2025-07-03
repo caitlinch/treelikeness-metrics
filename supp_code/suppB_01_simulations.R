@@ -1,4 +1,4 @@
-## Supplementary analysis B: Tree Proportion
+## Supplementary analysis B: Likelihood Mapping (proportion of resolved quartets)
 
 # caitlinch/treelikeness-metrics/supp_code/suppB_01_simulations.R
 # Caitlin Cherryh 2025
@@ -267,18 +267,6 @@ if (run.experiment.B2 == TRUE) {
       scale.gene.trees = TRUE,
       mc.cores = number_parallel_threads
     )
-    expB2_op_list <- mclapply(
-      1:5,
-      ms.generate.alignment,
-      output_directory = expB2_dir,
-      ms_path = ms_path,
-      iqtree2_path = iqtree2_path,
-      experiment_params_df = expB2_params,
-      select.sister = FALSE,
-      scale.gene.trees = TRUE,
-      mc.cores = number_parallel_threads
-    )
-
   }
   # Record output alignment files
   expB2_op_df <- as.data.frame(do.call(rbind, expB2_op_list))

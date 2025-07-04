@@ -53,9 +53,14 @@ if (run_location == "WSL"){
 }
 
 # Control variables
-run_expA1 <- TRUE
+run_expA1 <- FALSE
 run_expA2 <- TRUE
 
+# Set number of threads for IQ-Tree2 and number of parallel processes
+iqtree2_num_threads <- 4
+num_parallel_processes <- ifelse(floor(num_cores / iqtree2_num_threads) == 0,
+                                 1,
+                                 floor(num_cores / iqtree2_num_threads))
 
 
 #### 2. Prepare analyses ####
@@ -85,28 +90,15 @@ if (run_expA1 == TRUE){
                           ))
   expA1_op_df <- read.csv(expA1_op_file, stringsAsFactors = FALSE)
   # Call NTLT wrapper function on each row of the expA1_op_df
-  if (num_cores == 1){
-    # Apply sequentially
-    lapply(
-      1:nrow(expA1_op_df),
-      network.treelikeness.test.wrapper,
-      alignment_dataframe = expA1_op_df,
-      splitstree_path = splitstree_path,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 2
-    )
-  } else {
-    # Apply in parallel
-    mclapply(
-      1:nrow(expA1_op_df),
-      network.treelikeness.test.wrapper,
-      alignment_dataframe = expA1_op_df,
-      splitstree_path = splitstree_path,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1,
-      mc.cores = num_cores
-    )
-  }
+  mclapply(
+    1:nrow(expA1_op_df),
+    network.treelikeness.test.wrapper,
+    alignment_dataframe = expA1_op_df,
+    splitstree_path = splitstree_path,
+    iqtree2_path = iqtree2_path,
+    iqtree2_num_threads = iqtree2_num_threads,
+    mc.cores = num_parallel_processes
+  )
   # Collect all output files
   expA1_ntlt_csvs <- paste0(
     results_directory,
@@ -147,29 +139,21 @@ if (run_expA2 == TRUE){
                             value = TRUE
                           ))
   expA2_op_df <- read.csv(expA2_op_file, stringsAsFactors = FALSE)
+  # Sort by number of trees and tree depth
+  expA2_op_df <- expA2_op_df[order(
+    expA2_op_df$total_alignment_length,
+    expA2_op_df$num_trees
+    ), ]
   # Call NTLT wrapper function on each row of the expA2_op_df
-  if (num_cores == 1){
-    # Apply sequentially
-    lapply(
-      1:nrow(expA2_op_df),
-      network.treelikeness.test.wrapper,
-      alignment_dataframe = expA2_op_df,
-      splitstree_path = splitstree_path,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1
-    )
-  } else {
-    # Apply in parallel
-    mclapply(
-      1:nrow(expA2_op_df),
-      network.treelikeness.test.wrapper,
-      alignment_dataframe = expA2_op_df,
-      splitstree_path = splitstree_path,
-      iqtree2_path = iqtree2_path,
-      iqtree2_num_threads = 1,
-      mc.cores = num_cores
-    )
-  }
+  mclapply(
+    1:nrow(expA2_op_df),
+    network.treelikeness.test.wrapper,
+    alignment_dataframe = expA2_op_df,
+    splitstree_path = splitstree_path,
+    iqtree2_path = iqtree2_path,
+    iqtree2_num_threads = iqtree2_num_threads,
+    mc.cores = num_parallel_processes
+  )
   # Collect all output files
   expA2_ntlt_csvs <- paste0(
     results_directory,

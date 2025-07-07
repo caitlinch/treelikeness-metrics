@@ -95,14 +95,14 @@ read.complete.csv <- function(file_name){
 }
 
 expA2_ntlt_rows <- lapply(
-expA2_ntlt_csvs,
-read.complete.csv
+  expA2_ntlt_csvs,
+  read.complete.csv
 )
 
 write.csv(
-expA2_ntlt_df,
-file = paste0(results_directory, "expA2_NTLT_results_collated.csv"),
-row.names = FALSE
+  expA2_ntlt_df,
+  file = "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/expA2_NTLT_results_completeReps20250707.csv",
+  row.names = FALSE
 )
 ```
 

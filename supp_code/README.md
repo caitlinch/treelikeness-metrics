@@ -45,15 +45,15 @@ pc_A1_complete <- round(num_A1_complete/3000*100, digits = 2)
 num_A2_complete <- length(grep("NTLT_results.csv", list.files(expA2_dir, recursive = TRUE)))
 pc_A2_complete <- round(num_A2_complete/10000*100, digits = 2)
 status <- paste0(
-    "Exp A1 complete: ", 
-    num_A1_complete, 
-    " of 3000 (", 
-    pc_A1_complete, 
-    "%) ; Exp A2 complete: ", 
-    num_A2_complete, 
-    " of 10,000 (", 
-    pc_A2_complete, 
-    "%)"
+"Exp A1 complete: ", 
+num_A1_complete, 
+" of 3000 (", 
+pc_A1_complete, 
+"%) ; Exp A2 complete: ", 
+num_A2_complete, 
+" of 10,000 (", 
+pc_A2_complete, 
+"%)"
 )
 print(status)
 ```
@@ -70,19 +70,40 @@ pc_B1_complete <- round(num_B1_complete/3750*100, digits = 2)
 num_B2_complete <- length(grep("LM_results.csv", list.files(expB2_dir, recursive = TRUE)))
 pc_B2_complete <- round(num_B2_complete/5940*100, digits = 2)
 status <- paste0(
-    "Exp B1 complete: ",
-    num_B1_complete,
-    " of 3750 (",
-    pc_B1_complete,
-    "%) ; Exp B2 complete: ",
-    num_B2_complete,
-    " of 5940 (",
-    pc_B2_complete,
-    "%)"
+"Exp B1 complete: ",
+num_B1_complete,
+" of 3750 (",
+pc_B1_complete,
+"%) ; Exp B2 complete: ",
+num_B2_complete,
+" of 5940 (",
+pc_B2_complete,
+"%)"
 )
 print(status)
 ```
 
+## Quick function to check if row output csv files are complete
+```
+read.complete.csv <- function(file_name){
+  if (file.exists(file_name) == TRUE){
+    if (file.info(file_name)[["size"]] != 0){
+      file_contents <- read.csv(file_name)
+      return(file_contents)
+    }
+  }
+}
 
+expA2_ntlt_rows <- lapply(
+expA2_ntlt_csvs,
+read.complete.csv
+)
+
+write.csv(
+expA2_ntlt_df,
+file = paste0(results_directory, "expA2_NTLT_results_collated.csv"),
+row.names = FALSE
+)
+```
 
 

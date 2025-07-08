@@ -1,0 +1,5 @@
+#nexus
+begin sets;
+	charset gene_00001 = DNA, 1-10000;
+	charpartition genes = JC:gene_00001;
+end;

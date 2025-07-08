@@ -1,0 +1,44 @@
+IQ-TREE multicore version 2.2.2.6 COVID-edition for Linux 64-bit built May 27 2023
+Developed by Bui Quang Minh, James Barbetti, Nguyen Lam Tung,
+Olga Chernomor, Heiko Schmidt, Dominik Schrempf, Michael Woodhams, Ly Trong Nhan.
+
+Host:    dayhoff.uds.anu.edu.au (AVX2, FMA3, 1007 GB RAM)
+Command: /mnt/data/dayhoff/home/u5348329/treelikeness_supp/software/iqtree-2.2.2.6-Linux/bin/iqtree2 --alisim /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_output_alignment -t /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_random_trees.phy -q /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_partitions.nex --seqtype DNA -af fasta
+Seed:    971328 (Using SPRNG - Scalable Parallel Random Number Generator)
+Time:    Wed Jul  2 14:39:02 2025
+Kernel:  AVX+FMA - 1 threads (10 CPU cores detected)
+
+Reading partition model file /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_partitions.nex ...
+
+Loading 1 partitions...
+Subset	Type	Model	Name
+1	DNA	JC	gene_00001
+Info: multi-threading strategy over partitions
+
+[Alignment Simulator] Executing
+Reading partition model file /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_partitions.nex ...
+
+Loading 1 partitions...
+Subset	Type	Model	Name
+1	DNA	JC	gene_00001
+Info: multi-threading strategy over partitions
+
+ - Time spent on Loading trees: 0.007
+ - Tree filepath: /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_random_trees.phy
+ - Length of output sequences: 1000
+ - Model: Partition model
+ - Number of output datasets: 1
+WARNING: The sequence_length is now set equally to the total length of all partitions
+ - Time spent on merging partitions: 0.000
+An alignment has just been exported to /mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1/expA1_00001_0010_067_1_10kbp/expA1_00001_0010_067_1_10kbp_output_alignment.fa
+SUBSTITUTION PROCESS
+--------------------
+
+Edge-linked-equal partition model with separate substitution models and separate rates across sites
+
+  ID  Model           Speed  Parameters
+   1  JC             1.000  JC
+
+[Alignment Simulator] Done
+Simulation time: 0.011s
+Date and Time: Wed Jul  2 14:39:03 2025

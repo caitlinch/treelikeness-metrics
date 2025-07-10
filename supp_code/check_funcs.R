@@ -82,7 +82,7 @@ check.expA1.analysis.stats <- function(simulation_directory){
 
 
 check.expA2.analysis.stats <- function(simulation_directory){
-  ## Calculate statistics on the alignment and trees for each replicate in expA1
+  ## Calculate statistics on the alignment and trees for each replicate in expA2
   # List all files in this directory
   rep_files <- list.files(simulation_directory)
   if (TRUE %in% grepl("_NTLT_results.csv", rep_files)){
@@ -121,7 +121,13 @@ check.expA2.analysis.stats <- function(simulation_directory){
           rep(paste0("tree_", 1:10, "_"), each = 16),
           rep(names(check_trees_values), 10)
         )
-      } else if (is(rep_trees, "multiPhylo")){
+      } else if (is(rep_trees, "multiPhylo") & length(rep_trees) == 10){
+        check_trees_values <- lapply(rep_trees, check.tree.stats)
+        for (i in 1:length(check_trees_values)){
+          names(check_trees_values[[i]]) <- paste0("tree_", i, "_",  names(check_trees_values[[i]]))
+        }
+        rep_trees_values <- unlist(check_trees_values)
+      } else if (is(rep_trees, "multiPhylo") & length(rep_trees) < 10){
         check_trees_values <- lapply(rep_trees, check.tree.stats)
         present_trees <- length(check_trees_values)
         missing_trees <- (present_trees + 1):10
@@ -194,6 +200,130 @@ check.expA2.analysis.stats <- function(simulation_directory){
     }
   }
 }
+
+
+
+check.expB1.analysis.stats <- function(simulation_directory){
+  ## Calculate statistics on the alignment and trees for each replicate in expB1
+  # List all files in this directory
+  rep_files <- list.files(simulation_directory)
+  if (TRUE %in% grepl("_LM_results.csv", rep_files)){
+    LM_file = paste0(simulation_directory, grep("_LM_results.csv", rep_files, value = TRUE))
+    if (file.info(LM_file)[["size"]] != 0){
+      # Open simulation parameters
+      rep_params <- read.csv(paste0(
+        simulation_directory,
+        grep("parameters.csv", rep_files, value = TRUE)
+      ))
+      # Open NTLT results
+      rep_results <- read.csv(paste0(
+        simulation_directory,
+        grep("_LM_results.csv", rep_files, value = TRUE)
+      ))
+      rep_results <- rep_results[, which(names(rep_results) == "num_resolved_quartets"):ncol(rep_results)]
+      # Extract statistics about the alignment
+      rep_al_file <- paste0(simulation_directory,
+                            grep(
+                              "output_alignment.fa.",
+                              grep("output_alignment.fa", rep_files, value = TRUE),
+                              invert = TRUE,
+                              value = TRUE
+                            ))
+      rep_pwd <- check.pairwise.distances(rep_al_file)
+      # Extract tree statistics for simulated trees
+      rep_trees_file <- paste0(simulation_directory, grep("random_trees.phy", rep_files, value = TRUE))
+      rep_trees <- ape::read.tree(rep_trees_file)
+      if (is(rep_trees, "phylo")){
+        check_trees_values <- check.tree.stats(rep_trees)
+        rep_trees_values <- rep(check_trees_values, each = 6)
+      } else if (is(rep_trees, "multiPhylo")){
+        check_trees_values <- lapply(rep_trees, check.tree.stats)
+        rep_trees_values <- c(
+          summary(unlist(lapply(check_trees_values, function(x){x[["mean_nearest_taxon_distance"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["mean_pairwise_distance"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["mean_branch_length"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["var_branch_length"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["mean_branch_length_external"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["var_branch_length_external"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["mean_branch_length_internal"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["var_branch_length_internal"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["average_vertex_depth"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["max_width"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["max_depth"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["max_ladder"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["max_branching_time"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["crown_age"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["tree_height"]]}))),
+          summary(unlist(lapply(check_trees_values, function(x){x[["treeness"]]})))
+        )
+      }
+      # need output = rep_trees_values, with 10 trees worth of data
+      names(rep_trees_values) <- paste0(
+        "random_trees_",
+        rep(c(
+          "mean_nearest_taxon_distance",
+          "mean_pairwise_distance",
+          "mean_branch_length",
+          "var_branch_length",
+          "mean_branch_length_external",
+          "var_branch_length_external",
+          "mean_branch_length_internal",
+          "var_branch_length_internal",
+          "average_vertex_depth",
+          "max_width",
+          "max_depth",
+          "max_ladder",
+          "max_branching_time",
+          "crown_age",
+          "tree_height",
+          "treeness"
+        ), each = 6),
+        rep(c("_min", "_1st_qu", "_median", "_mean", "_3rd_qu", "_max"), 16)
+      )
+      # Extract information about IQ-Tree tree
+      rep_iqtree_treefile <- paste0(
+        simulation_directory,
+        grep("output_alignment.fa.treefile", rep_files, value = TRUE)
+      )
+      rep_iqtree_tree_stats <- check.tree.stats(
+        read.tree(rep_iqtree_treefile)
+      )
+      names(rep_iqtree_tree_stats) <- paste0("iqtree_tree_", names(rep_iqtree_tree_stats))
+      # Extract information from the IQ-Tree .iqtree file
+      rep_iqtree_file <- paste0(
+        simulation_directory,
+        grep("output_alignment.fa.iqtree", rep_files, value = TRUE)
+      )
+      rep_iqtree_values <- check.iqtree.file(rep_iqtree_file)
+      # Collate function output
+      op_data <- c(rep_pwd,
+                   rep_trees_values,
+                   rep_iqtree_values,
+                   rep_iqtree_tree_stats)
+      op_df <- as.data.frame(matrix(
+        data = op_data,
+        nrow = 1,
+        ncol = length(op_data),
+        byrow = TRUE
+      ))
+      names(op_df) <- c(
+        names(rep_pwd),
+        names(rep_trees_values),
+        names(rep_iqtree_values),
+        names(rep_iqtree_tree_stats)
+      )
+      # Collate with rep_params object
+      op_df <- cbind(rep_params, rep_results, op_df)
+      # Save dataframe
+      write.csv(
+        op_df,
+        file = paste0(simulation_directory, op_df$uid, ".check_02_analysis_stats.csv"),
+        row.names = FALSE
+      )
+    }
+  }
+}
+
 
 
 check.pairwise.distances <- function(alignment_file){

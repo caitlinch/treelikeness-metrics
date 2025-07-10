@@ -8,7 +8,6 @@
 
 ## 01. Prepare input parameters
 num_cores <- 10
-out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
 
 ## 02. Prepare libraries and functions
 library(parallel)
@@ -16,6 +15,7 @@ source("/mnt/data/dayhoff/home/u5348329/treelikeness_supp/supp_code/check_funcs.
 
 
 ## 03. Collect expA1 simulation statistics
+out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
 expA1_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1"
 expA1_dirs <- paste0(list.dirs(expA1_dir), "/")
 expA1_dirs <- expA1_dirs[2:length(expA1_dirs)]
@@ -38,12 +38,16 @@ write.csv(expA1_collated,
 
 
 ## 04. Collect expA2 simulation statistics
+out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
 expA2_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A2"
 expA2_dirs <- paste0(list.dirs(expA2_dir), "/")
 expA2_dirs <- expA2_dirs[2:length(expA2_dirs)]
 mclapply(
   expA2_dirs,
-  check.expA2.analysis.stats,
+  function(x){
+    print(x)
+    check.expA2.analysis.stats(x)
+    },
   mc.cores = num_cores
 )
 expA2_check_files <- paste0(expA2_dir,
@@ -56,5 +60,31 @@ expA2_check_files <- paste0(expA2_dir,
 expA2_collated <- as.data.frame(do.call(rbind, lapply(expA2_check_files, read.csv)))
 write.csv(expA2_collated,
           file = paste0(out_dir, "expA2_check_02_analysis_stats_collated.csv"),
+          row.names = FALSE)
+
+
+## 05. Collect expB1 simulation statistics
+out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppB/"
+expB1_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppB/exp_B1"
+expB1_dirs <- paste0(list.dirs(expB1_dir), "/")
+expB1_dirs <- expB1_dirs[2:length(expB1_dirs)]
+mclapply(
+  expB1_dirs,
+  function(x){
+    print(x)
+    check.expB1.analysis.stats(x)
+  },
+  mc.cores = num_cores
+)
+expB1_check_files <- paste0(expB1_dir,
+                            "/",
+                            grep(
+                              ".check_02_analysis_stats.csv",
+                              list.files(expB1_dir, recursive = TRUE),
+                              value = TRUE
+                            ))
+expB1_collated <- as.data.frame(do.call(rbind, lapply(expB1_check_files, read.csv)))
+write.csv(expB1_collated,
+          file = paste0(out_dir, "expB1_check_02_analysis_stats_collated.csv"),
           row.names = FALSE)
 

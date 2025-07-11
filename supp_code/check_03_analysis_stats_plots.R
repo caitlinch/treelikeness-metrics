@@ -68,6 +68,11 @@ ggsave(
   plot = p,
   device = "pdf"
 )
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_constant_sites.png"),
+  plot = p,
+  device = "png"
+)
 
 ## Histogram: number of parsimoney-informative sites, faceted by tree depth
 p_df <- b1_df_raw %>%
@@ -96,6 +101,11 @@ ggsave(
   filename = paste0(plot_dir, "/B2_hist_parsimony-informative_sites.pdf"),
   plot = p,
   device = "pdf"
+)
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_parsimony-informative_sites.png"),
+  plot = p,
+  device = "png"
 )
 
 ## Histogram: raw pairwise distances for alignment, faceted by tree depth
@@ -130,6 +140,11 @@ ggsave(
   plot = p,
   device = "pdf"
 )
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_median_alnmt_raw_pwd.png"),
+  plot = p,
+  device = "png"
+)
 # Min pwd
 p <- ggplot(p_df, aes(x = al_raw_pairwise_distance_min)) +
   facet_wrap(vars(tree_depth)) +
@@ -142,6 +157,11 @@ ggsave(
   plot = p,
   device = "pdf"
 )
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_min_alnmt_raw_pwd.png"),
+  plot = p,
+  device = "png"
+)
 # Max pwd
 p <- ggplot(p_df, aes(x = al_raw_pairwise_distance_max)) +
   facet_wrap(vars(tree_depth)) +
@@ -153,6 +173,11 @@ ggsave(
   filename = paste0(plot_dir, "/B2_hist_max_alnmt_raw_pwd.pdf"),
   plot = p,
   device = "pdf"
+)
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_max_alnmt_raw_pwd.png"),
+  plot = p,
+  device = "png"
 )
 
 ## Scatterplot: median random tree max branching time vs iqtree tree max branching time
@@ -182,6 +207,11 @@ ggsave(
   plot = p,
   device = "pdf"
 )
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_random_tree_max_branching_time.png"),
+  plot = p,
+  device = "png"
+)
 # Maximum branching time for IQ-Tree tree
 p <- ggplot(p_df, aes(x = iqtree_tree_max_branching_time)) +
   facet_wrap(vars(tree_depth), scales = "free") +
@@ -194,6 +224,11 @@ ggsave(
   plot = p,
   device = "pdf"
 )
+ggsave(
+  filename = paste0(plot_dir, "/B2_hist_iqtree_tree_max_branching_time.png"),
+  plot = p,
+  device = "png"
+)
 # Plot branching times against each other (random tree vs iqtree)
 p <- ggplot(p_df, aes(x = random_trees_max_branching_time_median, y = iqtree_tree_max_branching_time)) +
   facet_wrap(vars(tree_depth), scales = "free") +
@@ -205,4 +240,9 @@ ggsave(
   filename = paste0(plot_dir, "/B2_scatter_compare_max_branching_times.pdf"),
   plot = p,
   device = "pdf"
+)
+ggsave(
+  filename = paste0(plot_dir, "/B2_scatter_compare_max_branching_times.png"),
+  plot = p,
+  device = "png"
 )

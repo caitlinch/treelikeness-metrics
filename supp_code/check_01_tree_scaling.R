@@ -199,6 +199,8 @@ p <- ggplot(p_df, aes(x = value)) +
   labs(title = "Median maximum branching time for all random trees\nin a single simulation replicate")
 ggsave(filename = "supp_plots/tree_scaling_check_hist_max_branching_time.pdf",
        plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_hist_max_branching_time.png",
+       plot = p)
 
 # Plot 2: Plot histogram of median tree height
 p_df <- ts_stats %>%
@@ -243,6 +245,8 @@ p <- ggplot(p_df, aes(x = value)) +
        subtitle = "Tree height = max. branching time plus root branch length")
 ggsave(filename = "supp_plots/tree_scaling_check_hist_tree_height.pdf",
        plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_hist_tree_height.png",
+       plot = p)
 
 # Plot 3: Plot histogram of median crown age
 p_df <- ts_stats %>%
@@ -286,6 +290,8 @@ p <- ggplot(p_df, aes(x = value)) +
   labs(title = "Median crown age for all random trees\nin a single simulation replicate",
        subtitle = "Crown age = max. branching time")
 ggsave(filename = "supp_plots/tree_scaling_check_hist_crown_age.pdf",
+       plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_hist_crown_age.png",
        plot = p)
 
 # Plot 4: Plot tree depth against median maximum branching times
@@ -336,6 +342,8 @@ p <- ggplot(p_df, aes(x = tree_method, y = value, colour = tree_depth)) +
   guides(colour = guide_legend(title = "Tree depth")) +
   theme_bw()
 ggsave(filename = "supp_plots/tree_scaling_check_boxplot_max_branching_time.pdf",
+       plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_boxplot_max_branching_time.png",
        plot = p)
 
 # Plot 5: Plot tree depth against median tree height
@@ -388,6 +396,8 @@ p <- ggplot(p_df, aes(x = tree_method, y = value, colour = tree_depth)) +
   theme_bw()
 ggsave(filename = "supp_plots/tree_scaling_check_boxplot_tree_height.pdf",
        plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_boxplot_tree_height.png",
+       plot = p)
 
 # Plot 6: Plot tree depth against median crown age
 p_df <- ts_stats %>%
@@ -439,4 +449,59 @@ p <- ggplot(p_df, aes(x = tree_method, y = value, colour = tree_depth)) +
   theme_bw()
 ggsave(filename = "supp_plots/tree_scaling_check_boxplot_crown_age.pdf",
        plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_boxplot_crown_age.png",
+       plot = p)
 
+# Plot 7: Plot number of taxa against median crown age
+p_df <- ts_stats %>%
+  select(
+    num_reps:uid,
+    st_rt_crown_age_median
+  ) %>%
+  pivot_longer(cols = starts_with("st_"),
+               names_to = "variable",
+               values_to = "value") %>%
+  mutate(tree_method = unlist(lapply(strsplit(variable, "_"), function(x) {
+    paste(x[1:2], collapse = "_")
+  })),
+  tree_stat = unlist(lapply(strsplit(variable, "_"), function(x) {
+    paste(x[3:length(x)], collapse = "_")
+  }))) %>%
+  mutate(
+    tree_method = case_when(
+      tree_method == "st_rt" ~ "rtree",
+      tree_method == "st_ext" ~ "rtree_extended",
+      tree_method == "st_coal" ~ "rcoal"
+    )
+  ) %>%
+  mutate(
+    tree_method = as.factor(tree_method) %>%
+      fct_relevel(., c("rtree")) %>%
+      fct_recode(
+        .,
+        "Random tree" = "rtree"
+      )
+  ) %>%
+  mutate(
+    tree_depth = as.factor(as.character(tree_depth)) %>%
+      fct_relevel(., c("0.01", "0.1", "1")) %>%
+      fct_recode(., "0.01" = "0.01", "0.10" = "0.1", "1.00" = "1")
+  ) %>%
+  mutate(
+    num_taxa = as.factor(as.character(num_taxa)) %>%
+      fct_relevel(., c("5", "10", "20", "50", "100"))
+  )
+p <- ggplot(p_df, aes(x = tree_method, y = value, colour = num_taxa)) +
+  facet_wrap(tree_depth ~ ., scales = "free" ) +
+  geom_boxplot() +
+  xlab("Tree simulation method") +
+  ylab("Median crown age") +
+  labs(title = "Median crown age for trees with different numbers of taxa",
+       subtitle = "Crown age = max. branching time") +
+  scale_colour_viridis_d(option = "H") +
+  guides(colour = guide_legend(title = "Num. taxa")) +
+  theme_bw()
+ggsave(filename = "supp_plots/tree_scaling_check_boxplot_numTaxa_crownAge.pdf",
+       plot = p)
+ggsave(filename = "supp_plots/tree_scaling_check_boxplot_numTaxa_crownAge.png",
+       plot = p)

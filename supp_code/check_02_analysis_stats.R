@@ -6,15 +6,15 @@
 #   * You should also examine (by eye) alignments from across all the simulations
 #     to see if there are other issues we aren't aware of yet.
 
-## 01. Prepare input parameters
+#### 01. Prepare input parameters ####
 num_cores <- 10
 
-## 02. Prepare libraries and functions
+#### 02. Prepare libraries and functions ####
 library(parallel)
 source("/mnt/data/dayhoff/home/u5348329/treelikeness_supp/supp_code/check_funcs.R")
 
 
-## 03. Collect expA1 simulation statistics
+#### 03. Collect expA1 simulation statistics ####
 out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
 expA1_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A1"
 expA1_dirs <- paste0(list.dirs(expA1_dir), "/")
@@ -37,7 +37,7 @@ write.csv(expA1_collated,
           row.names = FALSE)
 
 
-## 04. Collect expA2 simulation statistics
+#### 04. Collect expA2 simulation statistics ####
 out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/"
 expA2_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppA/exp_A2"
 expA2_dirs <- paste0(list.dirs(expA2_dir), "/")
@@ -63,7 +63,7 @@ write.csv(expA2_collated,
           row.names = FALSE)
 
 
-## 05. Collect expB1 simulation statistics
+#### 05. Collect expB1 simulation statistics ####
 out_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppB/"
 expB1_dir <- "/mnt/data/dayhoff/home/u5348329/treelikeness_supp/suppB/exp_B1"
 expB1_dirs <- paste0(list.dirs(expB1_dir), "/")

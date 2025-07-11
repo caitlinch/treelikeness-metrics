@@ -1,6 +1,6 @@
 ## Plotting analysis statistics
 
-## 1. Prepare input
+#### 1. Prepare input ####
 # Statistics files
 b1_df_file <- "supp_output/expB1_check_02_analysis_stats_collated.csv"
 # Output plot directory
@@ -8,17 +8,17 @@ plot_dir <- "supp_plots"
 if (dir.exists(plot_dir) == FALSE){dir.create(plot_dir)}
 
 
-## 2. Prepare packages
+#### 2. Prepare packages ####
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 
 
-## 3. Reformat dataframes
+#### 3. Reformat dataframes ####
 b1_df_raw <- read.csv(b1_df_file)
 
 
-## 4. Plot IQ-Tree statistics
+#### 4. Plot IQ-Tree statistics ####
 # b1_df <- b1_df_raw %>%
 #   select(!(
 #     starts_with("random_trees") |
@@ -97,7 +97,6 @@ ggsave(
   plot = p,
   device = "pdf"
 )
-
 
 ## Histogram: raw pairwise distances for alignment, faceted by tree depth
 p_df <- b1_df_raw %>%

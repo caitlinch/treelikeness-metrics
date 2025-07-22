@@ -143,7 +143,7 @@ if (run_expA2 == TRUE){
   expA2_op_df <- expA2_op_df[order(
     expA2_op_df$total_alignment_length,
     expA2_op_df$num_trees
-    ), ]
+  ), ]
   # Call NTLT wrapper function on each row of the expA2_op_df
   mclapply(
     1:nrow(expA2_op_df),
@@ -170,7 +170,11 @@ if (run_expA2 == TRUE){
   # Read in all output files and collate
   expA2_ntlt_rows <- lapply(
     expA2_ntlt_csvs,
-    read.csv
+    function(f){
+      if ((file.exists(f) == TRUE) & (file.info(f)[["size"]] != 0)){
+        read.csv(f)
+      }
+    }
   )
   expA2_ntlt_df <- as.data.frame(do.call(rbind, expA2_ntlt_rows))
   write.csv(

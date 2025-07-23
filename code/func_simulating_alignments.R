@@ -139,7 +139,7 @@ alisim.topology.unlinked.partition.model <- function(iqtree_path, output_alignme
 
 
 #### Functions to process a single row from the parameters matrix and estimate an alignment using the parameters in that row ####
-random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params){
+random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_path, experiment_params, force.rerun = FALSE){
   ## Function to generate a single alignment given a row from the experiment 1 params dataframe
   # The alignment will be simulated from a number of random trees
 
@@ -147,19 +147,55 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   row <- experiment_params[row_id, ]
 
   # Create a new folder to store the results in this experiment from (and a file to keep a csv of the parameter values in)
-  if (is.na(row$uid) == FALSE){
+  if (is.na(row$uid) == FALSE) {
     row_folder <- paste0(output_directory, row$uid, "/")
     row_csv_path <- paste0(row_folder, row$uid, "_parameters.csv")
-  } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE){
-    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                         "_", row$tree_depth, "/")
-    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", sprintf("%03d", row$num_reps),
-                           "_", row$tree_depth, "_parameters.csv")
+  } else if (is.na(row$uid) == TRUE & is.na(row$num_reps) == FALSE) {
+    row_folder <- paste0(
+      output_directory,
+      sprintf("%05d", row$num_trees),
+      "_",
+      sprintf("%04d", row$num_taxa),
+      "_",
+      sprintf("%03d", row$num_reps),
+      "_",
+      row$tree_depth,
+      "/"
+    )
+    row_csv_path <- paste0(
+      row_folder,
+      sprintf("%05d", row$num_trees),
+      "_",
+      sprintf("%04d", row$num_taxa),
+      "_",
+      sprintf("%03d", row$num_reps),
+      "_",
+      row$tree_depth,
+      "_parameters.csv"
+    )
   } else {
-    row_folder <- paste0(output_directory, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
-                         "_", row$tree_depth, "/")
-    row_csv_path <- paste0(row_folder, sprintf("%05d", row$num_trees), "_", sprintf("%04d", row$num_taxa), "_", NA,
-                           "_", row$tree_depth, "_parameters.csv")
+    row_folder <- paste0(
+      output_directory,
+      sprintf("%05d", row$num_trees),
+      "_",
+      sprintf("%04d", row$num_taxa),
+      "_",
+      NA,
+      "_",
+      row$tree_depth,
+      "/"
+    )
+    row_csv_path <- paste0(
+      row_folder,
+      sprintf("%05d", row$num_trees),
+      "_",
+      sprintf("%04d", row$num_taxa),
+      "_",
+      NA,
+      "_",
+      row$tree_depth,
+      "_parameters.csv"
+    )
   }
   if (dir.exists(row_folder) == FALSE){dir.create(row_folder)}
 
@@ -167,28 +203,55 @@ random.trees.generate.alignment <- function(row_id, output_directory, iqtree2_pa
   output_alignment_file <- paste0(row_folder, row$output_alignment_file, ".fa")
 
   # If the output alignment does not already exist, generate the output alignment
-  if (file.exists(output_alignment_file) == FALSE){
+  if ((file.exists(output_alignment_file) == FALSE) | (force.rerun == TRUE)){
     # Generate the random trees
-    generate.random.trees(num_trees = row$num_trees, num_taxa = row$num_taxa, tree_depth = row$tree_depth,
-                          output_filepath = paste0(row_folder, row$tree_file))
+    generate.random.trees(
+      num_trees = row$num_trees,
+      num_taxa = row$num_taxa,
+      tree_depth = row$tree_depth,
+      output_filepath = paste0(row_folder, row$tree_file)
+    )
     # Generate the partition file
-    partition.random.trees(num_trees = row$num_trees, al_length = row$total_alignment_length, sequence_type = row$sequence_type,
-                           models = row$alisim_gene_models, rescaled_tree_lengths = row$alisim_gene_tree_length,
-                           output_filepath = paste0(row_folder, row$partition_file))
+    partition.random.trees(
+      num_trees = row$num_trees,
+      al_length = row$total_alignment_length,
+      sequence_type = row$sequence_type,
+      models = row$alisim_gene_models,
+      rescaled_tree_lengths = row$alisim_gene_tree_length,
+      output_filepath = paste0(row_folder, row$partition_file)
+    )
     # Call alisim in IQ-Tree2 to simulate DNA along the trees given the partition file
-    alisim.topology.unlinked.partition.model(iqtree_path = iqtree2_path, output_alignment_path = paste0(row_folder, row$output_alignment_file),
-                                             partition_file_path = paste0(row_folder, row$partition_file), trees_path = paste0(row_folder, row$tree_file),
-                                             output_format = "fasta", sequence_type = row$sequence_type)
+    alisim.topology.unlinked.partition.model(
+      iqtree_path = iqtree2_path,
+      output_alignment_path = paste0(row_folder, row$output_alignment_file),
+      partition_file_path = paste0(row_folder, row$partition_file),
+      trees_path = paste0(row_folder, row$tree_file),
+      output_format = "fasta",
+      sequence_type = row$sequence_type
+    )
   }
 
-  if (file.exists(row_csv_path) == FALSE){
+  if ((file.exists(row_csv_path) == FALSE) | (force.rerun == TRUE)){
     # If parameter csv does not exist, finalise parameter csv for output as csv file
     row$row_id <- row_id
     row$tree_file <- paste0(row_folder, row$tree_file)
     row$partition_file <- paste0(row_folder, row$partition_file)
     row$output_alignment_file <- output_alignment_file
-    output_row <- row[ , c("row_id", "num_reps", "num_taxa", "num_trees", "tree_depth", "uid", "alisim_gene_models", "alisim_gene_tree_length", "total_alignment_length",
-                           "sequence_type", "tree_file", "partition_file", "output_alignment_file")]
+    output_row <- row[, c(
+      "row_id",
+      "num_reps",
+      "num_taxa",
+      "num_trees",
+      "tree_depth",
+      "uid",
+      "alisim_gene_models",
+      "alisim_gene_tree_length",
+      "total_alignment_length",
+      "sequence_type",
+      "tree_file",
+      "partition_file",
+      "output_alignment_file"
+    )]
     write.csv(output_row, file = row_csv_path, row.names = FALSE)
   } else if (file.exists(row_csv_path) == TRUE) {
     # If output parameter csv exists, read it in

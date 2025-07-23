@@ -31,13 +31,13 @@ if (run_location == "local"){
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"
   results_directory <- paste0(local_directory, "01_results/")
   repo_directory <- "/Users/caitlincherryh/Documents/Repositories/treelikeness-metrics/"
-  
+
   # Executable paths
   iqtree2_path <- "iqtree2"
   splitstree_path <- "/Applications/SplitsTree/SplitsTree.app/Contents/MacOS/JavaApplicationStub"
   phylogemetric_path <- "/Users/caitlincherryh/Documents/Executables/phylogemetric/phylogemetric_executable"
   fast_TIGER_path <- "/Users/caitlincherryh/Documents/Executables/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
-  
+
   # Run parameters
   num_cores <- 1
 } else if (run_location == "soma"){
@@ -45,20 +45,34 @@ if (run_location == "local"){
   local_directory <- "/data/caitlin/treelikeness_metrics/"
   results_directory <- local_directory
   repo_directory <- "/data/caitlin/treelikeness_metrics/"
-  
+
   # Executable paths
   iqtree2_path <- "/data/caitlin/executables/iqtree-2.2.2-Linux/bin/iqtree2"
   splitstree_path <- "/home/caitlin/splitstree4/SplitsTree"
   phylogemetric_path <- "/home/caitlin/.local/bin/phylogemetric"
   fast_TIGER_path <- "/data/caitlin/linux_executables/fast_TIGER/fast_TIGER"
-  
+
+  # Run parameters
+  num_cores <- 30
+} else if (run_location == "dayhoff"){
+  # Directories
+  local_directory <- "/mnt/data/dayhoff/home/u5348329/treelikeness_metrics/"
+  results_directory <- local_directory
+  repo_directory <- "/mnt/data/dayhoff/home/u5348329/treelikeness_metrics/"
+
+  # Executable paths
+  iqtree2_path <- "/mnt/data/dayhoff/home/u5348329/treelikeness_metrics/software/iqtree-2.4.0-Linux-intel/bin/iqtree2"
+  splitstree_path <- "/mnt/data/dayhoff/home/u5348329/splitstree4/SplitsTree"
+  phylogemetric_path <- "/mnt/data/dayhoff/home/u5348329/.local/bin/phylogemetric"
+  fast_TIGER_path <- "/mnt/data/dayhoff/home/u5348329/treelikeness_metrics/software/fast_TIGER-0.0.2/DAAD_project/fast_TIGER"
+
   # Run parameters
   num_cores <- 30
 }
 
 # Control variables
-run_exp1 <- FALSE
-run_exp3 <- TRUE
+run_exp1 <- TRUE
+run_exp3 <- FALSE
 
 
 
@@ -82,25 +96,48 @@ if (run_exp1 == FALSE){
   # Extract all file names from results folder
   results_files <- list.files(results_directory)
   # Open output df and get names of alignments
-  exp1_op_file <- paste0(results_directory, grep("rerun", grep("exp1", grep("file_output_paths", results_files, value = TRUE), value = TRUE), value = TRUE, invert = TRUE))
+  exp1_op_file <- paste0(results_directory,
+                         grep(
+                           "rerun",
+                           grep(
+                             "exp1",
+                             grep("file_output_paths", results_files, value = TRUE),
+                             value = TRUE
+                           ),
+                           value = TRUE,
+                           invert = TRUE
+                         ))
   exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
-  # Exp1 encountering errors in all cores. Not running properly. Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
-  exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 & exp1_op_df$tree_depth != 1e-03),]
+  # Exp1 encountering errors in all cores. Not running properly.
+  # Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
+  exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 &
+                              exp1_op_df$tree_depth != 1e-03), ]
   # Get list of alignments
   exp1_als <- exp1_op_df$output_alignment_file
-  # Apply treelikeness metrics to all alignments 
-  mclapply(exp1_als, treelikeness.metrics.simulations,
-           iqtree2_path, splitstree_path, 
-           phylogemetric_path, fast_TIGER_path, 
-           supply_number_of_taxa = FALSE, number_of_taxa = NA, 
-           num_iqtree2_threads = "AUTO", num_iqtree2_scf_quartets = 100, 
-           iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-           num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-           run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
-           apply.TIGER = FALSE, redo = FALSE, 
-           save_timers = TRUE,
-           mc.cores = num_cores)
-  
+  # Apply treelikeness metrics to all alignments
+  mclapply(
+    exp1_als,
+    treelikeness.metrics.simulations,
+    iqtree2_path,
+    splitstree_path,
+    phylogemetric_path,
+    fast_TIGER_path,
+    supply_number_of_taxa = FALSE,
+    number_of_taxa = NA,
+    num_iqtree2_threads = "AUTO",
+    num_iqtree2_scf_quartets = 100,
+    iqtree_substitution_model = "JC",
+    distance_matrix_substitution_method = "JC69",
+    num_phylogemetric_threads = NA,
+    tree_proportion_remove_trivial_splits = TRUE,
+    run_splitstree_for_tree_proportion = TRUE,
+    sequence_format = "DNA",
+    apply.TIGER = FALSE,
+    redo = FALSE,
+    save_timers = TRUE,
+    mc.cores = num_cores
+  )
+
   # Collect and collate results
   exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
@@ -121,18 +158,18 @@ if (run_exp3 == TRUE){
   exp3_op_df <- read.csv(exp3_op_file, stringsAsFactors = FALSE)
   # Get list of alignments
   exp3_als <- exp3_op_df$output_alignment_file
-  # Apply treelikeness metrics to all alignments 
+  # Apply treelikeness metrics to all alignments
   mclapply(exp3_als, treelikeness.metrics.simulations,
-           iqtree2_path, splitstree_path, 
-           phylogemetric_path, fast_TIGER_path, 
-           supply_number_of_taxa = FALSE, number_of_taxa = NA, 
-           num_iqtree2_threads = 1, num_iqtree2_scf_quartets = 100, 
-           iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69", 
-           num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE, 
-           run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA", 
+           iqtree2_path, splitstree_path,
+           phylogemetric_path, fast_TIGER_path,
+           supply_number_of_taxa = FALSE, number_of_taxa = NA,
+           num_iqtree2_threads = 1, num_iqtree2_scf_quartets = 100,
+           iqtree_substitution_model = "JC", distance_matrix_substitution_method = "JC69",
+           num_phylogemetric_threads = NA, tree_proportion_remove_trivial_splits = TRUE,
+           run_splitstree_for_tree_proportion = TRUE, sequence_format = "DNA",
            apply.TIGER = TRUE, redo = FALSE,
            mc.cores = num_cores)
-  
+
   # Collect and collate results
   exp3_list <- mclapply(exp3_als, collate.treelikeness.results, experiment_number = 3, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)

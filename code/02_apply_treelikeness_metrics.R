@@ -114,6 +114,28 @@ if (run_exp1 == FALSE){
                               exp1_op_df$tree_depth != 1e-03), ]
   # Get list of alignments
   exp1_als <- exp1_op_df$output_alignment_file
+  # Test one alignment
+  mclapply(
+    exp1_als[1],
+    treelikeness.metrics.simulations,
+    iqtree2_path,
+    splitstree_path,
+    phylogemetric_path,
+    fast_TIGER_path,
+    supply_number_of_taxa = FALSE,
+    number_of_taxa = NA,
+    num_iqtree2_threads = 1,
+    num_iqtree2_scf_quartets = 100,
+    iqtree_substitution_model = "JC",
+    distance_matrix_substitution_method = "JC69",
+    num_phylogemetric_threads = NA,
+    tree_proportion_remove_trivial_splits = TRUE,
+    run_splitstree_for_tree_proportion = TRUE,
+    sequence_format = "DNA",
+    apply.TIGER = TRUE,
+    redo = FALSE,
+    mc.cores = num_cores
+  )
   # Apply treelikeness metrics to all alignments
   mclapply(
     exp1_als,
@@ -124,7 +146,7 @@ if (run_exp1 == FALSE){
     fast_TIGER_path,
     supply_number_of_taxa = FALSE,
     number_of_taxa = NA,
-    num_iqtree2_threads = "AUTO",
+    num_iqtree2_threads = 1,
     num_iqtree2_scf_quartets = 100,
     iqtree_substitution_model = "JC",
     distance_matrix_substitution_method = "JC69",
@@ -132,9 +154,8 @@ if (run_exp1 == FALSE){
     tree_proportion_remove_trivial_splits = TRUE,
     run_splitstree_for_tree_proportion = TRUE,
     sequence_format = "DNA",
-    apply.TIGER = FALSE,
+    apply.TIGER = TRUE,
     redo = FALSE,
-    save_timers = TRUE,
     mc.cores = num_cores
   )
 

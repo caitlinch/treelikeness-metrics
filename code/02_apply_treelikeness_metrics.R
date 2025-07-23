@@ -25,7 +25,7 @@
 # run_exp1             <- Whether to apply the treelikeness test statistics to the first set of alignments (logical)
 # run_exp3             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
 
-run_location = "soma"
+run_location = "dayhoff"
 if (run_location == "local"){
   # Directories
   local_directory <- "/Users/caitlincherryh/Documents/C2_TreelikenessMetrics/"

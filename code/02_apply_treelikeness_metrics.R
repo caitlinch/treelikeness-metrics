@@ -25,6 +25,7 @@
 # run_exp1             <- Whether to apply the treelikeness test statistics to the first set of alignments (logical)
 # run_exp3             <- Whether to apply the treelikeness test statistics to the second set of alignments (logical)
 
+print("setting file paths")
 run_location = "dayhoff"
 if (run_location == "local"){
   # Directories
@@ -77,10 +78,12 @@ run_exp3 <- FALSE
 
 
 #### 2. Prepare analyses ####
+print("open packages")
 # Open packages
 library(parallel)
 
 # Source functions from caitlinch/treelikeness_metrics
+print("source functions")
 source(paste0(repo_directory, "code/func_metrics.R"))
 source(paste0(repo_directory, "code/func_data_analysis.R"))
 
@@ -91,7 +94,8 @@ exp_folders <- paste0(local_directory, c("exp_1/", "exp_3/"))
 
 #### 3. Apply tests for treelikeness to each simulated alignment ####
 # For each experiment, get the list of directories within that experiment folder and apply the test statistics to the alignment within each directory
-if (run_exp1 == FALSE){
+if (run_exp1 == TRUE){
+  print("in exp 1")
   ## For experiment 1:
   # Extract all file names from results folder
   results_files <- list.files(results_directory)
@@ -108,35 +112,15 @@ if (run_exp1 == FALSE){
                            invert = TRUE
                          ))
   exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
+  print("open exp1 df")
   # Exp1 encountering errors in all cores. Not running properly.
   # Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
   exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 &
                               exp1_op_df$tree_depth != 1e-03), ]
   # Get list of alignments
   exp1_als <- exp1_op_df$output_alignment_file
-  # Test one alignment
-  mclapply(
-    exp1_als[1],
-    treelikeness.metrics.simulations,
-    iqtree2_path,
-    splitstree_path,
-    phylogemetric_path,
-    fast_TIGER_path,
-    supply_number_of_taxa = FALSE,
-    number_of_taxa = NA,
-    num_iqtree2_threads = 1,
-    num_iqtree2_scf_quartets = 100,
-    iqtree_substitution_model = "JC",
-    distance_matrix_substitution_method = "JC69",
-    num_phylogemetric_threads = NA,
-    tree_proportion_remove_trivial_splits = TRUE,
-    run_splitstree_for_tree_proportion = TRUE,
-    sequence_format = "DNA",
-    apply.TIGER = TRUE,
-    redo = FALSE,
-    mc.cores = num_cores
-  )
   # Apply treelikeness metrics to all alignments
+  print("Apply treelikeness metrics to all alignments")
   mclapply(
     exp1_als,
     treelikeness.metrics.simulations,
@@ -158,7 +142,6 @@ if (run_exp1 == FALSE){
     redo = FALSE,
     mc.cores = num_cores
   )
-
   # Collect and collate results
   exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)

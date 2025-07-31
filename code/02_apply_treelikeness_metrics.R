@@ -108,11 +108,9 @@ if (run_exp1 == TRUE){
                            invert = TRUE
                          ))
   exp1_op_df <- read.csv(exp1_op_file, stringsAsFactors = FALSE)
-  # Exp1 encountering errors in all cores. Not running properly.
-  # Remove all alignments with substitution rate 1e-04 and 0.001 (too many identical sequences)
-  exp1_op_df <- exp1_op_df[(exp1_op_df$tree_depth != 1e-04 &
-                              exp1_op_df$tree_depth != 1e-03), ]
-  # Get list of alignments
+  # Reduce to only first 10 reps for each set of simulation parameters
+  exp1_op_df <- exp1_op_df[which(exp1_op_df$num_reps <= 10), ]
+  # Extract alignments
   exp1_als <- exp1_op_df$output_alignment_file
   # Apply treelikeness metrics to all alignments
   mclapply(

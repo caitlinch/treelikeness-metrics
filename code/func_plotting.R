@@ -178,7 +178,7 @@ exp1.format.summary.dataframe<- function(df){
         "mean_TIGER_value",
         "mean_delta_plot_value",
         "mean_Q_residual",
-        "sCFL_mean",
+        "sCF_mean",
         "LM_proportion_resolved_quartets",
         "NetworkTreelikenessTest"
       ),
@@ -211,7 +211,7 @@ exp1.format.dataframe<- function(df){
     "mean_delta_plot_value",
     "LM_proportion_resolved_quartets",
     "mean_Q_residual",
-    "sCFL_mean",
+    "sCF_mean",
     "mean_TIGER_value",
     "NetworkTreelikenessTest"
   )]
@@ -225,7 +225,7 @@ exp1.format.dataframe<- function(df){
     "mean_delta_plot_value",
     "LM_proportion_resolved_quartets",
     "mean_Q_residual",
-    "sCFL_mean",
+    "sCF_mean",
     "mean_TIGER_value"
   )]
   long_df <- melt(nonbinary_metric_df,
@@ -256,7 +256,7 @@ exp1.format.dataframe<- function(df){
         "mean_TIGER_value",
         "mean_delta_plot_value",
         "mean_Q_residual",
-        "sCFL_mean",
+        "sCF_mean",
         "LM_proportion_resolved_quartets",
         "NetworkTreelikenessTest"
       ),
@@ -267,7 +267,7 @@ exp1.format.dataframe<- function(df){
         "mean_TIGER_value",
         "mean_delta_plot_value",
         "mean_Q_residual",
-        "sCFL_mean",
+        "sCF_mean",
         "LM_proportion_resolved_quartets",
         "NetworkTreelikenessTest"
       )
@@ -282,7 +282,7 @@ exp1.format.dataframe<- function(df){
         "mean_TIGER_value",
         "mean_delta_plot_value",
         "mean_Q_residual",
-        "sCFL_mean",
+        "sCF_mean",
         "LM_proportion_resolved_quartets",
         "NetworkTreelikenessTest"
       ),

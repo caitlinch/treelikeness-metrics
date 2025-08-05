@@ -14,7 +14,7 @@
 # save.png <- TRUE to output png plots (1-2 MB per figure)
 data_directory <- "output/"
 plot_directory <- "plot/"
-save.png <- TRUE
+save.png <- FALSE
 
 
 
@@ -41,15 +41,13 @@ exp1_data_file <- grep(
   grep("treelikeness_metrics_collated_results", data_files, value = TRUE),
   value = TRUE
 )
-exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
+raw_exp1_df <- read.csv(file = exp1_data_file, stringsAsFactors = FALSE)
 
 # Convert sCFL values to decimal from percentage
-exp1_df$sCFL_mean <- exp1_df$sCFL_mean / 100
+raw_exp1_df$sCF_mean <- raw_exp1_df$sCF_mean / 100
 
 # Convert mean tiger value to numeric
-# Note: 4% (150/3750) of simulations for experiment 1 do not have a TIGER value (TIGER failed to run in these cases)
-#       Therefore converting to numeric will coerce these values (i.e. mean_TIGER_value = "no_TIGER_run") to NA
-exp1_df$mean_TIGER_value <- as.numeric(exp1_df$mean_TIGER_value)
+raw_exp1_df$mean_TIGER_value <- as.numeric(raw_exp1_df$mean_TIGER_value)
 
 # Remove columns you don't want for plotting
 nonbinary_metrics <- c(
@@ -58,10 +56,10 @@ nonbinary_metrics <- c(
   "mean_delta_plot_value",
   "LM_proportion_resolved_quartets",
   "mean_Q_residual",
-  "sCFL_mean",
+  "sCF_mean",
   "mean_TIGER_value"
 )
-exp1_df <- exp1_df[, c(
+exp1_df <- raw_exp1_df[, c(
   "row_id",
   "uid",
   "num_taxa",
@@ -132,7 +130,7 @@ exp1_plot1 <-
     fill = guide_legend(title = "Number of\ntaxa")
   ) +
   labs(
-    title = "Random Tree Simulations",
+    title = "Random Tree Simulations (Rescaled trees)",
     subtitle = "Tree depth (substitutions per site)",
     x = expression("Number of trees (" * log[10] * " scale)")
   ) +
@@ -211,7 +209,7 @@ exp1_plot2_panel1 <-
     fill = guide_legend(title = "Number of\ntaxa")
   ) +
   labs(
-    title = "Random Tree Simulations",
+    title = "Random Tree Simulations (Rescaled trees)",
     subtitle = "Tree depth (substitutions per site)",
     x = expression("Number of trees (" * log[10] * " scale)")
   ) +
@@ -261,7 +259,7 @@ exp1_plot2_panel2 <-
     fill = guide_legend(title = "Number of\ntaxa")
   ) +
   labs(
-    title = "Random Tree Simulations",
+    title = "Random Tree Simulations (Rescaled trees)",
     subtitle = "Tree depth (substitutions per site)",
     x = expression("Number of trees (" * log[10] * " scale)")
   ) +
@@ -319,7 +317,7 @@ exp1_plot2_panel3 <-
     fill = guide_legend(title = "Number of\ntaxa")
   ) +
   labs(
-    title = "Random Tree Simulations",
+    title = "Random Tree Simulations (Rescaled trees)",
     subtitle = "Tree depth (substitutions per site)",
     x = expression("Number of trees (" * log[10] * " scale)")
   ) +
@@ -379,7 +377,7 @@ exp1_plot3 <-
     oob = scales::rescale_none) +
   scale_color_viridis_d(direction = -1) +
   guides(color = guide_legend(title = "Number of\ntaxa")) +
-  labs(title = "Tree depth\n(substitutions per site)",
+  labs(title = "Tree depth (Rescaled trees)\n(substitutions per site)",
        x = expression("Number of trees (" * log[10] * " scale)")) +
   theme_bw() +
   theme(

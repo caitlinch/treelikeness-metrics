@@ -112,51 +112,9 @@ if (run_exp1 == TRUE){
   exp1_op_df <- exp1_op_df[which(exp1_op_df$num_reps <= 20), ]
   # Extract alignments
   exp1_als <- exp1_op_df$output_alignment_file
-  # # Apply treelikeness metrics to all alignments
-  # mclapply(
-  #   exp1_als,
-  #   treelikeness.metrics.simulations,
-  #   iqtree2_path,
-  #   splitstree_path,
-  #   phylogemetric_path,
-  #   fast_TIGER_path,
-  #   supply_number_of_taxa = FALSE,
-  #   number_of_taxa = NA,
-  #   num_iqtree2_threads = 1,
-  #   num_iqtree2_scf_quartets = 100,
-  #   iqtree_substitution_model = "JC",
-  #   distance_matrix_substitution_method = "JC69",
-  #   num_phylogemetric_threads = NA,
-  #   tree_proportion_remove_trivial_splits = TRUE,
-  #   run_splitstree_for_tree_proportion = TRUE,
-  #   sequence_format = "DNA",
-  #   apply.TIGER = TRUE,
-  #   redo = TRUE,
-  #   mc.cores = num_cores
-  # )
-  ## FORCE RERUN OF MISSING REPS
-  missing_reps <- c(1712, 1742, 1772, 1802, 1832, 1862, 1892, 1922, 1952, 1982,
-                    2012, 2042, 2072, 2102, 2132, 2162, 2192, 2222, 2252, 2282,
-                    2312, 2342, 2372, 2402, 2432, 2462, 2492, 2522, 2552, 2582,
-                    2612, 2642, 2672, 2702, 2732, 2762, 2792, 2822, 2852, 2882,
-                    2912, 2942, 2972, 3002, 3032, 3062, 3092, 3122, 3152, 3182,
-                    3212, 3242, 3272, 3302, 3332, 3362, 3392, 3422, 3452, 3482,
-                    3512, 3542, 3572, 3602, 3632, 3662, 3692, 3722, 3752, 3782,
-                    3812, 3842, 3872, 3902, 3932, 3962, 3992, 4022, 4052, 4082,
-                    4112, 4142, 4172, 4202, 4232, 4262, 4292, 4322, 4352, 4382,
-                    4412, 4442, 4472, 4502, 4532, 4562, 4592, 4622, 4652, 4682,
-                    4712, 4742, 4772, 4802, 4832, 4862, 4892, 4922, 4952, 4982,
-                    5012, 5042, 5072, 5102, 5132, 5162, 5192, 5222, 5252, 5282,
-                    5312, 5342, 5372, 5402, 5432, 5462, 5492, 5522, 5552, 5582,
-                    5612, 5642, 5672, 5702, 5732, 5762, 5792, 5822, 5852, 5882,
-                    5912, 5942, 5972, 6002, 6032, 6062, 6092, 6122, 6152, 6182,
-                    6212, 6242, 6272, 6302, 6332, 6362, 6392, 6422, 6452, 6482,
-                    6512, 6542, 6572, 6602, 6632, 6662, 6692, 6722, 6752, 6782,
-                    6812, 6842, 6872, 6902, 6932, 6962, 6992, 7022, 7052, 7082,
-                    7112, 7142, 7172, 7202, 7232, 7262, 7292, 7322, 7352, 7382,
-                    7412, 7442, 7472)
+  # Apply treelikeness metrics to all alignments
   mclapply(
-    exp1_als[missing_reps],
+    exp1_als,
     treelikeness.metrics.simulations,
     iqtree2_path,
     splitstree_path,
@@ -176,13 +134,6 @@ if (run_exp1 == TRUE){
     redo = TRUE,
     mc.cores = num_cores
   )
-  # Identify unrun files
-  exp1_results_files <- gsub("_output_alignment.fa", "_treelikeness_results.csv", exp1_als)
-  exp1_results_file_sizes <- unlist(lapply(exp1_results_files, function(x){file.size(x)}))
-  missing_result_ids <- which(exp1_results_file_sizes == 0)
-  if (length(missing_result_ids)){
-    print(paste0("Alignment indexes needing reruns:", paste(missing_result_ids, collapse = ", ")))
-  }
   # Collect and collate results
   exp1_list <- mclapply(exp1_als, collate.treelikeness.results, experiment_number = 1, mc.cores = num_cores)
   # Remove NULL objects in list (indicates treelikeness metrics csv does not exist for this alignment)
